@@ -22,3 +22,18 @@ This file tracks all major tracks for the project. Each track has its own detail
 ## [ ] Track: Pipeline Hardening, parallel GHA sync, and multi-subset indexing
 *Link: [./conductor/tracks/pipeline_hardening/](./conductor/tracks/pipeline_hardening/)*
 
+## [ ] Track: Integrate Coronial Decisions and Coroners Court cases
+*Link: [./conductor/tracks/coronial_integration/](./conductor/tracks/coronial_integration/)*
+
+## [ ] Track: Integrate Privacy Commissioner decisions and investigations
+*Link: [./conductor/tracks/privacy_commission_integration/](./conductor/tracks/privacy_commission_integration/)*
+
+## [ ] Track: Integrate Human Rights Commission/Tribunal decisions
+*Link: [./conductor/tracks/human_rights_integration/](./conductor/tracks/human_rights_integration/)*
+
+## [ ] Track: Integrate Office of the Ombudsman reports and findings
+*Link: [./conductor/tracks/ombudsman_integration/](./conductor/tracks/ombudsman_integration/)*
+
+## [ ] Track: Integrate broader Ministry of Justice (MoJ) Court cases and judicial decisions
+*Link: [./conductor/tracks/moj_courts_integration/](./conductor/tracks/moj_courts_integration/)*
+
