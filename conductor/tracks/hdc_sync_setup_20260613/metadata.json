@@ -1,0 +1,8 @@
+{
+  "track_id": "hdc_sync_setup_20260613",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-06-13T19:10:00Z",
+  "updated_at": "2026-06-13T19:10:00Z",
+  "description": "Establish the HDC corpus structure, ingestion pipeline configuration, and automated Hugging Face live sync"
+}
