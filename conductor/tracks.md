@@ -19,6 +19,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 ## [ ] Track: Integrate Teachers Disciplinary Tribunal decisions
 *Link: [./conductor/tracks/teachers_integration/](./conductor/tracks/teachers_integration/)*
 
+## [ ] Track: Integrate Royal Commissions of Inquiry and Waitangi Tribunal Reports (Near-Term)
+*Link: [./conductor/tracks/royal_commissions_integration/](./conductor/tracks/royal_commissions_integration/)*
+
 ## [ ] Track: Pipeline Hardening, parallel GHA sync, and multi-subset indexing
 *Link: [./conductor/tracks/pipeline_hardening/](./conductor/tracks/pipeline_hardening/)*
 
@@ -36,4 +39,11 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## [ ] Track: Integrate broader Ministry of Justice (MoJ) Court cases and judicial decisions
 *Link: [./conductor/tracks/moj_courts_integration/](./conductor/tracks/moj_courts_integration/)*
+
+## [ ] Track: Integrate Independent Police Conduct Authority (IPCA) reports
+*Link: [./conductor/tracks/ipca_integration/](./conductor/tracks/ipca_integration/)*
+
+## [ ] Track: Integrate Law Commission reports and statutory recommendations
+*Link: [./conductor/tracks/law_commission_integration/](./conductor/tracks/law_commission_integration/)*
+
 
