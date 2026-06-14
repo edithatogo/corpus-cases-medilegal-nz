@@ -1,0 +1,29 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.uv-cache/
+.venv/
+.env
+.env.*
+pytest-cache-files-*/
+
+# Generated corpus and archives: never commit data to GitHub
+data/
+dist/
+archive/
+generated/
+.tmp/
+.hf_cache/
+.pytest-tmp/
+test-tmp/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Logs
+logs/

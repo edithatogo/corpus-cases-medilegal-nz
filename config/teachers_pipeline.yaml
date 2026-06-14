@@ -1,0 +1,20 @@
+pipeline:
+  name: teachers
+  description: "Teachers Disciplinary Tribunal NZ Decisions Ingestion Pipeline"
+  source_url: "https://www.teachersdisciplinarytribunal.nz/"
+  base_url: "https://www.teachersdisciplinarytribunal.nz"
+  paths:
+    raw_dir: "data/raw/teachers"
+    processed_dir: "data/processed"
+  scraping:
+    page_size: 10
+    max_pages: 5
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) NZ-Medicolegal-Corpus-Sync"
+    timeout: 30
+  validation:
+    required_metadata_fields:
+      - "case_id"
+      - "date"
+      - "title"
+      - "citation"
+      - "url"

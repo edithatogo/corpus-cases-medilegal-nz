@@ -1,0 +1,26 @@
+{"ts": 1781367436.8101444, "agent": "Oracle", "event": "spawned", "detail": "mode=parallel", "meta": {"backend": "thread", "retry": 0}}
+{"ts": 1781367436.8186293, "agent": "Frontend", "event": "spawned", "detail": "mode=parallel", "meta": {"backend": "thread", "retry": 0}}
+{"ts": 1781367436.830079, "agent": "Junior", "event": "spawned", "detail": "mode=parallel", "meta": {"backend": "thread", "retry": 0}}
+{"ts": 1781367526.8368351, "agent": "Oracle", "event": "warning", "detail": "watchdog_soft_shutdown_requested", "meta": {"idle_seconds": 90.02}}
+{"ts": 1781367526.8395538, "agent": "Frontend", "event": "warning", "detail": "watchdog_soft_shutdown_requested", "meta": {"idle_seconds": 90.02}}
+{"ts": 1781367526.841874, "agent": "Junior", "event": "warning", "detail": "watchdog_soft_shutdown_requested", "meta": {"idle_seconds": 90.0}}
+{"ts": 1781367541.8628697, "agent": "Oracle", "event": "error", "detail": "watchdog_no_progress_timeout", "meta": {"idle_seconds": 105.05, "failure_class": "timeout_error"}}
+{"ts": 1781367541.8633933, "agent": "Frontend", "event": "error", "detail": "watchdog_no_progress_timeout", "meta": {"idle_seconds": 105.04, "failure_class": "timeout_error"}}
+{"ts": 1781367541.8633933, "agent": "Junior", "event": "error", "detail": "watchdog_no_progress_timeout", "meta": {"idle_seconds": 105.03, "failure_class": "timeout_error"}}
+{"ts": 1781367542.168354, "agent": "Oracle", "event": "status_change", "detail": "retrying", "meta": {"attempt": 1, "reason": "watchdog_timeout"}}
+{"ts": 1781367542.1727328, "agent": "Oracle", "event": "spawned", "detail": "mode=parallel", "meta": {"backend": "thread", "retry": 1}}
+{"ts": 1781367542.476242, "agent": "Frontend", "event": "status_change", "detail": "retrying", "meta": {"attempt": 1, "reason": "watchdog_timeout"}}
+{"ts": 1781367542.4791977, "agent": "Frontend", "event": "spawned", "detail": "mode=parallel", "meta": {"backend": "thread", "retry": 1}}
+{"ts": 1781367542.7817116, "agent": "Junior", "event": "status_change", "detail": "retrying", "meta": {"attempt": 1, "reason": "watchdog_timeout"}}
+{"ts": 1781367542.7847602, "agent": "Junior", "event": "spawned", "detail": "mode=parallel", "meta": {"backend": "thread", "retry": 1}}
+{"ts": 1781367632.1896713, "agent": "Oracle", "event": "warning", "detail": "watchdog_soft_shutdown_requested", "meta": {"idle_seconds": 90.01}}
+{"ts": 1781367632.4922183, "agent": "Frontend", "event": "warning", "detail": "watchdog_soft_shutdown_requested", "meta": {"idle_seconds": 90.01}}
+{"ts": 1781367632.802703, "agent": "Junior", "event": "warning", "detail": "watchdog_soft_shutdown_requested", "meta": {"idle_seconds": 90.01}}
+{"ts": 1781367647.229196, "agent": "Oracle", "event": "error", "detail": "watchdog_no_progress_timeout", "meta": {"idle_seconds": 105.06, "failure_class": "timeout_error"}}
+{"ts": 1781367647.534071, "agent": "Frontend", "event": "error", "detail": "watchdog_no_progress_timeout", "meta": {"idle_seconds": 105.05, "failure_class": "timeout_error"}}
+{"ts": 1781367647.8385608, "agent": "Junior", "event": "error", "detail": "watchdog_no_progress_timeout", "meta": {"idle_seconds": 105.05, "failure_class": "timeout_error"}}
+{"ts": 1781367647.8664432, "agent": "Quality_Validator", "event": "spawned", "detail": "mode=validator", "meta": {"backend": "thread", "retry": 0}}
+{"ts": 1781368073.9996188, "agent": "Oracle", "event": "status_change", "detail": "shutdown", "meta": {}}
+{"ts": 1781368074.001143, "agent": "Junior", "event": "status_change", "detail": "shutdown", "meta": {}}
+{"ts": 1781368074.003139, "agent": "Frontend", "event": "status_change", "detail": "shutdown", "meta": {}}
+{"ts": 1781368308.0625327, "agent": "Quality_Validator", "event": "status_change", "detail": "completed", "meta": {}}

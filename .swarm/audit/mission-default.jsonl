@@ -1,0 +1,5 @@
+{"ts": 1781368024.1778498, "agent": "agent", "event": "spawned", "detail": "Task: Test task: write a file named test_swarm.txt with hello", "meta": {"model": "auto-gemini-3"}}
+{"ts": 1781368024.1793606, "agent": "agent", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781368040.0773833, "agent": "agent", "event": "warning", "detail": "stream_tail_unparsed", "meta": {"tail_chars": 5234}}
+{"ts": 1781368040.077923, "agent": "agent", "event": "status_change", "detail": "idle", "meta": {}}
+{"ts": 1781368160.296611, "agent": "agent", "event": "status_change", "detail": "completed (idle_timeout)", "meta": {}}

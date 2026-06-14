@@ -1,0 +1,37 @@
+{
+  "mission_id": "d216a733",
+  "description": "Swarm Mission",
+  "started_at": 1781367480.3174493,
+  "status": "failed",
+  "agents": [
+    {
+      "name": "Oracle",
+      "mode": "parallel",
+      "color": "magenta",
+      "status": "shutdown"
+    },
+    {
+      "name": "Frontend",
+      "mode": "parallel",
+      "color": "green",
+      "status": "shutdown"
+    },
+    {
+      "name": "Junior",
+      "mode": "parallel",
+      "color": "yellow",
+      "status": "shutdown"
+    },
+    {
+      "name": "Quality_Validator",
+      "mode": "validator",
+      "color": "green",
+      "status": "completed"
+    }
+  ],
+  "attempt": 1,
+  "team_name": "swarm-mission",
+  "updated_at": 1781368232.599634,
+  "ended_at": 1781368232.599634,
+  "failure_reason": "runtime_failed"
+}

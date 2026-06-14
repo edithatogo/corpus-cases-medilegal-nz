@@ -1,0 +1,8 @@
+{"ts": 1781368063.0893652, "agent": "Oracle", "event": "spawned", "detail": "mode=parallel", "meta": {"backend": "thread", "retry": 0}}
+{"ts": 1781368063.1006296, "agent": "Frontend", "event": "spawned", "detail": "mode=parallel", "meta": {"backend": "thread", "retry": 0}}
+{"ts": 1781368063.1062982, "agent": "Junior", "event": "spawned", "detail": "mode=parallel", "meta": {"backend": "thread", "retry": 0}}
+{"ts": 1781368073.9797783, "agent": "Oracle", "event": "status_change", "detail": "shutdown", "meta": {}}
+{"ts": 1781368074.0805163, "agent": "Frontend", "event": "status_change", "detail": "completed", "meta": {}}
+{"ts": 1781368074.0816073, "agent": "Junior", "event": "status_change", "detail": "completed", "meta": {}}
+{"ts": 1781368074.1157844, "agent": "Quality_Validator", "event": "spawned", "detail": "mode=validator", "meta": {"backend": "thread", "retry": 0}}
+{"ts": 1781368077.9760764, "agent": "Quality_Validator", "event": "status_change", "detail": "completed", "meta": {}}

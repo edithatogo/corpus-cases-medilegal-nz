@@ -19,3 +19,25 @@ permission_mode: auto
 
 # Audit trail
 audit_enabled: true
+
+# Team presets (reusable team configurations)
+presets:
+  fullstack:
+    description: "Full-stack development team"
+    agents:
+      - {name: Oracle, mode: parallel}
+      - {name: Frontend, mode: parallel}
+      - {name: Junior, mode: parallel}
+      - {name: Quality_Validator, mode: validator}
+  analysis:
+    description: "Deep analysis and planning team"
+    agents:
+      - {name: Prometheus, mode: serial}
+      - {name: Momus, mode: serial}
+      - {name: Librarian, mode: parallel}
+      - {name: Quality_Validator, mode: validator}
+  quick:
+    description: "Fast single-agent execution"
+    agents:
+      - {name: Junior, mode: serial}
+      - {name: Quality_Validator, mode: validator}

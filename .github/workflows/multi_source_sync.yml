@@ -1,0 +1,43 @@
+name: Multi-Source Daily Sync
+on:
+  schedule:
+    - cron: '17 14 * * *'   # daily 14:17 UTC
+  workflow_dispatch:
+    inputs:
+      sources:
+        description: 'Comma-separated source IDs to sync (empty = all)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        source: [hdc, hpdt, moj_tribunals, era, teachers]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.8
+        with:
+          pixi-version: latest
+      - name: Sync ${{ matrix.source }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_REPO_ID: ${{ vars.HF_REPO_ID || 'edithatogo/corpus-cases-medilegal-nz' }}
+        run: |
+          echo "Syncing source: ${{ matrix.source }}"
+          pixi run python -c "
+import sys
+from pathlib import Path
+sys.path.insert(0, 'src')
+from corpus_cases_medilegal_nz.sources import get_adapter, SOURCE_REGISTRY
+adapter = get_adapter('${{ matrix.source }}')
+info = SOURCE_REGISTRY['${{ matrix.source }}']
+print(f'Syncing {info[\"name\"]} from {adapter.config_path}')
+"
+      - name: Upload ${{ matrix.source }} data
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: pixi run python -m corpus_cases_medilegal_nz.hf_sync ${{ matrix.source }}

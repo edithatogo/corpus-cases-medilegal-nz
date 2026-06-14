@@ -1,0 +1,20 @@
+pipeline:
+  name: ombudsman
+  description: "Ombudsman Reports NZ Ingestion Pipeline"
+  source_url: ""
+  base_url: ""
+  paths:
+    raw_dir: "data/raw/ombudsman"
+    processed_dir: "data/processed"
+  scraping:
+    page_size: 10
+    max_pages: 5
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) NZ-Medicolegal-Corpus-Sync"
+    timeout: 30
+  validation:
+    required_metadata_fields:
+      - "case_id"
+      - "date"
+      - "title"
+      - "citation"
+      - "url"

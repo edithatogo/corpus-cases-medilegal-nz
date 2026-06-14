@@ -1,3 +1,4 @@
+- [x] Task: Oracle architectural analysis and mission review — Key finding: Use `uv` + `pyproject.toml` (not `pixi.toml`) per sibling convention
 # Plan: Establish HDC Corpus Structure, Ingestion, and Live Sync
 
 ## Phase 1: Project Scaffolding & Shared Library Linkage

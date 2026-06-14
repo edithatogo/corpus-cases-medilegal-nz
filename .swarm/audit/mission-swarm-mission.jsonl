@@ -1,0 +1,57 @@
+{"ts": 1781367436.9738276, "agent": "oracle", "event": "spawned", "detail": "Task: You are Oracle. Your role is to provide deep architectural insights, debug complex issues, and find ", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781367436.9743767, "agent": "oracle", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781367436.974888, "agent": "frontend", "event": "spawned", "detail": "Task: You are Frontend. Your role is to implement the user interface. You care about pixel-perfect design,", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781367436.974888, "agent": "frontend", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781367436.979789, "agent": "junior", "event": "spawned", "detail": "Task: You are Junior. Your role is to do the work. You write the code, run the commands, and fix the bugs.", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781367436.979789, "agent": "junior", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781367480.4879093, "agent": "oracle", "event": "spawned", "detail": "Task: You are Oracle. Your role is to provide deep architectural insights, debug complex issues, and find ", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781367480.4879093, "agent": "oracle", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781367480.49897, "agent": "junior", "event": "spawned", "detail": "Task: You are Junior. Your role is to do the work. You write the code, run the commands, and fix the bugs.", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781367480.49897, "agent": "junior", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781367480.5046072, "agent": "frontend", "event": "spawned", "detail": "Task: You are Frontend. Your role is to implement the user interface. You care about pixel-perfect design,", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781367480.5046072, "agent": "frontend", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781368063.2476969, "agent": "oracle", "event": "spawned", "detail": "Task: You are Oracle. Your role is to provide deep architectural insights, debug complex issues, and find ", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368063.2482257, "agent": "oracle", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781368063.2561333, "agent": "junior", "event": "spawned", "detail": "Task: You are Junior. Your role is to do the work. You write the code, run the commands, and fix the bugs.", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368063.2561333, "agent": "junior", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781368063.2587237, "agent": "frontend", "event": "spawned", "detail": "Task: You are Frontend. Your role is to implement the user interface. You care about pixel-perfect design,", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368063.2587237, "agent": "frontend", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781368073.8375866, "agent": "oracle", "event": "warning", "detail": "stream_tail_unparsed", "meta": {"tail_chars": 1973}}
+{"ts": 1781368073.8375866, "agent": "oracle", "event": "error", "detail": "Process exited with code 1", "meta": {"stderr": "\u001b[31merror:\u001b[0m session not found: 1781368065320_ooj72\n", "failure_class": "process_error"}}
+{"ts": 1781368073.8391712, "agent": "oracle", "event": "status_change", "detail": "idle", "meta": {}}
+{"ts": 1781368073.8434036, "agent": "junior", "event": "warning", "detail": "stream_tail_unparsed", "meta": {"tail_chars": 1534}}
+{"ts": 1781368073.8434036, "agent": "junior", "event": "error", "detail": "Process exited with code 1", "meta": {"stderr": "\u001b[31merror:\u001b[0m session not found: 1781368065196_m7yrl\n", "failure_class": "process_error"}}
+{"ts": 1781368073.8434036, "agent": "junior", "event": "status_change", "detail": "idle", "meta": {}}
+{"ts": 1781368073.8507376, "agent": "frontend", "event": "warning", "detail": "stream_tail_unparsed", "meta": {"tail_chars": 960}}
+{"ts": 1781368073.8512664, "agent": "frontend", "event": "error", "detail": "Process exited with code 1", "meta": {"stderr": "\u001b[31merror:\u001b[0m session not found: 1781368065284_h6h7b\n", "failure_class": "process_error"}}
+{"ts": 1781368073.8521779, "agent": "frontend", "event": "status_change", "detail": "idle", "meta": {}}
+{"ts": 1781368073.8856122, "agent": "oracle", "event": "message_received", "detail": "from leader", "meta": {"type": "shutdown_request"}}
+{"ts": 1781368073.8856122, "agent": "oracle", "event": "shutdown", "detail": "Requested by leader", "meta": {}}
+{"ts": 1781368073.911793, "agent": "junior", "event": "message_received", "detail": "from leader", "meta": {"type": "shutdown_request"}}
+{"ts": 1781368073.911793, "agent": "junior", "event": "shutdown", "detail": "Requested by leader", "meta": {}}
+{"ts": 1781368073.930041, "agent": "frontend", "event": "message_received", "detail": "from leader", "meta": {"type": "shutdown_request"}}
+{"ts": 1781368073.930041, "agent": "frontend", "event": "shutdown", "detail": "Requested by leader", "meta": {}}
+{"ts": 1781368074.3335927, "agent": "quality_validator", "event": "spawned", "detail": "Task: You are Quality_Validator. Your role is to verify the work. You run tests, check files, and ensure t", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368074.3335927, "agent": "quality_validator", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781368077.7909858, "agent": "quality_validator", "event": "error", "detail": "Process exited with code 4294967295", "meta": {"stderr": "", "failure_class": "process_error"}}
+{"ts": 1781368077.7924936, "agent": "quality_validator", "event": "status_change", "detail": "completed", "meta": {}}
+{"ts": 1781368077.9771702, "agent": "junior", "event": "spawned", "detail": "Task: You are Junior. Your role is to do the work. You write the code, run the commands, and fix the bugs.", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368077.9771702, "agent": "junior", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781368077.9864955, "agent": "frontend", "event": "spawned", "detail": "Task: You are Frontend. Your role is to implement the user interface. You care about pixel-perfect design,", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368077.9864955, "agent": "frontend", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781368077.9934275, "agent": "junior", "event": "spawned", "detail": "Task: You are Junior. Your role is to do the work. You write the code, run the commands, and fix the bugs.", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368077.9954422, "agent": "oracle", "event": "spawned", "detail": "Task: You are Oracle. Your role is to provide deep architectural insights, debug complex issues, and find ", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368077.9954422, "agent": "oracle", "event": "spawned", "detail": "Task: You are Oracle. Your role is to provide deep architectural insights, debug complex issues, and find ", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368077.9954422, "agent": "oracle", "event": "status_change", "detail": "running", "meta": {}}
+ity_Validator. Your role is to verify the work. You run tests, check files, and ensure t", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368077.997066, "agent": "oracle", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781368077.9992347, "agent": "frontend", "event": "spawned", "detail": "Task: You are Frontend. Your role is to implement the user interface. You care about pixel-perfect design,", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368078.0000248, "agent": "quality_validator", "event": "status_change", "detail": "running", "meta": {}}
+or. Your role is to verify the work. You run tests, check files, and ensure t", "meta": {"model": "deepseek-v4-flash"}}
+{"ts": 1781368078.0027602, "agent": "quality_validator", "event": "status_change", "detail": "running", "meta": {}}
+{"ts": 1781368231.4087648, "agent": "quality_validator", "event": "warning", "detail": "stream_tail_unparsed", "meta": {"tail_chars": 35146}}
+{"ts": 1781368231.4087648, "agent": "quality_validator", "event": "status_change", "detail": "completed", "meta": {}}
+{"ts": 1781368291.3106394, "agent": "oracle", "event": "warning", "detail": "stream_tail_unparsed", "meta": {"tail_chars": 30448}}
+{"ts": 1781368291.3113384, "agent": "oracle", "event": "status_change", "detail": "idle", "meta": {}}
+{"ts": 1781368308.0255919, "agent": "quality_validator", "event": "warning", "detail": "stream_tail_unparsed", "meta": {"tail_chars": 27818}}
+{"ts": 1781368308.0271406, "agent": "quality_validator", "event": "status_change", "detail": "completed", "meta": {}}
