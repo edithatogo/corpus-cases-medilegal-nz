@@ -42,6 +42,7 @@ class FetchedCase:
         MIME type of the fetched document (e.g. ``application/pdf``).
     metadata : dict
         Additional metadata extracted during fetch.
+
     """
 
     case_id: str
@@ -67,6 +68,7 @@ class HdcFetcher:
     ----------
     config : HdcPipelineConfig
         Pipeline configuration with fetch settings.
+
     """
 
     def __init__(self, config: HdcPipelineConfig) -> None:
@@ -115,6 +117,7 @@ class HdcFetcher:
         ------
         requests.RequestException
             If the request fails after all retries.
+
         """
         rate = self._config.fetch.rate_limit_per_second
         if rate > 0:
@@ -141,6 +144,7 @@ class HdcFetcher:
         -------
         FetchedCase
             The fetched case document.
+
         """
         resp = self.fetch_url(url)
         cid = case_id or Path(url).stem
@@ -161,7 +165,7 @@ class HdcFetcher:
     def __enter__(self) -> HdcFetcher:
         return self
 
-    def __exit__(self, *args: Any) -> None:
+    def __exit__(self, *args: object) -> None:
         self.close()
 
 
@@ -190,6 +194,7 @@ def fetch_case(
     -------
     FetchedCase
         The fetched case document.
+
     """
     cfg = config if config is not None else HdcPipelineConfig()
     with HdcFetcher(cfg) as fetcher:

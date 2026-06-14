@@ -15,11 +15,11 @@ from corpus_cases_medilegal_nz.sources import (
 )
 
 __all__ = [
+    "SOURCE_REGISTRY",
     "FetchConfig",
     "HdcPipelineConfig",
     "PipelineConfig",
     "PipelineDetails",
-    "SOURCE_REGISTRY",
     "SourceAdapter",
     "get_adapter",
     "get_source_ids",

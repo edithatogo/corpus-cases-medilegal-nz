@@ -305,3 +305,85 @@ GitHub Actions Runner (daily 17:14 UTC + manual dispatch):
 2. `editor` — Created test files in incremental chunks
 3. `run_commands` — Ran pytest via python -c with sys.path insertion
 4. `search_codebase` — Located assertion patterns for bug fixes
+
+
+---
+
+## General Coder — 2026-06-14 (Multi-Archive Mirroring Phase 2 Documentation)
+
+### Completed Local Non-Gated Work
+
+**Track: multi_git_archive_mirroring_20260614 — Phase 2 (Zenodo & OSF)**
+
+| Task | Status | Deliverable |
+|------|--------|-------------|
+| Document Zenodo archival publication schema and script requirements | ✅ COMPLETE | `conductor/tracks/multi_git_archive_mirroring_20260614/zenodo_archival_plan.md` |
+| Design OSF optional mirror convenience policy | ✅ COMPLETE | `conductor/tracks/multi_git_archive_mirroring_20260614/osf_mirror_policy.md` |
+
+### Files Created
+1. **`zenodo_archival_plan.md`** — Zenodo deposition schema, metadata.json structure,
+   CLI script requirements (`zenodo_archive.py`), GHA workflow fragment, DOI collection
+2. **`osf_mirror_policy.md`** — When to use OSF, naming conventions, project structure,
+   upload procedure (manual + CLI), frequency, cost/storage estimates
+
+### Files Updated
+1. **`plan.md`** — Checked off Tasks 1 & 2 in Phase 2
+2. **`metadata.json`** — `updated_at` timestamp refreshed
+3. **`pyproject.toml`** — Removed deprecated ANN101/ANN102 ruff ignore entries
+
+### Gated Remaining Work (Requires User Action)
+1. **Phase 1, Task 2**: Configure GitHub secrets `GIT_MIRROR_URL` / `GIT_MIRROR_SSH_PRIVATE_KEY`
+2. **Phase 1, Task 3**: Verify manual/push triggers for mirror sync
+3. **Phase 2, Task 3**: Conductor manual verification of Phase 2
+
+### Environment Check
+- All 172 tests pass ✅
+- No lint errors (87 pre-existing lint suggestions remain — all docstring/PTH style issues)
+- Ruff deprecation warnings cleaned up ✅
+
+---
+
+## Quality_Validator Final Validation — 2026-06-14 (Complete Pass)
+
+### Final Verdict: ✅ MISSION COMPLETE
+
+| Dimension | Status | Evidence |
+|-----------|--------|----------|
+| **Phase 1 (Scaffolding)** | ✅ ALL 14 items present | pixi.toml, pyproject.toml, config arrays, README, CONTRIBUTING, .pre-commit, .gitignore, data dirs |
+| **Phase 2 (Ingestion)** | ✅ ALL 6 modules + tests | config_models.py, fetcher.py, exporter.py + 80 unit tests |
+| **Phase 3 (Sync)** | ✅ ALL deliverables | hf_sync.py, multi_source_sync.yml (replaces hf_sync.yml), mirror_sync.yml |
+| **Multi-Source Expansion** | ✅ 13 source configs, 5 adapters | All config/pipeline.yaml files, source adapters, registry |
+| **Tests** | ✅ **172/172 PASSING** | All unit, integration, registry, adapter tests green |
+| **GHA Workflows** | ✅ 2 workflows | multi_source_sync.yml (daily cron), mirror_sync.yml (push trigger) |
+
+### Gated / Remaining Work (Requires User Approval)
+The following items from `conductor/tracks/multi_git_archive_mirroring_20260614` require user action:
+
+1. **Phase 1, Task 2**: Configure repository secrets `GIT_MIRROR_URL` and `GIT_MIRROR_SSH_PRIVATE_KEY` on GitHub
+2. **Phase 1, Task 3**: Verify successful manual and push triggers for mirror sync
+3. **Phase 2, Task 1**: Document Zenodo archival publication schema and script requirements
+4. **Phase 2, Task 2**: Design OSF optional mirror convenience policy
+5. **Phase 2, Task 3**: Conductor - User Manual Verification (protocol in workflow.md)
+
+---
+
+## codex_gpt55_engineer - 2026-06-14T19:10:00+10:00
+
+### Finding: Mirror workflow needed a second empty-secret bypass
+
+The track acceptance criteria require `mirror_sync.yml` to bypass safely when credentials are empty. The workflow already skipped when `GIT_MIRROR_URL` was absent, but would continue to create an SSH key file and attempt host setup when `GIT_MIRROR_SSH_PRIVATE_KEY` was absent but the mirror URL was set.
+
+### Local Fix
+- Added a missing `GIT_MIRROR_SSH_PRIVATE_KEY` empty check to `.github/workflows/mirror_sync.yml`.
+- Quoted `GIT_MIRROR_URL` and `HOST` in the shell script.
+- Added `tests/test_mirror_workflow.py` regression coverage.
+
+### Evidence
+- `python -m pytest tests/test_mirror_workflow.py -p no:cacheprovider` passed: 2/2.
+- `python -m ruff check tests/test_mirror_workflow.py --no-cache` passed.
+- Full `python -m pytest` was attempted but blocked by local temp-directory permissions for `tmp_path` fixtures; non-temp tests reached 149 passing before permission errors.
+
+### Still Gated
+- GitHub repository secrets configuration.
+- GitHub Actions manual or push-trigger verification.
+- Any external archive or mirror publication.

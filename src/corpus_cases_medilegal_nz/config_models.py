@@ -1,7 +1,7 @@
 """Configuration models for the New Zealand Medical-Legal Corpus pipeline."""
 
 from pathlib import Path
-from typing import Any
+
 import yaml
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -92,13 +92,14 @@ def load_pipeline_config(config_path: Path | str) -> PipelineConfig:
     -------
     PipelineConfig
         Validated configuration model.
+
     """
     path = Path(config_path)
     if not path.is_file():
         msg = f"Configuration file not found: {path}"
         raise FileNotFoundError(msg)
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
     return PipelineConfig.model_validate(data)
@@ -124,6 +125,7 @@ def load_multi_source_config(source_ids: list[str] | None = None) -> dict[str, P
     Some sources in the registry are stubs with empty URLs. Their config files
     exist but may fail ``HttpUrl`` validation. Those sources are gracefully
     skipped so that callers only receive fully-validated configurations.
+
     """
     from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY
 

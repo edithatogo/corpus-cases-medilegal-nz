@@ -2,15 +2,14 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import Any
 
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from corpus_cases_medilegal_nz.sources import SourceAdapter
 from corpus_cases_medilegal_nz.config_models import load_pipeline_config
+from corpus_cases_medilegal_nz.sources import SourceAdapter
 
 logger = logging.getLogger(__name__)
 

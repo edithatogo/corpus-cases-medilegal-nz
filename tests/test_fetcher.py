@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -14,7 +13,6 @@ from corpus_cases_medilegal_nz.fetcher import (
     HdcFetcher,
     fetch_case,
 )
-
 
 # ---------------------------------------------------------------------------
 # FetchedCase

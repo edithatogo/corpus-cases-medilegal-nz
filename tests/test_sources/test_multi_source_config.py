@@ -1,8 +1,6 @@
 """Tests for multi-source config loading."""
 from __future__ import annotations
 
-from pathlib import Path
-
 from corpus_cases_medilegal_nz.config_models import load_multi_source_config
 
 

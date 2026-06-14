@@ -8,9 +8,9 @@ import pytest
 from corpus_cases_medilegal_nz.sources import (
     SOURCE_REGISTRY,
     SourceAdapter,
+    get_adapter,
     get_source_ids,
     get_source_info,
-    get_adapter,
 )
 
 

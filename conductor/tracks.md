@@ -60,4 +60,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./conductor/tracks/law_commission_integration/](./conductor/tracks/law_commission_integration/)*
 *Status: ✅ COMPLETE — Config created, source registered in multi-source framework*
 
+## [ ] Track: Implement Multi-Git and Multi-Archive Mirroring Setup
+*Link: [./conductor/tracks/multi_git_archive_mirroring_20260614/](./conductor/tracks/multi_git_archive_mirroring_20260614/)*
+*Status: IN PROGRESS - local mirror workflow hardening complete; GitHub secrets, live trigger verification, and external archive publication remain gated.*
+
 

@@ -33,6 +33,7 @@ class ExportableCase:
         Clean full text of the case.
     metadata : dict[str, Any]
         Arbitrary metadata keys (commissioner, parties, outcome, citations, …).
+
     """
 
     case_id: str
@@ -89,6 +90,7 @@ def export_markdown(case: ExportableCase, output_dir: Path) -> Path:
     -------
     Path
         Path to the written file.
+
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     file_path = output_dir / f"{case.case_id}.md"
@@ -135,6 +137,7 @@ def export_text_json(
     -------
     tuple[Path, Path]
         ``(txt_path, json_path)``.
+
     """
     text_dir.mkdir(parents=True, exist_ok=True)
     json_dir.mkdir(parents=True, exist_ok=True)
@@ -180,6 +183,7 @@ def export_jsonl(cases: list[ExportableCase], output_path: Path) -> Path:
     -------
     Path
         ``output_path`` (for chaining).
+
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -223,6 +227,7 @@ def export_parquet(
     -------
     Path
         ``output_dir`` (for chaining).
+
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -277,6 +282,7 @@ def export_all(
     -------
     dict[str, list[Path]]
         Mapping of format names to lists of created file paths.
+
     """
     processed_dir.mkdir(parents=True, exist_ok=True)
 

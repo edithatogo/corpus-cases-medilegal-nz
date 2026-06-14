@@ -54,8 +54,6 @@ select = [
 ignore = [
     "PLR0913",                   # Too many arguments (acceptable for CLI)
     "E501",                      # Line length handled by formatter
-    "ANN101",                    # Missing type annotation for self
-    "ANN102",                    # Missing type annotation for cls
     "D107",                      # Missing docstring in __init__
     "D203",                      # 1 blank line before class (D211 preferred)
     "D212",                      # Multi-line docstring summary on first line

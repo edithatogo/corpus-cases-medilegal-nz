@@ -2,21 +2,17 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 from corpus_cases_medilegal_nz.hf_sync import (
+    _export_data,
     _fetch_new_cases,
     _process_cases,
-    _export_data,
     _validate_data,
-    sync_pipeline,
     download_snapshot,
+    sync_pipeline,
     upload_to_hf,
-    main,
 )
-
 
 # ===========================================================================
 # download_snapshot

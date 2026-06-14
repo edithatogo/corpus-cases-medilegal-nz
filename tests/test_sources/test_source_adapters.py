@@ -2,17 +2,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-import pytest
-
-from corpus_cases_medilegal_nz.sources import get_adapter, SourceAdapter
+from corpus_cases_medilegal_nz.sources import SourceAdapter, get_adapter
+from corpus_cases_medilegal_nz.sources.era import EraSourceAdapter
 from corpus_cases_medilegal_nz.sources.hdc import HdcSourceAdapter
 from corpus_cases_medilegal_nz.sources.hpdt import HpdtSourceAdapter
 from corpus_cases_medilegal_nz.sources.moj_tribunals import MojTribunalsSourceAdapter
-from corpus_cases_medilegal_nz.sources.era import EraSourceAdapter
 from corpus_cases_medilegal_nz.sources.teachers import TeachersSourceAdapter
-
 
 # ===========================================================================
 # HDC

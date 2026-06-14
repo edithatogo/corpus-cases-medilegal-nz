@@ -12,9 +12,8 @@ from typing import Any
 
 from huggingface_hub import snapshot_download, upload_folder
 
-from corpus_cases_medilegal_nz.config_models import load_pipeline_config
 from corpus_cases_medilegal_nz.exporter import ExportableCase, export_all
-from corpus_cases_medilegal_nz.sources import get_adapter, get_source_ids, SOURCE_REGISTRY
+from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY, get_adapter, get_source_ids
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +48,7 @@ def download_snapshot(
     ------
     huggingface_hub.utils.HfHubHTTPError
         If the download fails due to an HTTP error.
+
     """
     local_path = Path(local_dir)
     local_path.mkdir(parents=True, exist_ok=True)
@@ -96,6 +96,7 @@ def upload_to_hf(
     -------
     str
         URL of the commit created on Hugging Face.
+
     """
     logger.info(
         "Uploading %s to %s ... (message: %s)",
@@ -134,6 +135,7 @@ def _fetch_new_cases(source_id: str, config_path: Path) -> list[dict[str, Any]]:
     -------
     list[dict[str, Any]]
         List of fetched case dictionaries.
+
     """
     adapter = get_adapter(source_id)
     logger.info("Fetching cases from %s (%s)", source_id, SOURCE_REGISTRY[source_id]["name"])
@@ -162,6 +164,7 @@ def _process_cases(
     -------
     list[dict[str, Any]]
         Processed case dictionaries.
+
     """
     adapter = get_adapter(source_id)
     processed = adapter.process(raw_cases)
@@ -189,6 +192,7 @@ def _export_data(
     -------
     Path
         Path to the exported data directory.
+
     """
     processed_dir = Path("data/processed")
 
@@ -225,6 +229,7 @@ def _validate_data(data_dir: Path) -> bool:
     -------
     bool
         ``True`` if all expected sub-directories exist.
+
     """
     required = ["markdown", "text", "json", "jsonl", "parquet"]
     all_ok = True
@@ -270,6 +275,7 @@ def sync_pipeline(
     dict[str, Any]
         Dictionary with keys ``\"source_id\"``, ``\"status\"``, ``\"commit_url\"``,
         and details about each step.
+
     """
     cfg_path = Path(config_path) if config_path else Path(f"config/{source_id}_pipeline.yaml")
     local_dir = Path("data/processed")

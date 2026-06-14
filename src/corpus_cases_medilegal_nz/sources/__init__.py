@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-
 SOURCE_REGISTRY: dict[str, dict[str, Any]] = {
     "hdc": {"name": "Health and Disability Commissioner", "url": "https://www.hdc.org.nz/decisions/search-decisions/", "config": "config/hdc_pipeline.yaml"},
     "hpdt": {"name": "Health Practitioners Disciplinary Tribunal", "url": "https://www.hpdt.org.nz/Search-Decisions", "config": "config/hpdt_pipeline.yaml"},
