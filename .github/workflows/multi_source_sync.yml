@@ -36,4 +36,5 @@ jobs:
       - name: Upload ${{ matrix.source }} data
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          PYTHONPATH: src
         run: pixi run python -m corpus_cases_medilegal_nz.hf_sync ${{ matrix.source }}
