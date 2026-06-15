@@ -19,6 +19,9 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
+      - name: Remove local-only sibling dependency in CI
+        run: |
+          python -c "from pathlib import Path; p = Path('pixi.toml'); text = p.read_text(); p.write_text(text.replace('nlp-policy-nz = { path = \"../nlp-policy-nz\", editable = true }\n', ''))"
       - uses: prefix-dev/setup-pixi@v0
         with:
           pixi-version: latest
