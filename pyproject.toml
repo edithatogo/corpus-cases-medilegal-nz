@@ -22,6 +22,7 @@ dependencies = [
     "click>=8.1.0",
     "typer>=0.26.7",
     "rich>=15.0.0",
+    "loguru>=0.7.2",
     "nlp_policy_nz>=0.1.0",
 ]
 
@@ -132,3 +133,7 @@ exclude_lines = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.legal_nz]
+versioning = "semver"
+logging = "loguru"

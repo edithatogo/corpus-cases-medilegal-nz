@@ -1,5 +1,7 @@
 """New Zealand Medical-Legal Corpus ingestion and sync pipeline."""
 
+__version__ = "0.1.0"
+
 from corpus_cases_medilegal_nz.config_models import (
     FetchConfig,
     HdcPipelineConfig,
@@ -21,6 +23,7 @@ __all__ = [
     "PipelineConfig",
     "PipelineDetails",
     "SourceAdapter",
+    "__version__",
     "get_adapter",
     "get_source_ids",
     "load_pipeline_config",
