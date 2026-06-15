@@ -28,15 +28,7 @@ jobs:
           HF_REPO_ID: ${{ vars.HF_REPO_ID || 'edithatogo/corpus-cases-medilegal-nz' }}
         run: |
           echo "Syncing source: ${{ matrix.source }}"
-          pixi run python -c "
-import sys
-from pathlib import Path
-sys.path.insert(0, 'src')
-from corpus_cases_medilegal_nz.sources import get_adapter, SOURCE_REGISTRY
-adapter = get_adapter('${{ matrix.source }}')
-info = SOURCE_REGISTRY['${{ matrix.source }}']
-print('Syncing {} from {}'.format(info['name'], adapter.config_path))
-"
+          pixi run python -c "import sys; sys.path.insert(0, 'src'); from corpus_cases_medilegal_nz.sources import get_adapter, SOURCE_REGISTRY; adapter = get_adapter('${{ matrix.source }}'); info = SOURCE_REGISTRY['${{ matrix.source }}']; print('Syncing {} from {}'.format(info['name'], adapter.config_path))"
       - name: Upload ${{ matrix.source }} data
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
