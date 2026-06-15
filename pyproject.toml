@@ -26,6 +26,10 @@ dependencies = [
     "nlp_policy_nz>=0.1.0",
 ]
 
+[project.scripts]
+corpus-cases-medilegal-nz = "corpus_cases_medilegal_nz.cli:main"
+nz-medilegal-corpus = "corpus_cases_medilegal_nz.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
