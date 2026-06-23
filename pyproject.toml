@@ -141,3 +141,6 @@ pythonpath = ["src"]
 [tool.legal_nz]
 versioning = "semver"
 logging = "loguru"
+
+[tool.uv.sources]
+nlp_policy_nz = { path = "../nlp-policy-nz" }
