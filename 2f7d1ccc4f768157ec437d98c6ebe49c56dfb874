@@ -1,0 +1,16 @@
+Task: Define nlp-policy-nz parser delegation contract
+
+Summary:
+- Added parser_contract.py with versioned parser input/output contract, provider version detection, and validation helpers.
+- Added parser-contract CLI command.
+- Added docs/source-parser-contract.md.
+- Added parser_contract release evidence manifest and embedded contract evidence in release_evidence.json/source_collection_audit.
+- Added tests for contract shape, input validation, output validation, source mismatch, and release artifact integration.
+- Marked the parser delegation contract task complete in the Conductor plan.
+
+Validation:
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_parser_contract.py tests/test_archive_release.py -q
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_parser_contract.py tests/test_archive_release.py tests/test_monthly_publication_workflow.py tests/test_publication_adapters.py -q
+- uv run --frozen --python 3.12 --extra dev ruff check src/corpus_cases_medilegal_nz/parser_contract.py src/corpus_cases_medilegal_nz/archive.py src/corpus_cases_medilegal_nz/cli.py tests/test_parser_contract.py tests/test_archive_release.py
+- uv run --frozen --python 3.12 --extra dev ruff format --check src/corpus_cases_medilegal_nz/parser_contract.py src/corpus_cases_medilegal_nz/archive.py src/corpus_cases_medilegal_nz/cli.py tests/test_parser_contract.py tests/test_archive_release.py
+- uv run --frozen --python 3.12 --extra dev python scripts/build_release_evidence.py --output-dir .tmp/parser-contract-verify
