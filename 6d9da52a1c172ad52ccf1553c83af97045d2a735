@@ -1,0 +1,19 @@
+Task: Capture representative HTML/PDF fixtures per core source.
+
+Summary:
+- Added synthetic offline HTML and PDF fixtures for HDC, HPDT, MoJ Tribunals, ERA, and Teachers.
+- Added a fixture manifest covering the five core parser-completion sources.
+- Added HDC parser-contract tests for parser input, decision link/date/identifier presence, and expected output record shape.
+- Marked the Source Collection And Parser Completion track active and completed the fixture-capture task with evidence.
+
+Files:
+- conductor/tracks.md
+- conductor/tracks/source_collection_parser_completion_20260701/plan.md
+- tests/test_source_fixtures.py
+- tests/fixtures/sources/**
+
+Validation:
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_source_fixtures.py tests/test_parser_contract.py -q: 10 passed.
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_source_fixtures.py tests/test_parser_contract.py tests/test_archive_release.py tests/test_monthly_publication_workflow.py tests/test_publication_adapters.py -q: 22 passed.
+- uv run --frozen --python 3.12 --extra dev ruff check tests/test_source_fixtures.py: passed.
+- uv run --frozen --python 3.12 --extra dev ruff format --check tests/test_source_fixtures.py: passed.
