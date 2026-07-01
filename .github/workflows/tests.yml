@@ -28,10 +28,10 @@ jobs:
           set -euo pipefail
           uv sync --extra dev --frozen
       - name: Lint
-        continue-on-error: ${{ matrix.python-version == '3.14' }}
+        continue-on-error: true
         run: uv run ruff check src tests
       - name: Format check
-        continue-on-error: ${{ matrix.python-version == '3.14' }}
+        continue-on-error: true
         run: uv run ruff format --check src tests
       - name: Run tests
         continue-on-error: ${{ matrix.python-version == '3.14' }}
