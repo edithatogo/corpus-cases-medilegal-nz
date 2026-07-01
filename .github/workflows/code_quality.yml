@@ -21,6 +21,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Checkout sibling nlp-policy-nz dependency
+        run: git clone --depth 1 https://github.com/edithatogo/nlp-policy-nz.git ../nlp-policy-nz
+
       - name: Setup uv
         uses: astral-sh/setup-uv@v7
 

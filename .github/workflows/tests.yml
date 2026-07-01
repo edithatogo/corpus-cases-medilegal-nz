@@ -16,6 +16,8 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v6
+      - name: Checkout sibling nlp-policy-nz dependency
+        run: git clone --depth 1 https://github.com/edithatogo/nlp-policy-nz.git ../nlp-policy-nz
       - uses: astral-sh/setup-uv@v7
       - uses: actions/setup-python@v6
         with:
