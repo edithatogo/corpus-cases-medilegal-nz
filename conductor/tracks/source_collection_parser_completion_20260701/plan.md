@@ -30,11 +30,16 @@
 
 ## Phase 3: Source Parser Implementation
 
-- [ ] Task: Complete or integrate HDC parser output.
-- [ ] Task: Complete or integrate HPDT parser output.
-- [ ] Task: Complete or integrate MoJ Tribunals parser output.
-- [ ] Task: Complete or integrate ERA parser output.
-- [ ] Task: Complete or integrate Teachers parser output.
+- [x] Task: Complete or integrate HDC parser output.
+    - Evidence: `HdcSourceAdapter.fetch()` parses HDC listing HTML through `parse_source_listing_html`; fixture-backed adapter integration tests validate contract-shaped HDC output.
+- [x] Task: Complete or integrate HPDT parser output.
+    - Evidence: `HpdtSourceAdapter.fetch()` parses HPDT listing HTML through `parse_source_listing_html`; fixture-backed adapter integration tests validate contract-shaped HPDT output.
+- [x] Task: Complete or integrate MoJ Tribunals parser output.
+    - Evidence: `MojTribunalsSourceAdapter.fetch()` parses MoJ Tribunals listing HTML through `parse_source_listing_html`; fixture-backed adapter integration tests validate contract-shaped MoJ output.
+- [x] Task: Complete or integrate ERA parser output.
+    - Evidence: `EraSourceAdapter.fetch()` parses ERA listing HTML through `parse_source_listing_html`; fixture-backed adapter integration tests validate contract-shaped ERA output.
+- [x] Task: Complete or integrate Teachers parser output.
+    - Evidence: `TeachersSourceAdapter.fetch()` parses Teachers Tribunal listing HTML through `parse_source_listing_html`; fixture-backed adapter integration tests validate contract-shaped Teachers output.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Source Parser Implementation' (Protocol in workflow.md)
 
 ## Phase 4: Export And Reconciliation

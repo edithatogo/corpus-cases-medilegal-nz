@@ -11,6 +11,7 @@ PARSER_PROVIDER_PACKAGE = "nlp_policy_nz"
 PARSER_PROVIDER_DISTRIBUTION = "nlp-policy-nz"
 REQUIRED_RECORD_FIELDS = ("case_id", "source", "title", "date", "text", "metadata")
 REQUIRED_INPUT_FIELDS = ("source_id", "url", "content", "content_type")
+REQUIRED_METADATA_FIELDS = ("url", "retrieved_at", "parser_name", "parser_version", "raw_sha256")
 
 JsonObject = dict[str, Any]
 
@@ -49,13 +50,7 @@ def build_parser_contract() -> JsonObject:
         "output": {
             "type": "list[dict]",
             "required_fields": list(REQUIRED_RECORD_FIELDS),
-            "metadata_required_fields": [
-                "url",
-                "retrieved_at",
-                "parser_name",
-                "parser_version",
-                "raw_sha256",
-            ],
+            "metadata_required_fields": list(REQUIRED_METADATA_FIELDS),
             "description": (
                 "Each record must be compatible with ExportableCase and release "
                 "evidence JSONL records."
@@ -107,6 +102,15 @@ def validate_parser_record(record: Mapping[str, Any], *, source_id: str) -> Json
     metadata_value = normalized.get("metadata")
     if not isinstance(metadata_value, dict):
         raise ParserContractError("Parser record metadata must be a dict")
+    missing_metadata = [
+        field
+        for field in REQUIRED_METADATA_FIELDS
+        if not str(metadata_value.get(field, "")).strip()
+    ]
+    if missing_metadata:
+        raise ParserContractError(
+            f"Parser record metadata missing required fields: {missing_metadata}"
+        )
     normalized["metadata"] = metadata_value
     return normalized
 

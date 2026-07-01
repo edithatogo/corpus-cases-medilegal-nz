@@ -106,8 +106,29 @@ def test_validate_parser_records_normalizes_all_records() -> None:
             "title": "Decision 001",
             "date": "2026-07-01",
             "text": "Decision body",
-            "metadata": {},
+            "metadata": {
+                "url": "https://example.test/decision",
+                "retrieved_at": "2026-07-01T00:00:00Z",
+                "parser_name": "fixture",
+                "parser_version": "1.0.0",
+                "raw_sha256": "0" * 64,
+            },
         }
     ]
 
     assert validate_parser_records(records, source_id="hdc") == records
+
+
+def test_validate_parser_record_rejects_missing_metadata_fields() -> None:
+    with pytest.raises(ParserContractError, match="metadata missing required fields"):
+        validate_parser_record(
+            {
+                "case_id": "hdc-001",
+                "source": "hdc",
+                "title": "Decision 001",
+                "date": "2026-07-01",
+                "text": "Decision body",
+                "metadata": {},
+            },
+            source_id="hdc",
+        )
