@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
+import pytest
+
 from corpus_cases_medilegal_nz.parser_contract import validate_parser_input, validate_parser_records
 
 FIXTURES_ROOT = Path(__file__).parent / "fixtures" / "sources"
@@ -61,3 +63,13 @@ def test_hdc_fixture_record_shape_matches_expected_parser_output() -> None:
     }
 
     assert validate_parser_records([record], source_id="hdc") == [record]
+
+
+@pytest.mark.parametrize("source_id", sorted(CORE_SOURCE_IDS))
+def test_core_source_fixtures_encode_parser_metadata_expectations(source_id: str) -> None:
+    manifest = json.loads((FIXTURES_ROOT / "fixture_manifest.json").read_text(encoding="utf-8"))
+    source_fixture = manifest["core_sources"][source_id]
+    html = (FIXTURES_ROOT / source_fixture["html"]).read_text(encoding="utf-8")
+
+    for expected_value in source_fixture["expected"].values():
+        assert expected_value in html, source_id

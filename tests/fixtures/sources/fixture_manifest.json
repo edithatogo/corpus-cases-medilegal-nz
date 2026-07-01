@@ -4,23 +4,58 @@
   "core_sources": {
     "era": {
       "html": "era/listing.html",
-      "pdf": "era/decision.pdf"
+      "pdf": "era/decision.pdf",
+      "expected": {
+        "body_text": "Employment determination synthetic fixture.",
+        "date": "2026-03-12",
+        "decision_link": "/assets/Uploads/determinations/2026/2026-NZERA-001.pdf",
+        "identifier": "2026-NZERA-001",
+        "title": "Employment Relations Authority Determinations"
+      }
     },
     "hdc": {
       "html": "hdc/listing.html",
-      "pdf": "hdc/decision.pdf"
+      "pdf": "hdc/decision.pdf",
+      "expected": {
+        "body_text": "Synthetic fixture summary for parser tests.",
+        "date": "2026-06-15",
+        "decision_link": "/decisions/search-decisions/2026/hdc26hdc001/",
+        "identifier": "HDC26HDC001",
+        "title": "Care planning and informed consent"
+      }
     },
     "hpdt": {
       "html": "hpdt/listing.html",
-      "pdf": "hpdt/decision.pdf"
+      "pdf": "hpdt/decision.pdf",
+      "expected": {
+        "body_text": "Practitioner discipline decision synthetic fixture.",
+        "date": "2026-05-21",
+        "decision_link": "/Search-Decisions/Decision?file=hpdt26-001.pdf",
+        "identifier": "HPDT26/001",
+        "title": "Search Decisions"
+      }
     },
     "moj_tribunals": {
       "html": "moj_tribunals/listing.html",
-      "pdf": "moj_tribunals/decision.pdf"
+      "pdf": "moj_tribunals/decision.pdf",
+      "expected": {
+        "body_text": "Ministry tribunal synthetic fixture.",
+        "date": "2026-04-30",
+        "decision_link": "/tribunals/synthetic-medical-appeal-2026-001.pdf",
+        "identifier": "Synthetic Medical Appeal 2026/001",
+        "title": "Tribunal Decisions"
+      }
     },
     "teachers": {
       "html": "teachers/listing.html",
-      "pdf": "teachers/decision.pdf"
+      "pdf": "teachers/decision.pdf",
+      "expected": {
+        "body_text": "Teacher discipline synthetic fixture.",
+        "date": "2026-02-10",
+        "decision_link": "/assets/Uploads/decisions/2026/tdt-2026-001.pdf",
+        "identifier": "TDT-2026-001",
+        "title": "Disciplinary Decisions"
+      }
     }
   }
 }

@@ -22,7 +22,8 @@
 
 - [x] Task: Capture representative HTML/PDF fixtures per core source.
     - Evidence: `tests/fixtures/sources/fixture_manifest.json` covers HDC, HPDT, MoJ Tribunals, ERA, and Teachers with synthetic HTML and PDF fixtures; `tests/test_source_fixtures.py` validates fixture presence and HDC parser-contract payload shape.
-- [ ] Task: Add parser unit tests for source metadata, decision links, dates, identifiers, and body text.
+- [x] Task: Add parser unit tests for source metadata, decision links, dates, identifiers, and body text.
+    - Evidence: `tests/fixtures/sources/fixture_manifest.json` now records expected title, identifier, date, decision link, and body text per core source; `tests/test_source_fixtures.py` asserts these expectations are present for all five core fixtures.
 - [ ] Task: Add malformed fixture tests for defensive parsing.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Fixture Corpus And Parser Tests' (Protocol in workflow.md)
 
