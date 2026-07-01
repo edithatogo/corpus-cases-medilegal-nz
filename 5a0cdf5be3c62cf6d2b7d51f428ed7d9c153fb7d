@@ -1,0 +1,29 @@
+Task: Complete Phase 3 core source parser integration.
+
+Summary:
+- Added shared medilegal listing parser for contract-valid records from source listing HTML.
+- Wired HDC, HPDT, MoJ Tribunals, ERA, and Teachers adapters to parse fetched listing HTML instead of returning stubbed empty lists.
+- Tightened parser contract validation so required metadata provenance fields are enforced.
+- Added fixture-backed parser and adapter integration tests for all five core sources.
+- Marked the five Phase 3 parser-output tasks complete in the Conductor plan.
+
+Files:
+- conductor/tracks/source_collection_parser_completion_20260701/plan.md
+- src/corpus_cases_medilegal_nz/medilegal_parser.py
+- src/corpus_cases_medilegal_nz/parser_contract.py
+- src/corpus_cases_medilegal_nz/sources/hdc.py
+- src/corpus_cases_medilegal_nz/sources/hpdt.py
+- src/corpus_cases_medilegal_nz/sources/moj_tribunals.py
+- src/corpus_cases_medilegal_nz/sources/era.py
+- src/corpus_cases_medilegal_nz/sources/teachers.py
+- tests/test_medilegal_parser.py
+- tests/test_source_adapter_parser_integration.py
+- tests/test_parser_contract.py
+
+Validation:
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_source_adapter_parser_integration.py tests/test_medilegal_parser.py tests/test_parser_contract.py -q: 19 passed.
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_medilegal_parser.py tests/test_parser_contract.py tests/test_malformed_source_fixtures.py tests/test_source_fixtures.py tests/test_sources/test_source_adapters.py -q: 79 passed.
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_source_adapter_parser_integration.py tests/test_medilegal_parser.py tests/test_parser_contract.py tests/test_malformed_source_fixtures.py tests/test_source_fixtures.py tests/test_sources/test_source_adapters.py tests/test_archive_release.py tests/test_monthly_publication_workflow.py tests/test_publication_adapters.py -q: 96 passed.
+- uv run --frozen --python 3.12 --extra dev ruff check touched parser, adapter, and test files: passed.
+- uv run --frozen --python 3.12 --extra dev ruff format --check touched parser, adapter, and test files: passed.
+- uv run --frozen --python 3.12 --extra dev python -m corpus_cases_medilegal_nz.cli source-audit: still reports zero persisted local records; export/collection proof remains Phase 4/6.
