@@ -1,0 +1,17 @@
+Task: Add parser unit tests for source metadata, decision links, dates, identifiers, and body text.
+
+Summary:
+- Extended the core source fixture manifest with expected title, identifier, date, decision link, and body text values.
+- Added parametrized fixture tests proving all five core source fixtures encode the metadata and text expectations parser implementations must preserve.
+- Kept expectations synthetic and offline to avoid brittle live-site or copyrighted fixture dependence.
+
+Files:
+- conductor/tracks/source_collection_parser_completion_20260701/plan.md
+- tests/fixtures/sources/fixture_manifest.json
+- tests/test_source_fixtures.py
+
+Validation:
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_source_fixtures.py -q: 8 passed.
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_source_fixtures.py tests/test_parser_contract.py tests/test_archive_release.py tests/test_monthly_publication_workflow.py tests/test_publication_adapters.py -q: 27 passed.
+- uv run --frozen --python 3.12 --extra dev ruff check tests/test_source_fixtures.py: passed.
+- uv run --frozen --python 3.12 --extra dev ruff format --check tests/test_source_fixtures.py: passed.
