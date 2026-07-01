@@ -94,9 +94,11 @@ jobs:
             ????\.??\.0) ;;
             *) echo "Archive version must use YYYY.MM.0: $VERSION" >&2; exit 1 ;;
           esac
-          echo "archive_version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "release_tag=dataset-v$VERSION" >> "$GITHUB_OUTPUT"
-          echo "bundle=$BUNDLE_DIR/corpus-cases-medilegal-nz-$VERSION.tar.gz" >> "$GITHUB_OUTPUT"
+          {
+            echo "archive_version=$VERSION"
+            echo "release_tag=dataset-v$VERSION"
+            echo "bundle=$BUNDLE_DIR/corpus-cases-medilegal-nz-$VERSION.tar.gz"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Guard publication events
         env:
