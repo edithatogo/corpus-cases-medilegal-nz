@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Synthetic source fixtures for parser contract tests. These are not copied source documents.",
+  "core_sources": {
+    "era": {
+      "html": "era/listing.html",
+      "pdf": "era/decision.pdf"
+    },
+    "hdc": {
+      "html": "hdc/listing.html",
+      "pdf": "hdc/decision.pdf"
+    },
+    "hpdt": {
+      "html": "hpdt/listing.html",
+      "pdf": "hpdt/decision.pdf"
+    },
+    "moj_tribunals": {
+      "html": "moj_tribunals/listing.html",
+      "pdf": "moj_tribunals/decision.pdf"
+    },
+    "teachers": {
+      "html": "teachers/listing.html",
+      "pdf": "teachers/decision.pdf"
+    }
+  }
+}
