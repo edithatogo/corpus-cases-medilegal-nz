@@ -1,0 +1,74 @@
+name: Code Quality And Workflow Hardening
+
+on:
+  pull_request:
+  push:
+    branches: [main, master, "codex/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  quality:
+    name: Python, Evidence, And Workflow Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --extra dev --frozen
+
+      - name: Ruff lint
+        run: uv run ruff check src tests scripts
+
+      - name: Ruff format
+        run: uv run ruff format --check src tests scripts
+
+      - name: Release evidence checks
+        run: |
+          set -euo pipefail
+          uv run python scripts/build_release_evidence.py --output-dir generated/monthly-publication
+          uv run python scripts/check_release_evidence.py --require-file
+          uv run python scripts/check_metadata_packages.py --require-file
+          uv run python scripts/check_public_surface_audit.py --require-file
+          uv run python -m corpus_cases_medilegal_nz.cli publication-readiness --strict
+
+      - name: Typos
+        uses: crate-ci/typos@v1
+
+      - name: Taplo TOML format check
+        run: |
+          set -euo pipefail
+          cargo install taplo-cli --locked --version 0.10.0
+          taplo fmt --check pyproject.toml pixi.toml
+
+      - name: Actionlint
+        uses: raven-actions/actionlint@v2
+
+      - name: Zizmor workflow hardening scan
+        run: uvx zizmor --pedantic .github/workflows
+
+  no-publication-from-dependency-updates:
+    name: Dependency Update Publication Guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.actor == 'dependabot[bot]' || github.actor == 'renovate[bot]'
+    steps:
+      - name: Confirm publication is disabled for dependency automation
+        run: |
+          set -euo pipefail
+          echo "Dependency update actors are not allowed to run publication workflows."

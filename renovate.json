@@ -17,6 +17,28 @@
   "assignees": ["edithatogo"],
   "packageRules": [
     {
+      "description": "Publication and release-evidence paths require human review",
+      "matchFileNames": [
+        ".github/workflows/monthly_dynamic_archive_publication.yml",
+        ".github/workflows/code_quality.yml",
+        ".github/workflows/codeql.yml",
+        ".github/workflows/scorecard.yml",
+        ".github/workflows/osv_scan.yml",
+        "scripts/build_release_evidence.py",
+        "scripts/check_release_evidence.py",
+        "scripts/check_metadata_packages.py",
+        "scripts/check_public_surface_audit.py",
+        "scripts/publication_readiness.py",
+        "scripts/publish_huggingface_release.py",
+        "scripts/publish_zenodo_draft.py",
+        "schemas/**",
+        "docs/monthly-dynamic-archive-publication.md"
+      ],
+      "automerge": false,
+      "dependencyDashboardApproval": true,
+      "labels": ["dependencies", "publication", "requires-review"]
+    },
+    {
       "groupName": "All Dependencies (Auto-merge)",
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true,

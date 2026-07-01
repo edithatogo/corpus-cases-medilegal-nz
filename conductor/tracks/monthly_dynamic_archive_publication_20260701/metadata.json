@@ -1,0 +1,8 @@
+{
+  "track_id": "monthly_dynamic_archive_publication_20260701",
+  "type": "feature",
+  "status": "in_progress",
+  "created_at": "2026-07-01T00:00:00Z",
+  "updated_at": "2026-07-01T10:48:00Z",
+  "description": "Implement monthly dynamically versioned archive publication to GitHub Releases, Hugging Face, and Zenodo with evidence, protected gates, and parallel archive alignment."
+}

@@ -204,7 +204,14 @@ processing logic — keeping this repository focused on data and configuration.
 |-------------|-------------------------------------------------------------------------|
 | GitHub      | [edithatogo/corpus-cases-medilegal-nz](https://github.com/edithatogo/corpus-cases-medilegal-nz) |
 | Hugging Face| [edithatogo/corpus-cases-medilegal-nz](https://huggingface.co/datasets/edithatogo/corpus-cases-medilegal-nz) |
-| Zenodo      | Coming soon — annual DOI-backed snapshots                              |
+| Zenodo      | Monthly draft/new-version snapshots; production DOI publish requires protected approval |
+
+Monthly archive versions use `YYYY.MM.0`, with GitHub release tags of the form
+`dataset-vYYYY.MM.0`. The publication workflow keeps GitHub as the code and
+release-evidence surface, Hugging Face as the live mutable dataset surface, and
+Zenodo as the immutable DOI snapshot surface. See
+[docs/monthly-dynamic-archive-publication.md](docs/monthly-dynamic-archive-publication.md)
+for the release contract, evidence ledgers, and protected Zenodo handoff.
 
 ---
 

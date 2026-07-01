@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/edithatogo/corpus-cases-medilegal-nz/schemas/release_evidence.schema.json",
+  "title": "Monthly Dynamic Archive Release Evidence",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "release",
+    "git",
+    "hugging_face",
+    "zenodo",
+    "schema",
+    "checksums",
+    "quality",
+    "source_coverage",
+    "dataset_diff",
+    "public_surface",
+    "legal_provenance",
+    "release_ladder"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "release": {
+      "type": "object",
+      "required": [
+        "archive_version",
+        "github_release_tag",
+        "record_count",
+        "coverage_statement"
+      ],
+      "properties": {
+        "archive_version": {
+          "type": "string",
+          "pattern": "^\\d{4}\\.\\d{2}\\.0$"
+        },
+        "github_release_tag": {
+          "type": "string",
+          "pattern": "^dataset-v\\d{4}\\.\\d{2}\\.0$"
+        },
+        "github_release_url": {
+          "type": "string"
+        },
+        "record_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coverage_statement": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "git": {
+      "type": "object",
+      "required": [
+        "commit_sha",
+        "workflow_run_id"
+      ],
+      "properties": {
+        "commit_sha": {
+          "type": "string"
+        },
+        "workflow_run_id": {
+          "type": "string"
+        }
+      }
+    },
+    "hugging_face": {
+      "type": "object",
+      "required": [
+        "repo_id",
+        "revision",
+        "remote_manifest_verified"
+      ],
+      "properties": {
+        "repo_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": "string"
+        },
+        "remote_manifest_verified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "zenodo": {
+      "type": "object",
+      "required": [
+        "draft_id",
+        "record_url",
+        "doi",
+        "concept_doi",
+        "protected_publish_environment",
+        "publish_handoff_only"
+      ],
+      "properties": {
+        "draft_id": {
+          "type": "string"
+        },
+        "record_url": {
+          "type": "string"
+        },
+        "doi": {
+          "type": "string"
+        },
+        "concept_doi": {
+          "type": "string"
+        },
+        "protected_publish_environment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "publish_handoff_only": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "schema": {
+      "type": "object"
+    },
+    "checksums": {
+      "type": "object",
+      "required": [
+        "manifest_path",
+        "sha256sums_path",
+        "manifest_sha256",
+        "artifact_count"
+      ],
+      "properties": {
+        "manifest_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256sums_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manifest_sha256": {
+          "type": "string"
+        },
+        "artifact_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "quality": {
+      "type": "object"
+    },
+    "source_coverage": {
+      "type": "object"
+    },
+    "dataset_diff": {
+      "type": "object"
+    },
+    "public_surface": {
+      "type": "object"
+    },
+    "legal_provenance": {
+      "type": "object"
+    },
+    "release_ladder": {
+      "type": "object"
+    }
+  }
+}

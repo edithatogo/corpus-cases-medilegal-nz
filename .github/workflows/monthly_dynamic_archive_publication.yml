@@ -1,0 +1,269 @@
+name: Monthly Dynamic Archive Publication
+
+on:
+  schedule:
+    - cron: "30 16 1 * *"
+  workflow_dispatch:
+    inputs:
+      publication_mode:
+        description: "Publication mode"
+        required: true
+        default: "dry-run"
+        type: choice
+        options:
+          - dry-run
+          - huggingface
+          - zenodo-draft
+          - full
+      archive_version:
+        description: "Archive version in YYYY.MM.0 format. Empty derives current month."
+        required: false
+        default: ""
+        type: string
+      zenodo_deposition_id:
+        description: "Existing Zenodo draft/deposition id. Empty creates a new draft."
+        required: false
+        default: ""
+        type: string
+      zenodo_create_new_version:
+        description: "Create a new Zenodo version from the supplied deposition id."
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  actions: read
+  attestations: write
+  id-token: write
+
+concurrency:
+  group: monthly-dynamic-archive-publication-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  ARTIFACT_DIR: generated/monthly-publication
+  BUNDLE_DIR: generated/monthly-publication-bundles
+  HF_REPO_ID: ${{ vars.HF_REPO_ID || 'edithatogo/corpus-cases-medilegal-nz' }}
+  ZENODO_API_URL: ${{ vars.ZENODO_API_URL || 'https://zenodo.org/api' }}
+  ZENODO_SANDBOX_API_URL: ${{ vars.ZENODO_SANDBOX_API_URL || 'https://sandbox.zenodo.org/api' }}
+  PUBLICATION_MODE: ${{ inputs.publication_mode || 'full' }}
+  INPUT_ARCHIVE_VERSION: ${{ inputs.archive_version || '' }}
+  ZENODO_DEPOSITION_ID: ${{ inputs.zenodo_deposition_id || '' }}
+  ZENODO_CREATE_NEW_VERSION: ${{ inputs.zenodo_create_new_version || false }}
+
+jobs:
+  build-validate-publish:
+    name: Build, Validate, And Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --extra dev --frozen
+
+      - name: Resolve archive version
+        id: version
+        env:
+          REQUESTED_VERSION: ${{ env.INPUT_ARCHIVE_VERSION }}
+        run: |
+          set -euo pipefail
+          if [ -n "$REQUESTED_VERSION" ]; then
+            VERSION="$REQUESTED_VERSION"
+          else
+            VERSION="$(uv run python -c "from corpus_cases_medilegal_nz.archive import derive_archive_version; print(derive_archive_version())")"
+          fi
+          case "$VERSION" in
+            ????\.??\.0) ;;
+            *) echo "Archive version must use YYYY.MM.0: $VERSION" >&2; exit 1 ;;
+          esac
+          echo "archive_version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_tag=dataset-v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "bundle=$BUNDLE_DIR/corpus-cases-medilegal-nz-$VERSION.tar.gz" >> "$GITHUB_OUTPUT"
+
+      - name: Guard publication events
+        env:
+          MODE: ${{ env.PUBLICATION_MODE }}
+          ACTOR: ${{ github.actor }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          case "$MODE" in
+            dry-run|huggingface|zenodo-draft|full) ;;
+            *) echo "Unsupported publication mode: $MODE" >&2; exit 1 ;;
+          esac
+          if [ "$ACTOR" = "dependabot[bot]" ] || [ "$ACTOR" = "renovate[bot]" ]; then
+            echo "Dependency automation cannot publish archives." >&2
+            exit 1
+          fi
+          if [ "$EVENT_NAME" != "schedule" ] && [ "$EVENT_NAME" != "workflow_dispatch" ]; then
+            echo "Archive publication only runs on schedule or manual dispatch." >&2
+            exit 1
+          fi
+
+      - name: Build release evidence
+        env:
+          ARCHIVE_VERSION: ${{ steps.version.outputs.archive_version }}
+        run: |
+          set -euo pipefail
+          uv run python scripts/build_release_evidence.py \
+            --output-dir "$ARTIFACT_DIR" \
+            --archive-version "$ARCHIVE_VERSION" \
+            --hf-repo-id "$HF_REPO_ID"
+
+      - name: Validate local release evidence
+        run: |
+          set -euo pipefail
+          uv run python scripts/check_release_evidence.py \
+            --path "$ARTIFACT_DIR/manifests/release_evidence.json" \
+            --require-file
+          uv run python scripts/check_metadata_packages.py \
+            --path "$ARTIFACT_DIR/metadata/metadata_packages_manifest.json" \
+            --require-file
+          uv run python scripts/check_public_surface_audit.py \
+            --path "$ARTIFACT_DIR/manifests/public_surface_audit.json" \
+            --require-file
+          uv run python -m corpus_cases_medilegal_nz.cli publication-readiness --strict
+
+      - name: Build Zenodo/GitHub bundle
+        env:
+          BUNDLE: ${{ steps.version.outputs.bundle }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$BUNDLE_DIR"
+          uv run python -c "from pathlib import Path; from corpus_cases_medilegal_nz.archive import build_archive_bundle; build_archive_bundle(Path('$ARTIFACT_DIR'), Path('$BUNDLE'))"
+
+      - name: Dry-run publication evidence
+        if: env.PUBLICATION_MODE == 'dry-run'
+        env:
+          ARCHIVE_VERSION: ${{ steps.version.outputs.archive_version }}
+          BUNDLE: ${{ steps.version.outputs.bundle }}
+        run: |
+          set -euo pipefail
+          uv run python scripts/publish_huggingface_release.py \
+            --artifact-dir "$ARTIFACT_DIR" \
+            --archive-version "$ARCHIVE_VERSION" \
+            --repo-id "$HF_REPO_ID" \
+            --dry-run
+          uv run python scripts/publish_zenodo_draft.py \
+            --artifact-dir "$ARTIFACT_DIR" \
+            --bundle "$BUNDLE" \
+            --archive-version "$ARCHIVE_VERSION" \
+            --dry-run
+
+      - name: Publish versioned artifacts to Hugging Face
+        if: env.PUBLICATION_MODE == 'huggingface' || env.PUBLICATION_MODE == 'full'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          ARCHIVE_VERSION: ${{ steps.version.outputs.archive_version }}
+        run: |
+          set -euo pipefail
+          if [ -z "$HF_TOKEN" ]; then
+            echo "HF_TOKEN is required for Hugging Face publication." >&2
+            exit 1
+          fi
+          uv run python scripts/publish_huggingface_release.py \
+            --artifact-dir "$ARTIFACT_DIR" \
+            --archive-version "$ARCHIVE_VERSION" \
+            --repo-id "$HF_REPO_ID"
+
+      - name: Upload Zenodo draft or new version
+        if: env.PUBLICATION_MODE == 'zenodo-draft' || env.PUBLICATION_MODE == 'full'
+        env:
+          ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+          ARCHIVE_CREATORS_JSON: ${{ secrets.ARCHIVE_CREATORS_JSON }}
+          ARCHIVE_VERSION: ${{ steps.version.outputs.archive_version }}
+          BUNDLE: ${{ steps.version.outputs.bundle }}
+        run: |
+          set -euo pipefail
+          if [ -z "$ZENODO_ACCESS_TOKEN" ]; then
+            echo "ZENODO_ACCESS_TOKEN is required for Zenodo draft upload." >&2
+            exit 1
+          fi
+          NEW_VERSION_ARGS=""
+          if [ "$ZENODO_CREATE_NEW_VERSION" = "true" ]; then
+            NEW_VERSION_ARGS="--create-new-version"
+          fi
+          uv run python scripts/publish_zenodo_draft.py \
+            --artifact-dir "$ARTIFACT_DIR" \
+            --bundle "$BUNDLE" \
+            --archive-version "$ARCHIVE_VERSION" \
+            --api-url "$ZENODO_API_URL" \
+            --deposition-id "$ZENODO_DEPOSITION_ID" \
+            $NEW_VERSION_ARGS
+
+      - name: Upload GitHub Actions artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: monthly-publication-${{ steps.version.outputs.archive_version }}
+          path: |
+            generated/monthly-publication/**
+            generated/monthly-publication-bundles/**
+          if-no-files-found: error
+
+      - name: Attest release artifacts
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: |
+            generated/monthly-publication/**
+            generated/monthly-publication-bundles/**
+
+      - name: Create or update GitHub release
+        if: env.PUBLICATION_MODE != 'dry-run'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.release_tag }}
+          ARCHIVE_VERSION: ${{ steps.version.outputs.archive_version }}
+          BUNDLE: ${{ steps.version.outputs.bundle }}
+        run: |
+          set -euo pipefail
+          RELEASE_NOTES="$ARTIFACT_DIR/manifests/release_evidence.json"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --notes-file "$RELEASE_NOTES"
+          else
+            gh release create "$TAG" \
+              --title "Dataset archive $ARCHIVE_VERSION" \
+              --notes-file "$RELEASE_NOTES"
+          fi
+          gh release upload "$TAG" \
+            "$BUNDLE" \
+            "$ARTIFACT_DIR/SHA256SUMS" \
+            "$ARTIFACT_DIR/manifests/release_evidence.json" \
+            "$ARTIFACT_DIR/manifests/checksum_manifest.json" \
+            "$ARTIFACT_DIR/manifests/source_coverage.json" \
+            "$ARTIFACT_DIR/manifests/public_surface_audit.json" \
+            "$ARTIFACT_DIR/metadata/metadata_packages_manifest.json" \
+            "$ARTIFACT_DIR/sbom/sbom.cyclonedx.json" \
+            "$ARTIFACT_DIR/sbom/sbom.spdx.json" \
+            --clobber
+
+  zenodo-production-handoff:
+    name: Protected Zenodo Publish Handoff
+    needs: build-validate-publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: inputs.publication_mode == 'full'
+    environment: ${{ vars.ZENODO_PROTECTED_ENVIRONMENT || 'zenodo-production' }}
+    permissions:
+      contents: read
+    steps:
+      - name: Confirm protected handoff boundary
+        run: |
+          set -euo pipefail
+          echo "Zenodo draft upload is complete."
+          echo "Production DOI publication remains a human-approved protected-environment action."
+          echo "Review zenodo_draft_evidence.json and publish from Zenodo only after approval."

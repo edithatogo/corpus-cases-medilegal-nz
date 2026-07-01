@@ -64,4 +64,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./conductor/tracks/multi_git_archive_mirroring_20260614/](./conductor/tracks/multi_git_archive_mirroring_20260614/)*
 *Status: IN PROGRESS - local mirror workflow hardening complete; GitHub secrets, live trigger verification, and external archive publication remain gated.*
 
+## [ ] Track: Monthly Dynamic Archive Publication
+*Link: [./conductor/tracks/monthly_dynamic_archive_publication_20260701/](./conductor/tracks/monthly_dynamic_archive_publication_20260701/)*
+*Status: IN PROGRESS - local release hardening scaffolding implemented; live GitHub, Hugging Face, and Zenodo proof remains gated on credentials and protected approval.*
 
