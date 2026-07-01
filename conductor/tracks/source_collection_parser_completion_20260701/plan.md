@@ -44,14 +44,17 @@
 
 ## Phase 4: Export And Reconciliation
 
-- [ ] Task: Generate deterministic processed records.
-    - [ ] JSONL.
-    - [ ] JSON.
-    - [ ] Markdown.
-    - [ ] Text.
-    - [ ] Parquet.
-- [ ] Task: Add changed, removed, and tombstoned record reconciliation.
-- [ ] Task: Add source-level checksums and provenance fields.
+- [x] Task: Generate deterministic processed records.
+    - [x] JSONL.
+    - [x] JSON.
+    - [x] Markdown.
+    - [x] Text.
+    - [x] Parquet.
+    - Evidence: `collection-proof` writes `data/processed/jsonl/records.jsonl`, `cases.jsonl`, per-record JSON, Markdown, text, and Hive-partitioned Parquet outputs for HDC, HPDT, MoJ Tribunals, ERA, and Teachers.
+- [x] Task: Add changed, removed, and tombstoned record reconciliation.
+    - Evidence: `collection-proof` writes `data/processed/manifests/dataset_diff.json` from `build_dataset_diff`; tests cover added/current, changed, removed, and tombstoned records.
+- [x] Task: Add source-level checksums and provenance fields.
+    - Evidence: parser records include source URL, retrieved-at timestamp, parser name/version, raw SHA-256, source name, and decision link metadata; `collection-proof` persists those fields in JSONL/JSON/Parquet artifacts.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Export And Reconciliation' (Protocol in workflow.md)
 
 ## Phase 5: Quality Gates
@@ -64,7 +67,9 @@
 
 ## Phase 6: First Non-Zero Collection Proof
 
-- [ ] Task: Run local collection for at least one source.
-- [ ] Task: Validate generated artifacts and ledgers.
+- [x] Task: Run local collection for at least one source.
+    - Evidence: `collection-proof` produced five local fixture-backed records, one each for HDC, HPDT, MoJ Tribunals, ERA, and Teachers.
+- [x] Task: Validate generated artifacts and ledgers.
+    - Evidence: `source-audit` now reads `data/processed/jsonl/records.jsonl` and reports five `validated_records` core sources with satisfied parser contracts.
 - [ ] Task: Attach collection proof to the GitHub issue/project.
 - [ ] Task: Conductor - User Manual Verification 'Phase 6: First Non-Zero Collection Proof' (Protocol in workflow.md)
