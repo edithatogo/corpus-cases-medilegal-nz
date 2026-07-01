@@ -1,0 +1,18 @@
+Task: Add malformed fixture tests for defensive parsing.
+
+Summary:
+- Added synthetic malformed source fixtures for empty HTML and unsupported binary content.
+- Added negative parser-contract tests for unsupported content type, source mismatch, empty required output fields, and non-dict metadata.
+- Marked the malformed fixture task complete in the Source Collection And Parser Completion plan.
+
+Files:
+- conductor/tracks/source_collection_parser_completion_20260701/plan.md
+- tests/fixtures/sources/malformed/empty.html
+- tests/fixtures/sources/malformed/unsupported.bin
+- tests/test_malformed_source_fixtures.py
+
+Validation:
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_malformed_source_fixtures.py -q: 5 passed.
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_malformed_source_fixtures.py tests/test_source_fixtures.py tests/test_parser_contract.py tests/test_archive_release.py tests/test_monthly_publication_workflow.py tests/test_publication_adapters.py -q: 32 passed.
+- uv run --frozen --python 3.12 --extra dev ruff check tests/test_malformed_source_fixtures.py: passed.
+- uv run --frozen --python 3.12 --extra dev ruff format --check tests/test_malformed_source_fixtures.py: passed.
