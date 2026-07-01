@@ -1,0 +1,14 @@
+Task: Source collection audit tracking
+
+Summary:
+- Added source_collection_audit release evidence to classify source collection/parser completion state.
+- Added source-audit CLI command for local inspection.
+- Added tests for current zero-record/parser-stub state and future validated-record state.
+- Committed six recommendation Conductor tracks so the registry links resolve.
+
+Validation:
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_archive_release.py -q
+- uv run --frozen --python 3.12 --extra dev pytest tests/test_archive_release.py tests/test_monthly_publication_workflow.py tests/test_publication_adapters.py -q
+- uv run --frozen --python 3.12 --extra dev ruff check src/corpus_cases_medilegal_nz/archive.py src/corpus_cases_medilegal_nz/cli.py tests/test_archive_release.py
+- uv run --frozen --python 3.12 --extra dev ruff format --check src/corpus_cases_medilegal_nz/archive.py src/corpus_cases_medilegal_nz/cli.py tests/test_archive_release.py
+- uv run --frozen --python 3.12 --extra dev python scripts/build_release_evidence.py --output-dir .tmp/source-audit-verify
