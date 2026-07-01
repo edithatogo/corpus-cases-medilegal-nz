@@ -10,11 +10,12 @@
     - [x] Teachers.
     - [x] Planned extended sources.
     - Evidence: `source-audit` CLI and `source_collection_audit.json` release manifest classify five core sources as `fetch_scaffold_parser_stub` and eight extended sources as `planned`.
-- [ ] Task: Define the `nlp-policy-nz` parser delegation contract.
-    - [ ] Input types.
-    - [ ] Output schema.
-    - [ ] Error semantics.
-    - [ ] Version compatibility.
+- [x] Task: Define the `nlp-policy-nz` parser delegation contract.
+    - [x] Input types.
+    - [x] Output schema.
+    - [x] Error semantics.
+    - [x] Version compatibility.
+    - Evidence: `parser-contract` CLI, `docs/source-parser-contract.md`, `parser_contract.py`, tests, and `parser_contract.json` release manifest define the `nlp-policy-nz` delegation boundary.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Collection Baseline And Parser Contract' (Protocol in workflow.md)
 
 ## Phase 2: Fixture Corpus And Parser Tests

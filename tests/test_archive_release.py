@@ -103,9 +103,11 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert evidence["release"]["archive_version"] == "2026.07.0"
     assert evidence["release"]["github_release_tag"] == "dataset-v2026.07.0"
     assert evidence["zenodo"]["publish_handoff_only"] is True
+    assert evidence["parser_contract"]["provider"]["package"] == "nlp_policy_nz"
     assert evidence["source_collection_audit"]["stage_counts"]["planned"] == 8
     assert evidence["public_surface"]["surfaces"]["osf"]["status"] == "inactive"
     assert (output_dir / "SHA256SUMS").is_file()
+    assert (output_dir / "manifests/parser_contract.json").is_file()
     assert (output_dir / "manifests/source_collection_audit.json").is_file()
     assert (output_dir / "metadata/croissant.jsonld").is_file()
     assert (output_dir / "metadata/ro-crate-metadata.json").is_file()

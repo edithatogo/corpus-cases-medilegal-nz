@@ -22,6 +22,7 @@ from corpus_cases_medilegal_nz.config_models import (
     PipelineConfig,
     SourceConfig,
 )
+from corpus_cases_medilegal_nz.parser_contract import build_parser_contract
 from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY
 
 DEFAULT_HF_REPO_ID = "edithatogo/corpus-cases-medilegal-nz"
@@ -310,6 +311,7 @@ def build_source_collection_audit(
                 "record_count": record_count,
                 "parser_contract": {
                     "shared_library": "nlp-policy-nz",
+                    "contract_version": build_parser_contract()["schema_version"],
                     "status": "required" if stage != "validated_records" else "satisfied",
                     "expected_output": "list[dict] compatible with ExportableCase and release evidence records",
                 },
@@ -639,6 +641,7 @@ def build_release_evidence(
             "artifact_count": 0,
         },
         "quality": quality,
+        "parser_contract": build_parser_contract(),
         "source_coverage": coverage,
         "source_collection_audit": collection_audit,
         "dataset_diff": dataset_diff,
@@ -768,6 +771,7 @@ def build_release_artifacts(
         evidence["source_collection_audit"],
     )
     write_json(manifests_dir / "dataset_quality.json", evidence["quality"])
+    write_json(manifests_dir / "parser_contract.json", evidence["parser_contract"])
     write_json(manifests_dir / "dataset_diff.json", evidence["dataset_diff"])
     write_json(manifests_dir / "public_surface_audit.json", evidence["public_surface"])
     write_json(manifests_dir / "legal_provenance.json", evidence["legal_provenance"])
