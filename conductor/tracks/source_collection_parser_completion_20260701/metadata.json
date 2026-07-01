@@ -1,0 +1,8 @@
+{
+  "track_id": "source_collection_parser_completion_20260701",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-07-01T13:20:00Z",
+  "updated_at": "2026-07-01T13:20:00Z",
+  "description": "Complete source collection and parser integration so configured sources produce validated non-zero corpus records with evidence-backed quality gates."
+}

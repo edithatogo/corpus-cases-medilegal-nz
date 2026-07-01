@@ -7,7 +7,7 @@ import json
 import os
 from collections.abc import Sequence
 
-from corpus_cases_medilegal_nz.archive import publication_readiness
+from corpus_cases_medilegal_nz.archive import build_source_collection_audit, publication_readiness
 from corpus_cases_medilegal_nz.hf_sync import main as hf_sync_main
 from corpus_cases_medilegal_nz.sources import get_source_ids
 
@@ -17,6 +17,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Medilegal corpus CLI.")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("sources", help="List configured source identifiers.")
+    sub.add_parser("source-audit", help="Report source collection and parser completion state.")
     sync = sub.add_parser("sync", help="Run the existing Hugging Face sync pipeline.")
     sync.add_argument("source", nargs="?", help="Optional source ID such as hdc, hpdt, or era.")
     readiness = sub.add_parser(
@@ -28,6 +29,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.command == "sources":
         for source_id in get_source_ids():
             print(source_id)  # noqa: T201
+        return 0
+    if ns.command == "source-audit":
+        result = build_source_collection_audit()
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
         return 0
     if ns.command == "sync":
         if ns.source:

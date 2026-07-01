@@ -9,6 +9,7 @@ from corpus_cases_medilegal_nz.archive import (
     build_dataset_diff,
     build_quality_report,
     build_release_artifacts,
+    build_source_collection_audit,
     derive_archive_version,
     publication_readiness,
     release_tag,
@@ -61,6 +62,30 @@ def test_quality_report_flags_blocking_record_regressions() -> None:
     assert quality["blocking_issue_count"] == 3
 
 
+def test_source_collection_audit_reports_current_parser_completion_state() -> None:
+    audit = build_source_collection_audit(root=ROOT, records=[])
+    by_source = {source["source_id"]: source for source in audit["sources"]}
+
+    assert audit["stage_counts"]["fetch_scaffold_parser_stub"] == 5
+    assert audit["stage_counts"]["planned"] == 8
+    assert by_source["hdc"]["completion_stage"] == "fetch_scaffold_parser_stub"
+    assert by_source["hdc"]["adapter_module_exists"] is True
+    assert by_source["hdc"]["record_count"] == 0
+    assert by_source["coronial"]["completion_stage"] == "planned"
+
+
+def test_source_collection_audit_marks_sources_with_records_validated() -> None:
+    audit = build_source_collection_audit(
+        root=ROOT,
+        records=[{"case_id": "hdc-1", "source": "hdc", "text": "Decision text"}],
+    )
+    by_source = {source["source_id"]: source for source in audit["sources"]}
+
+    assert by_source["hdc"]["completion_stage"] == "validated_records"
+    assert by_source["hdc"]["parser_contract"]["status"] == "satisfied"
+    assert by_source["hdc"]["record_count"] == 1
+
+
 def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None:
     output_dir = tmp_path / "monthly-publication"
 
@@ -78,8 +103,10 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert evidence["release"]["archive_version"] == "2026.07.0"
     assert evidence["release"]["github_release_tag"] == "dataset-v2026.07.0"
     assert evidence["zenodo"]["publish_handoff_only"] is True
+    assert evidence["source_collection_audit"]["stage_counts"]["planned"] == 8
     assert evidence["public_surface"]["surfaces"]["osf"]["status"] == "inactive"
     assert (output_dir / "SHA256SUMS").is_file()
+    assert (output_dir / "manifests/source_collection_audit.json").is_file()
     assert (output_dir / "metadata/croissant.jsonld").is_file()
     assert (output_dir / "metadata/ro-crate-metadata.json").is_file()
     assert (output_dir / "metadata/datapackage.json").is_file()

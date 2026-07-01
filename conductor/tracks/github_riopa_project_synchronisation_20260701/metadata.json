@@ -1,0 +1,8 @@
+{
+  "track_id": "github_riopa_project_synchronisation_20260701",
+  "type": "chore",
+  "status": "new",
+  "created_at": "2026-07-01T13:05:40Z",
+  "updated_at": "2026-07-01T13:05:40Z",
+  "description": "Synchronise this repository with the Rare Insights on Open Policy from Aotearoa meta-project using GitHub project fields, item mirroring, and sub-issues."
+}

@@ -246,6 +246,102 @@ def build_source_coverage(
     }
 
 
+CORE_SOURCE_IDS = {"hdc", "hpdt", "moj_tribunals", "era", "teachers"}
+
+
+def _source_module_exists(source_id: str, root: Path) -> bool:
+    return (root / "src" / "corpus_cases_medilegal_nz" / "sources" / f"{source_id}.py").is_file()
+
+
+def _source_completion_stage(
+    *,
+    source_id: str,
+    config_exists: bool,
+    has_url: bool,
+    adapter_exists: bool,
+    record_count: int,
+) -> tuple[str, str]:
+    if record_count > 0:
+        return "validated_records", "published-ready local records exist for this source."
+    if adapter_exists and source_id in CORE_SOURCE_IDS and has_url and config_exists:
+        return "fetch_scaffold_parser_stub", (
+            "source has configuration and fetch scaffolding, but no parsed local records."
+        )
+    if has_url and config_exists:
+        return "configured_no_adapter", (
+            "source has configuration and a public URL but no source-specific adapter module."
+        )
+    if config_exists:
+        return "planned", "source has a placeholder configuration but no public URL."
+    return "blocked", "source is missing required local configuration."
+
+
+def build_source_collection_audit(
+    root: Path = Path(), records: Iterable[Mapping[str, Any]] = ()
+) -> JsonObject:
+    """Build source-level collection and parser completion evidence."""
+    root = Path(root)
+    record_counts = Counter(str(record.get("source", "")) for record in records)
+    sources: list[JsonObject] = []
+    stage_counts: Counter[str] = Counter()
+    for source_id, info in SOURCE_REGISTRY.items():
+        config_path = root / str(info.get("config", ""))
+        config_exists = config_path.is_file()
+        has_url = bool(str(info.get("url", "")).strip())
+        adapter_exists = _source_module_exists(source_id, root)
+        record_count = record_counts[source_id]
+        stage, stage_reason = _source_completion_stage(
+            source_id=source_id,
+            config_exists=config_exists,
+            has_url=has_url,
+            adapter_exists=adapter_exists,
+            record_count=record_count,
+        )
+        stage_counts[stage] += 1
+        sources.append(
+            {
+                "source_id": source_id,
+                "name": info["name"],
+                "completion_stage": stage,
+                "stage_reason": stage_reason,
+                "config_exists": config_exists,
+                "has_public_url": has_url,
+                "adapter_module_exists": adapter_exists,
+                "record_count": record_count,
+                "parser_contract": {
+                    "shared_library": "nlp-policy-nz",
+                    "status": "required" if stage != "validated_records" else "satisfied",
+                    "expected_output": "list[dict] compatible with ExportableCase and release evidence records",
+                },
+                "next_action": _next_source_action(stage),
+            }
+        )
+    return {
+        "schema_version": "1.0.0",
+        "generated_at": utc_now_iso(),
+        "stage_counts": dict(sorted(stage_counts.items())),
+        "completion_ladder": [
+            "planned",
+            "configured_no_adapter",
+            "fetch_scaffold_parser_stub",
+            "validated_records",
+            "blocked",
+        ],
+        "sources": sources,
+    }
+
+
+def _next_source_action(stage: str) -> str:
+    actions = {
+        "validated_records": "monitor record-count drift and quality regressions.",
+        "fetch_scaffold_parser_stub": "complete parser integration and fixture tests.",
+        "configured_no_adapter": "add a source-specific adapter module or explicit delegation.",
+        "planned": "confirm source URL, rights posture, and adapter scope.",
+        "blocked": "restore required source configuration.",
+    }
+    return actions.get(stage, "triage source state.")
+
+
 def build_quality_report(records: Iterable[Mapping[str, Any]]) -> JsonObject:
     """Build quality signals for release gating."""
     records_list = [dict(record) for record in records]
@@ -493,6 +589,7 @@ def build_release_evidence(
     records = load_jsonl_records(root / "data/processed/jsonl/records.jsonl")
     quality = build_quality_report(records)
     coverage = build_source_coverage(root=root, records=records)
+    collection_audit = build_source_collection_audit(root=root, records=records)
     dataset_diff = build_dataset_diff(records)
     public_surface = build_public_surface_audit(
         archive_version=version,
@@ -543,6 +640,7 @@ def build_release_evidence(
         },
         "quality": quality,
         "source_coverage": coverage,
+        "source_collection_audit": collection_audit,
         "dataset_diff": dataset_diff,
         "public_surface": public_surface,
         "legal_provenance": build_legal_provenance(),
@@ -665,6 +763,10 @@ def build_release_artifacts(
     )
     write_json(manifests_dir / "release_evidence.json", evidence)
     write_json(manifests_dir / "source_coverage.json", evidence["source_coverage"])
+    write_json(
+        manifests_dir / "source_collection_audit.json",
+        evidence["source_collection_audit"],
+    )
     write_json(manifests_dir / "dataset_quality.json", evidence["quality"])
     write_json(manifests_dir / "dataset_diff.json", evidence["dataset_diff"])
     write_json(manifests_dir / "public_surface_audit.json", evidence["public_surface"])

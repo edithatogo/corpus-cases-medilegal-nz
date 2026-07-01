@@ -68,3 +68,38 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./conductor/tracks/monthly_dynamic_archive_publication_20260701/](./conductor/tracks/monthly_dynamic_archive_publication_20260701/)*
 *Status: IN PROGRESS - local release hardening scaffolding implemented; live GitHub, Hugging Face, and Zenodo proof remains gated on credentials and protected approval.*
 
+---
+
+## [ ] Track: GitHub RIOPA Project Synchronisation
+*Link: [./conductor/tracks/github_riopa_project_synchronisation_20260701/](./conductor/tracks/github_riopa_project_synchronisation_20260701/)*
+*Status: NEW - plan captures RIOPA mirror-source alignment, repo project fields, sub-issues, and idempotent project sync automation.*
+
+---
+
+## [ ] Track: GitHub Governance And Automation Hardening
+*Link: [./conductor/tracks/github_governance_automation_hardening_20260701/](./conductor/tracks/github_governance_automation_hardening_20260701/)*
+*Status: NEW - plan captures protected Zenodo environment, branch/ruleset protection, vulnerability alerts, Dependency Review, action policy, and attestation verification.*
+
+---
+
+## [ ] Track: Bleeding-Edge Archive Intelligence
+*Link: [./conductor/tracks/bleeding_edge_archive_intelligence_20260701/](./conductor/tracks/bleeding_edge_archive_intelligence_20260701/)*
+*Status: NEW - plan captures archive maturity scoring, source observability, claims generation, anomaly detection, telemetry, and cross-repo dashboard compatibility.*
+
+---
+
+## [ ] Track: Source Collection And Parser Completion
+*Link: [./conductor/tracks/source_collection_parser_completion_20260701/](./conductor/tracks/source_collection_parser_completion_20260701/)*
+*Status: NEW - plan captures transition from configured/stubbed sources to validated non-zero local corpus records.*
+
+---
+
+## [ ] Track: Privacy, Takedown, And Redaction Governance
+*Link: [./conductor/tracks/privacy_takedown_governance_20260701/](./conductor/tracks/privacy_takedown_governance_20260701/)*
+*Status: NEW - plan captures privacy risk scoring, takedown/correction workflow, redaction/exclusion ledgers, and release-blocking privacy gates.*
+
+---
+
+## [ ] Track: Cross-Repo Archive Federation
+*Link: [./conductor/tracks/cross_repo_archive_federation_20260701/](./conductor/tracks/cross_repo_archive_federation_20260701/)*
+*Status: NEW - plan captures shared archive-family schemas, evidence profile versioning, federation drift reports, and RIOPA-compatible cross-repo issue/project integration.*

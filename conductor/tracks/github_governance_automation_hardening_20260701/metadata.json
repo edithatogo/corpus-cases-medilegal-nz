@@ -1,0 +1,8 @@
+{
+  "track_id": "github_governance_automation_hardening_20260701",
+  "type": "chore",
+  "status": "new",
+  "created_at": "2026-07-01T13:05:40Z",
+  "updated_at": "2026-07-01T13:05:40Z",
+  "description": "Harden GitHub environments, branch protection, dependency security, action policy, and attestation verification for archive publication."
+}
