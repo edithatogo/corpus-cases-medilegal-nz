@@ -3,6 +3,7 @@
 ## Phase 1: Git Remote Mirror Setup
 - [x] Task: Write `.github/workflows/mirror_sync.yml` to support automated SSH mirroring to secondary Git remotes (GitLab/Codeberg).
 - [x] Task: Locally harden `mirror_sync.yml` credential bypass behavior for missing mirror URL or missing SSH private key.
+- [x] Task: Document public GitLab and Codeberg mirror URLs in env templates and mirror docs.
 - [ ] Task: Configure repository secrets `GIT_MIRROR_URL` and `GIT_MIRROR_SSH_PRIVATE_KEY` on GitHub.
 - [x] Task: Verify successful manual and push triggers for mirror sync.
 
@@ -27,3 +28,4 @@
 - Full `python -m pytest` was attempted, but tests requiring `tmp_path` were blocked by local Windows filesystem permissions on pytest temp directories. Non-temp tests reached 149 passing before the permission errors.
 - Gated items remain pending: GitHub secret configuration and any external archive/account publication.
 - 2026-07-02: Verified live GitHub Mirror Sync push runs completed successfully with guarded secret skips, and a manual `workflow_dispatch` run (`28582552048`) was accepted and completed successfully on `master`.
+- 2026-07-03: Public GitLab and Codeberg mirror endpoints were verified as reachable; env templates now store mirror URLs and tokens in ignored local env files.
