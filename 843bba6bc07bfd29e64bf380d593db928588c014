@@ -1,0 +1,1 @@
+RIOPA Phase 4: added idempotent sync script, guarded scheduled/manual workflow, tests, and evidence. Live apply repaired project drift and final dry-run returned status in_sync. GitHub checks for 843bba6 succeeded: Tests, Code Quality, CodeQL, OSV, Docs, Mirror Sync.
