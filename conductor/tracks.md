@@ -88,9 +88,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Source Collection And Parser Completion
+## [x] Track: Source Collection And Parser Completion
 *Link: [./conductor/tracks/source_collection_parser_completion_20260701/](./conductor/tracks/source_collection_parser_completion_20260701/)*
-*Status: NEW - plan captures transition from configured/stubbed sources to validated non-zero local corpus records.*
+*Status: ✅ COMPLETE - five core sources now produce validated non-zero local corpus records with deterministic exports, reconciliation ledgers, quality gates, review evidence, and GitHub issue/project evidence.*
 
 ---
 

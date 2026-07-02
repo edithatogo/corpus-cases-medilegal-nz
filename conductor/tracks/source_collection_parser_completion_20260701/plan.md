@@ -16,7 +16,8 @@
     - [x] Error semantics.
     - [x] Version compatibility.
     - Evidence: `parser-contract` CLI, `docs/source-parser-contract.md`, `parser_contract.py`, tests, and `parser_contract.json` release manifest define the `nlp-policy-nz` delegation boundary.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Collection Baseline And Parser Contract' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Collection Baseline And Parser Contract' (Protocol in workflow.md)
+    - Evidence: Conductor review loaded product, tech stack, workflow, style guides, spec, and plan; parser contract and source audit evidence satisfy the phase scope.
 
 ## Phase 2: Fixture Corpus And Parser Tests
 
@@ -26,7 +27,8 @@
     - Evidence: `tests/fixtures/sources/fixture_manifest.json` now records expected title, identifier, date, decision link, and body text per core source; `tests/test_source_fixtures.py` asserts these expectations are present for all five core fixtures.
 - [x] Task: Add malformed fixture tests for defensive parsing.
     - Evidence: `tests/fixtures/sources/malformed/` and `tests/test_malformed_source_fixtures.py` cover empty-but-valid HTML input, unsupported content types, source mismatches, empty required output fields, and malformed metadata.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Fixture Corpus And Parser Tests' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Fixture Corpus And Parser Tests' (Protocol in workflow.md)
+    - Evidence: Conductor review verified fixture and malformed-fixture coverage; relevant parser and fixture tests passed in the 101-test review suite.
 
 ## Phase 3: Source Parser Implementation
 
@@ -40,7 +42,8 @@
     - Evidence: `EraSourceAdapter.fetch()` parses ERA listing HTML through `parse_source_listing_html`; fixture-backed adapter integration tests validate contract-shaped ERA output.
 - [x] Task: Complete or integrate Teachers parser output.
     - Evidence: `TeachersSourceAdapter.fetch()` parses Teachers Tribunal listing HTML through `parse_source_listing_html`; fixture-backed adapter integration tests validate contract-shaped Teachers output.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Source Parser Implementation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Source Parser Implementation' (Protocol in workflow.md)
+    - Evidence: Conductor review verified all five core adapters produce contract-shaped parsed output; relevant adapter/parser tests passed in the 101-test review suite.
 
 ## Phase 4: Export And Reconciliation
 
@@ -55,7 +58,8 @@
     - Evidence: `collection-proof` writes `data/processed/manifests/dataset_diff.json` from `build_dataset_diff`; tests cover added/current, changed, removed, and tombstoned records.
 - [x] Task: Add source-level checksums and provenance fields.
     - Evidence: parser records include source URL, retrieved-at timestamp, parser name/version, raw SHA-256, source name, and decision link metadata; `collection-proof` persists those fields in JSONL/JSON/Parquet artifacts.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Export And Reconciliation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Export And Reconciliation' (Protocol in workflow.md)
+    - Evidence: Conductor review reran `collection-proof`; deterministic processed exports, dataset diff, and source audit ledgers were generated with 5 records.
 
 ## Phase 5: Quality Gates
 
@@ -67,7 +71,8 @@
     - Evidence: `collection_quality_gates.json` includes per-source record counts, previous counts, pass/blocked status, blockers, and warnings for HDC, HPDT, MoJ Tribunals, ERA, and Teachers.
 - [x] Task: Update release evidence to report parser and collection state.
     - Evidence: release artifacts now include `collection_quality_gates` in `release_evidence.json` and write `manifests/collection_quality_gates.json` alongside source coverage, collection audit, parser contract, and dataset diff ledgers.
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: Quality Gates' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Quality Gates' (Protocol in workflow.md)
+    - Evidence: Conductor review verified `collection_quality_gates.status=pass`; quality gate unit tests and release artifact tests passed.
 
 ## Phase 6: First Non-Zero Collection Proof
 
@@ -77,4 +82,5 @@
     - Evidence: `source-audit` now reads `data/processed/jsonl/records.jsonl` and reports five `validated_records` core sources with satisfied parser contracts.
 - [x] Task: Attach collection proof to the GitHub issue/project.
     - Evidence: collection proof evidence is recorded in `collection_proof_evidence.md` and attached to GitHub issue `https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/1#issuecomment-4861166064`, the project-linked evidence anchor for the monthly archive publication track.
-- [ ] Task: Conductor - User Manual Verification 'Phase 6: First Non-Zero Collection Proof' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 6: First Non-Zero Collection Proof' (Protocol in workflow.md)
+    - Evidence: Conductor review reran `collection-proof` and `source-audit`: `record_count=5`, `quality_status=pass`, `validated_records=5`, `planned=8`.
