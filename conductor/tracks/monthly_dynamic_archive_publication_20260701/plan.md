@@ -48,7 +48,8 @@
 ## Phase 8: Verification And First Release Proof
 
 - [x] Task: Run the complete local validation suite after implementation.
-- [ ] Task: Execute a GitHub Actions dry run and capture no-secret failure behavior.
+- [x] Task: Execute a GitHub Actions dry run and capture no-secret failure behavior.
+    - Evidence: corrected dry-run `https://github.com/edithatogo/corpus-cases-medilegal-nz/actions/runs/28557667012` succeeded in `dry-run` mode with `quality.record_count=5`, `collection_quality_gates.status=pass`, HF dry-run evidence, Zenodo dry-run evidence, artifact upload, and attestation. Initial run `28557593684` exposed a zero-record release-evidence ordering defect, fixed by commit `21968e6`. GitHub issue evidence: `https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/1#issuecomment-4861228232`.
 - [ ] Task: Execute approved Hugging Face publication and verify the remote manifest from a fresh snapshot.
 - [ ] Task: Execute approved Zenodo draft/new-version upload and capture draft evidence.
 - [ ] Task: Route production Zenodo publication through the protected environment after human approval.
