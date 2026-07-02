@@ -1,0 +1,63 @@
+name: RIOPA Project Sync
+
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Apply safe issue sync actions instead of dry-run only"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+  issues: write
+  repository-projects: read
+
+jobs:
+  sync:
+    name: Verify RIOPA Project Sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --extra dev --frozen
+
+      - name: Run project sync
+        env:
+          GH_TOKEN: ${{ secrets.RIOPA_PROJECT_TOKEN || secrets.GITHUB_TOKEN }}
+          APPLY: ${{ inputs.apply || 'false' }}
+        run: |
+          set -euo pipefail
+          if [ "$APPLY" = "true" ]; then
+            uv run python scripts/sync_riopa_project.py --apply
+          else
+            uv run python scripts/sync_riopa_project.py
+          fi
+
+      - name: Upload project sync evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: riopa-project-sync-evidence
+          path: generated/project-sync/riopa_project_sync_evidence.json
+          if-no-files-found: error

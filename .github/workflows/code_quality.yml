@@ -47,7 +47,9 @@ jobs:
             scripts/publication_readiness.py \
             scripts/publish_huggingface_release.py \
             scripts/publish_zenodo_draft.py \
+            scripts/sync_riopa_project.py \
             tests/test_archive_release.py \
+            tests/test_riopa_project_sync.py \
             tests/test_publication_adapters.py \
             tests/test_monthly_publication_workflow.py
 
@@ -63,7 +65,9 @@ jobs:
             scripts/publication_readiness.py \
             scripts/publish_huggingface_release.py \
             scripts/publish_zenodo_draft.py \
+            scripts/sync_riopa_project.py \
             tests/test_archive_release.py \
+            tests/test_riopa_project_sync.py \
             tests/test_publication_adapters.py \
             tests/test_monthly_publication_workflow.py
 

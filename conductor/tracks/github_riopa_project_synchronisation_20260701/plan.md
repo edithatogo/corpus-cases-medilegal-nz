@@ -47,16 +47,20 @@
 
 ## Phase 4: Sync Automation
 
-- [ ] Task: Add an idempotent GitHub project sync script.
-    - [ ] Read Conductor track entries and hidden issue markers.
-    - [ ] Reconcile issues, sub-issues, labels, and project items.
-    - [ ] Support dry-run and apply modes.
-- [ ] Task: Add a scheduled/manual sync workflow.
-    - [ ] Use least-privilege permissions.
-    - [ ] Guard writes against dependency-update actors.
-    - [ ] Emit project-sync evidence artifacts.
-- [ ] Task: Add tests for marker parsing, duplicate avoidance, and field mapping.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Sync Automation' (Protocol in workflow.md)
+- [x] Task: Add an idempotent GitHub project sync script.
+    - [x] Read Conductor track entries and hidden issue markers.
+    - [x] Reconcile issues, sub-issues, labels, and project items.
+    - [x] Support dry-run and apply modes.
+    - Evidence: `scripts/sync_riopa_project.py` parses stable issue markers, detects duplicate markers, builds idempotent sync plans, supports dry-run and explicit `--apply`, and writes JSON evidence.
+- [x] Task: Add a scheduled/manual sync workflow.
+    - [x] Use least-privilege permissions.
+    - [x] Guard writes against dependency-update actors.
+    - [x] Emit project-sync evidence artifacts.
+    - Evidence: `.github/workflows/riopa_project_sync.yml` runs weekly/manual sync, guards Dependabot/Renovate, prefers `RIOPA_PROJECT_TOKEN`, and uploads `riopa-project-sync-evidence`.
+- [x] Task: Add tests for marker parsing, duplicate avoidance, and field mapping.
+    - Evidence: `tests/test_riopa_project_sync.py` covers marker parsing, in-sync state, drift planning, and duplicate marker blocking; workflow assertions cover the RIOPA sync workflow guard and evidence artifact.
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Sync Automation' (Protocol in workflow.md)
+    - Evidence: `phase4_sync_automation_evidence.md` records local tests, Ruff checks, live apply-mode drift repair, and final dry-run `status: in_sync`.
 
 ## Phase 5: Documentation And Evidence
 

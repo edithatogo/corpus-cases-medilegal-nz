@@ -38,3 +38,17 @@ def test_security_workflows_are_present() -> None:
     assert "codeql.yml" in workflows
     assert "scorecard.yml" in workflows
     assert "osv_scan.yml" in workflows
+
+
+def test_riopa_project_sync_workflow_is_guarded_and_evidence_backed() -> None:
+    workflow = (ROOT / ".github/workflows/riopa_project_sync.yml").read_text(encoding="utf-8")
+
+    assert 'cron: "17 3 * * 1"' in workflow
+    assert "workflow_dispatch:" in workflow
+    assert "github.actor != 'dependabot[bot]'" in workflow
+    assert "github.actor != 'renovate[bot]'" in workflow
+    assert "secrets.RIOPA_PROJECT_TOKEN || secrets.GITHUB_TOKEN" in workflow
+    assert "scripts/sync_riopa_project.py --apply" in workflow
+    assert "scripts/sync_riopa_project.py" in workflow
+    assert "riopa-project-sync-evidence" in workflow
+    assert "generated/project-sync/riopa_project_sync_evidence.json" in workflow
