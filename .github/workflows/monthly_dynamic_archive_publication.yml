@@ -120,6 +120,11 @@ jobs:
             exit 1
           fi
 
+      - name: Build deterministic collection proof
+        run: |
+          set -euo pipefail
+          uv run python -m corpus_cases_medilegal_nz.cli collection-proof
+
       - name: Build release evidence
         env:
           ARCHIVE_VERSION: ${{ steps.version.outputs.archive_version }}

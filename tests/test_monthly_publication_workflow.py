@@ -23,6 +23,10 @@ def test_monthly_workflow_has_publication_guards_and_surfaces() -> None:
     )
     assert "publish_huggingface_release.py" in workflow
     assert "publish_zenodo_draft.py" in workflow
+    assert "Build deterministic collection proof" in workflow
+    assert workflow.index("Build deterministic collection proof") < workflow.index(
+        "Build release evidence"
+    )
 
 
 def test_security_workflows_are_present() -> None:
