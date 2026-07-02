@@ -1,0 +1,7 @@
+HF publication proof and Zenodo alias support:
+- Run 28557778268 succeeded in huggingface mode.
+- HF revision 73b7b10889bc43ce013ffe1d5e3ba66a0cb352c2 at releases/2026.07.0.
+- Remote manifest verification true; release evidence record_count=5 and collection_quality_gates.status=pass.
+- GitHub release dataset-v2026.07.0 exists with expected assets.
+- Added workflow/readiness support for legacy ZENODO_TOKEN alias alongside canonical ZENODO_ACCESS_TOKEN.
+- Focused tests: 15 passed; Ruff check passed.
