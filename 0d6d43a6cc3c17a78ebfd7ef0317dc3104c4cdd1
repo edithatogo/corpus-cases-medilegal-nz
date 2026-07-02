@@ -1,0 +1,6 @@
+GitHub governance hardening Phase 1-2:
+- Captured live baseline for repo visibility, master branch protection, rulesets, Actions policy, environments, vulnerability alerts, Dependabot alerts, secrets, variables, and workflows.
+- Configured zenodo-production environment with required reviewer edithatogo and disabled admin bypass.
+- Added publication-readiness detection for supplied GitHub environment and protected-environment observations.
+- Documented Zenodo legacy aliases and protected environment policy.
+- Validation: 15 tests passed; Ruff check passed; publication-readiness with GITHUB_ENVIRONMENT_NAMES/GITHUB_PROTECTED_ENVIRONMENT_NAMES=zenodo-production returned ready.
