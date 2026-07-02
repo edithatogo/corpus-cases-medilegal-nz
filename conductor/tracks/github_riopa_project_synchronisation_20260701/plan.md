@@ -16,13 +16,16 @@
 
 ## Phase 2: RIOPA Mirror Alignment
 
-- [ ] Task: Add or document the `corpus-cases-medilegal-nz` RIOPA mirror source option.
-    - [ ] Prefer a dedicated mirror-source option.
-    - [ ] If unavailable through the API, document the manual project-field change.
-- [ ] Task: Set issue #1 RIOPA item fields.
-    - [ ] Set status, repository, mirror source, and conductor-track metadata.
-    - [ ] Verify item appears in filtered RIOPA views.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: RIOPA Mirror Alignment' (Protocol in workflow.md)
+- [x] Task: Add or document the `corpus-cases-medilegal-nz` RIOPA mirror source option.
+    - [x] Prefer a dedicated mirror-source option.
+    - [x] If unavailable through the API, document the manual project-field change.
+    - Evidence: `phase2_riopa_mirror_alignment.md` records that RIOPA has `Mirror source` but no dedicated medilegal option; the installed `gh` supports creating new fields, not adding an option to an existing single-select field, so Phase 2 uses `other` as the API-safe fallback and documents the dedicated option as a manual/project-admin follow-up.
+- [x] Task: Set issue #1 RIOPA item fields.
+    - [x] Set status, repository, mirror source, and conductor-track metadata.
+    - [x] Verify item appears in filtered RIOPA views.
+    - Evidence: issue #1 RIOPA item `PVTI_lAHOAOYc4M4BcJFFzgxZYg0` now reads back with `mirror source: other`, `status: Done`, repository URL `https://github.com/edithatogo/corpus-cases-medilegal-nz`, and the hidden `monthly_dynamic_archive_publication_20260701` marker.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: RIOPA Mirror Alignment' (Protocol in workflow.md)
+    - Evidence: live `gh project item-edit`, `gh project item-list`, `gh issue view`, and `gh project field-list` verification completed and is recorded in `phase2_riopa_mirror_alignment.md`.
 
 ## Phase 3: Sub-Issue Work Breakdown
 
