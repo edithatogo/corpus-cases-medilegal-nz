@@ -20,6 +20,7 @@ from corpus_cases_medilegal_nz.archive_intelligence import (
 )
 from corpus_cases_medilegal_nz.collection_proof import write_collection_proof
 from corpus_cases_medilegal_nz.hf_sync import main as hf_sync_main
+from corpus_cases_medilegal_nz.mirror import mirror_sync_readiness
 from corpus_cases_medilegal_nz.parser_contract import build_parser_contract
 from corpus_cases_medilegal_nz.sources import get_source_ids
 
@@ -42,6 +43,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Check local monthly archive publication readiness.",
     )
     readiness.add_argument("--strict", action="store_true", help="Exit non-zero on blockers.")
+    mirror = sub.add_parser(
+        "mirror-readiness",
+        help="Check mirror workflow readiness and secret gating.",
+    )
+    mirror.add_argument("--strict", action="store_true", help="Exit non-zero on blockers.")
     intelligence = sub.add_parser(
         "archive-intelligence",
         help="Build archive maturity intelligence from monthly release evidence.",
@@ -82,6 +88,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         hf_sync_main()
     elif ns.command == "publication-readiness":
         result = publication_readiness()
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+        if ns.strict and result["status"] != "ready":
+            exit_code = 1
+    elif ns.command == "mirror-readiness":
+        result = mirror_sync_readiness()
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
         if ns.strict and result["status"] != "ready":
             exit_code = 1
