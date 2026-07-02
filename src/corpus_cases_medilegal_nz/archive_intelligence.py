@@ -562,6 +562,7 @@ def build_source_observability_ledger(
         source_records = [
             record for record in current_records if str(record.get("source", "")) == source_id
         ]
+        config_exists = (root / str(info.get("config", ""))).is_file()
         previous_count = previous_counts.get(source_id, 0)
         current_count = current_counts.get(source_id, 0)
         metadata_items = [_record_metadata(record) for record in source_records]
@@ -588,7 +589,12 @@ def build_source_observability_ledger(
         )
         if not document_classes:
             document_classes = ["decision"]
-        crawlability_status = "reachable" if info.get("url") and info.get("config") else "blocked"
+        if config_exists and info.get("url"):
+            crawlability_status = "reachable"
+        elif config_exists:
+            crawlability_status = "configured"
+        else:
+            crawlability_status = "blocked"
         parser_status = audit_by_source.get(source_id, {}).get("completion_stage", "planned")
         rights_review_state = (
             next(
@@ -620,7 +626,7 @@ def build_source_observability_ledger(
                 "crawlability": {
                     "status": crawlability_status,
                     "url": info.get("url", ""),
-                    "config_exists": (root / str(info.get("config", ""))).is_file(),
+                    "config_exists": config_exists,
                 },
                 "parser_completion": {
                     "status": parser_status,

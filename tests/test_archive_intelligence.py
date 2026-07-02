@@ -262,6 +262,62 @@ def test_source_observability_ledger_captures_drift_and_review_state(tmp_path: P
     assert by_source["hdc"]["document_classes"] == ["decision"]
 
 
+def test_source_collection_audit_distinguishes_stub_and_blocked_states(tmp_path: Path) -> None:
+    stub_root = tmp_path / "stub"
+    (stub_root / "config").mkdir(parents=True, exist_ok=True)
+    (stub_root / "config" / "hdc_pipeline.yaml").write_text("source: hdc\n", encoding="utf-8")
+    stub_module = stub_root / "src" / "corpus_cases_medilegal_nz" / "sources"
+    stub_module.mkdir(parents=True, exist_ok=True)
+    (stub_module / "hdc.py").write_text("# stub adapter\n", encoding="utf-8")
+
+    stub_audit = build_source_collection_audit(root=stub_root, records=[])
+    stub_hdc = next(source for source in stub_audit["sources"] if source["source_id"] == "hdc")
+
+    assert stub_hdc["completion_stage"] == "fetch_scaffold_parser_stub"
+    assert stub_hdc["next_action"] == "complete parser integration and fixture tests."
+    assert stub_audit["stage_counts"]["fetch_scaffold_parser_stub"] == 1
+
+    blocked_audit = build_source_collection_audit(root=tmp_path / "blocked", records=[])
+    blocked_hdc = next(
+        source for source in blocked_audit["sources"] if source["source_id"] == "hdc"
+    )
+
+    assert blocked_hdc["completion_stage"] == "blocked"
+    assert blocked_hdc["next_action"] == "restore required source configuration."
+
+
+def test_source_observability_ledger_distinguishes_configured_and_blocked_crawlability(
+    tmp_path: Path,
+) -> None:
+    configured_root = tmp_path / "configured"
+    (configured_root / "config").mkdir(parents=True, exist_ok=True)
+    (configured_root / "config" / "hdc_pipeline.yaml").write_text(
+        "source: hdc\n",
+        encoding="utf-8",
+    )
+
+    configured_ledger = build_source_observability_ledger(
+        root=configured_root,
+        records=[],
+    )
+    configured_hdc = next(
+        source for source in configured_ledger["sources"] if source["source_id"] == "hdc"
+    )
+
+    assert configured_hdc["crawlability"]["status"] == "reachable"
+    assert configured_hdc["parser_completion"]["status"] == "configured_no_adapter"
+    assert configured_hdc["timestamps"]["last_fetch_at"] == ""
+    assert configured_hdc["timestamps"]["last_parse_at"] == ""
+
+    blocked_ledger = build_source_observability_ledger(root=tmp_path / "blocked", records=[])
+    blocked_hdc = next(
+        source for source in blocked_ledger["sources"] if source["source_id"] == "hdc"
+    )
+
+    assert blocked_hdc["crawlability"]["status"] == "blocked"
+    assert blocked_hdc["parser_completion"]["status"] == "blocked"
+
+
 def test_archive_anomaly_report_detects_drift_and_manifest_problems(tmp_path: Path) -> None:
     evidence = _complete_evidence(tmp_path)
     source_observability = build_source_observability_ledger(
