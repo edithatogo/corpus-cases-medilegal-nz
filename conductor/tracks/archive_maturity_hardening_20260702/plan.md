@@ -27,24 +27,24 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Workflow Attachment And Strict Gate' (Protocol in workflow.md)
     - Evidence: `phase2_workflow_gate_evidence.md` records the workflow assertions and local validation results.
 
-## Phase 3: Source Observability And Anomaly Detection
+## Phase 3: Source Observability And Anomaly Detection [checkpoint: 51594d3]
 
 - [x] Task: Add source-level observability and drift warnings.
-    - Evidence: `src/corpus_cases_medilegal_nz/archive_intelligence.py` now emits source crawlability, parser completion, fetch/parse timestamps, drift, rights, and document-class observability for all registry sources.
+    - Evidence: `src/corpus_cases_medilegal_nz/archive_intelligence.py` now emits source crawlability, parser completion, fetch/parse timestamps, drift, rights, and document-class observability for all registry sources. [51594d3]
 - [x] Task: Add anomaly detection for counts, schema, and remote manifests.
-    - Evidence: `build_archive_anomaly_report` flags record-count drops, source URL drift, schema drift, failed remote manifest verification, and metadata inconsistencies.
+    - Evidence: `build_archive_anomaly_report` flags record-count drops, source URL drift, schema drift, failed remote manifest verification, and metadata inconsistencies. [51594d3]
 - [x] Task: Add tests for warning and failure thresholds.
-    - Evidence: `tests/test_archive_intelligence.py` covers drift warnings, anomaly blockers, privacy scores, claims generation, federation compatibility, and bundle artifact writes.
+    - Evidence: `tests/test_archive_intelligence.py` covers drift warnings, anomaly blockers, privacy scores, claims generation, federation compatibility, and bundle artifact writes. [51594d3]
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Source Observability And Anomaly Detection' (Protocol in workflow.md)
-    - Evidence: `phase3_observability_anomaly_evidence.md` records the focused validation commands and `16 passed` result.
+    - Evidence: `phase3_observability_anomaly_evidence.md` records the focused validation commands and `16 passed` result. [51594d3]
 
-## Phase 4: Claims, Privacy, And Federation
+## Phase 4: Claims, Privacy, And Federation [checkpoint: 51594d3]
 
 - [x] Task: Generate public claims from ledgers for docs and release notes.
-    - Evidence: `build_public_claims` emits README, dataset-card, release-notes, and GitHub-project-summary markdown derived from release evidence.
+    - Evidence: `build_public_claims` emits README, dataset-card, release-notes, and GitHub-project-summary markdown derived from release evidence. [51594d3]
 - [x] Task: Add privacy and rights scoring to archive intelligence.
-    - Evidence: `build_privacy_rights_scoring` scores active sources from observability ledgers and feeds the claims bundle.
+    - Evidence: `build_privacy_rights_scoring` scores active sources from observability ledgers and feeds the claims bundle. [51594d3]
 - [x] Task: Add cross-repo compatibility checks for sibling archive ledgers.
-    - Evidence: `build_federation_compatibility_report` validates the shared archive-family contract and records target sibling repositories.
+    - Evidence: `build_federation_compatibility_report` validates the shared archive-family contract and records target sibling repositories. [51594d3]
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Claims, Privacy, And Federation' (Protocol in workflow.md)
-    - Evidence: `phase4_claims_privacy_federation_evidence.md` records the focused validation commands and `16 passed` result.
+    - Evidence: `phase4_claims_privacy_federation_evidence.md` records the focused validation commands and `16 passed` result. [51594d3]
