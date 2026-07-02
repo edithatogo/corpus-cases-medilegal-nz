@@ -1,0 +1,8 @@
+Monthly publication proof complete:
+- Full workflow run 28558066846 succeeded in full mode.
+- HF revision 154f2e06336b4a77839eb3ec23252d86cfa53e2b with remote manifest verified true.
+- Zenodo draft deposition 21119990 updated with 9 uploaded files; publish_handoff_only=true.
+- Protected Zenodo Publish Handoff job ran and logged that production DOI publication remains human-approved after draft evidence review.
+- DOI/concept DOI stayed empty by design; no automated DOI publication occurred.
+- Final focused validation: 18 passed; Ruff check passed.
+- Issue evidence: https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/1#issuecomment-4861278867
