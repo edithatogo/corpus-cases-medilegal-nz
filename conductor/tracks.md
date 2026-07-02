@@ -88,7 +88,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## [ ] Track: Archive Maturity Hardening
 *Link: [./conductor/tracks/archive_maturity_hardening_20260702/](./conductor/tracks/archive_maturity_hardening_20260702/)*
-*Status: IN PROGRESS - publication-evidence overlay, strict maturity gate, and workflow attachment are complete; next is observability, anomaly detection, claims, privacy, and federation hardening.*
+*Status: ✅ COMPLETE - publication-evidence overlay, strict maturity gate, workflow attachment, source observability, anomaly detection, claims generation, privacy scoring, and federation compatibility are complete.*
 
 ---
 

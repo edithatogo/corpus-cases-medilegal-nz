@@ -36,12 +36,21 @@ def test_monthly_workflow_has_publication_guards_and_surfaces() -> None:
         "Build archive maturity report"
     )
     assert workflow.index("Build archive maturity report") < workflow.index(
+        "Build archive intelligence bundle"
+    )
+    assert workflow.index("Build archive intelligence bundle") < workflow.index(
         "Create or update GitHub release"
     )
     assert '--artifact-dir "$ARTIFACT_DIR"' in workflow
     assert "--strict" in workflow
     assert "generated/archive-intelligence/**" in workflow
     assert "archive_maturity.json" in workflow
+    assert "source_observability.json" in workflow
+    assert "privacy_rights_score.json" in workflow
+    assert "anomaly_report.json" in workflow
+    assert "public_claims.json" in workflow
+    assert "federation_compatibility.json" in workflow
+    assert "README.claims.md" in workflow
 
 
 def test_security_workflows_are_present() -> None:

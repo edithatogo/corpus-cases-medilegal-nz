@@ -79,6 +79,20 @@ Each release build writes deterministic artifacts under
 - `sbom/sbom.spdx.json`
 - `SHA256SUMS`
 
+The publication workflow also writes the archive-intelligence bundle under
+`generated/archive-intelligence/`:
+
+- `archive_maturity.json`
+- `source_observability.json`
+- `privacy_rights_score.json`
+- `anomaly_report.json`
+- `public_claims.json`
+- `federation_compatibility.json`
+- `README.claims.md`
+- `dataset-card.claims.md`
+- `release-notes.claims.md`
+- `github-project-summary.claims.md`
+
 The public claims in README files, release notes, and dataset cards must be
 derived from these generated ledgers. Do not hand-maintain stronger coverage,
 rights, privacy, DOI, or mirror claims than the evidence supports.
@@ -138,6 +152,14 @@ Build release artifacts:
 
 ```bash
 python scripts/build_release_evidence.py --output-dir generated/monthly-publication
+```
+
+Build the archive-intelligence bundle:
+
+```bash
+python scripts/build_archive_intelligence_bundle.py \
+  --artifact-dir generated/monthly-publication \
+  --output-dir generated/archive-intelligence
 ```
 
 Run readiness checks:

@@ -15,11 +15,17 @@ from corpus_cases_medilegal_nz.archive import (
 )
 from corpus_cases_medilegal_nz.archive_intelligence import (
     MATURITY_DIMENSIONS,
+    build_archive_anomaly_report,
     build_archive_intelligence_from_artifact_dir,
     build_archive_intelligence_from_file,
     build_archive_maturity_report,
+    build_federation_compatibility_report,
+    build_privacy_rights_scoring,
+    build_public_claims,
+    build_source_observability_ledger,
     severity_for_score,
     validate_archive_intelligence_report,
+    write_archive_intelligence_bundle,
     write_archive_intelligence_report,
 )
 
@@ -34,6 +40,12 @@ def _complete_evidence(tmp_path: Path) -> dict:
             "text": "Example text.",
             "date": "2026-07-02",
             "url": "https://example.com/decision",
+            "metadata": {
+                "retrieved_at": "2026-07-02T00:00:00Z",
+                "parsed_at": "2026-07-02T00:15:00Z",
+                "document_class": "decision",
+                "rights_review_status": "reviewed",
+            },
         }
         for source in ("hdc", "hpdt", "moj_tribunals", "era", "teachers")
     ]
@@ -84,13 +96,36 @@ def _complete_evidence(tmp_path: Path) -> dict:
 
 
 def _write_complete_artifact_dir(tmp_path: Path) -> Path:
-    artifact_dir = tmp_path
+    root_dir = tmp_path
+    artifact_dir = root_dir / "monthly-publication"
     manifests_dir = artifact_dir / "manifests"
     metadata_dir = artifact_dir / "metadata"
-    manifests_dir.mkdir()
-    metadata_dir.mkdir()
+    records_dir = root_dir / "data" / "processed" / "jsonl"
+    manifests_dir.mkdir(parents=True, exist_ok=True)
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    records_dir.mkdir(parents=True, exist_ok=True)
     evidence = _complete_evidence(tmp_path)
     metadata_manifest = evidence.pop("metadata_packages")
+    records = [
+        {
+            "id": f"{source}-1",
+            "source": source,
+            "text": "Example text.",
+            "date": "2026-07-02",
+            "url": "https://example.com/decision",
+            "metadata": {
+                "retrieved_at": "2026-07-02T00:00:00Z",
+                "parsed_at": "2026-07-02T00:15:00Z",
+                "document_class": "decision",
+                "rights_review_status": "reviewed",
+            },
+        }
+        for source in ("hdc", "hpdt", "moj_tribunals", "era", "teachers")
+    ]
+    (records_dir / "records.jsonl").write_text(
+        "".join(json.dumps(record) + "\n" for record in records),
+        encoding="utf-8",
+    )
     (manifests_dir / "release_evidence.json").write_text(json.dumps(evidence), encoding="utf-8")
     (metadata_dir / "metadata_packages_manifest.json").write_text(
         json.dumps(metadata_manifest),
@@ -178,6 +213,171 @@ def test_archive_maturity_report_surfaces_missing_evidence() -> None:
     assert dimensions["remote_publication_proof"]["evidence"]["failed_checks"]
 
 
+def test_source_observability_ledger_captures_drift_and_review_state(tmp_path: Path) -> None:
+    current_records = [
+        {
+            "id": "hdc-1",
+            "source": "hdc",
+            "text": "Example text.",
+            "date": "2026-07-02",
+            "url": "https://example.com/decision",
+            "metadata": {
+                "retrieved_at": "2026-07-02T00:00:00Z",
+                "parsed_at": "2026-07-02T00:15:00Z",
+                "document_class": "decision",
+                "rights_review_status": "reviewed",
+            },
+        }
+    ]
+    previous_records = [
+        *current_records,
+        {
+            "id": "hdc-2",
+            "source": "hdc",
+            "text": "Example text.",
+            "date": "2026-07-01",
+            "url": "https://example.com/decision-2",
+            "metadata": {
+                "retrieved_at": "2026-07-01T00:00:00Z",
+                "parsed_at": "2026-07-01T00:15:00Z",
+                "document_class": "decision",
+                "rights_review_status": "reviewed",
+            },
+        },
+    ]
+
+    ledger = build_source_observability_ledger(
+        root=ROOT,
+        records=current_records,
+        previous_records=previous_records,
+    )
+    by_source = {source["source_id"]: source for source in ledger["sources"]}
+
+    assert ledger["summary"]["source_count"] == 13
+    assert by_source["hdc"]["crawlability"]["status"] == "reachable"
+    assert by_source["hdc"]["parser_completion"]["status"] == "validated_records"
+    assert by_source["hdc"]["timestamps"]["last_fetch_at"] == "2026-07-02T00:00:00Z"
+    assert by_source["hdc"]["drift"]["severity"] == "drop"
+    assert by_source["hdc"]["rights"]["status"] == "reviewed"
+    assert by_source["hdc"]["document_classes"] == ["decision"]
+
+
+def test_archive_anomaly_report_detects_drift_and_manifest_problems(tmp_path: Path) -> None:
+    evidence = _complete_evidence(tmp_path)
+    source_observability = build_source_observability_ledger(
+        root=ROOT,
+        records=[
+            {
+                "id": "hdc-1",
+                "source": "hdc",
+                "text": "Example text.",
+                "date": "2026-07-02",
+                "url": "https://example.com/decision",
+                "metadata": {
+                    "retrieved_at": "2026-07-02T00:00:00Z",
+                    "parsed_at": "2026-07-02T00:15:00Z",
+                    "document_class": "decision",
+                    "rights_review_status": "reviewed",
+                },
+            }
+        ],
+        previous_records=[
+            {
+                "id": "hdc-1",
+                "source": "hdc",
+                "text": "Example text.",
+                "date": "2026-07-01",
+                "url": "https://example.com/decision",
+                "metadata": {
+                    "retrieved_at": "2026-07-01T00:00:00Z",
+                    "parsed_at": "2026-07-01T00:15:00Z",
+                    "document_class": "decision",
+                    "rights_review_status": "reviewed",
+                },
+            },
+            {
+                "id": "hdc-2",
+                "source": "hdc",
+                "text": "Example text.",
+                "date": "2026-07-01",
+                "url": "https://example.com/decision-2",
+                "metadata": {
+                    "retrieved_at": "2026-07-01T00:00:00Z",
+                    "parsed_at": "2026-07-01T00:15:00Z",
+                    "document_class": "decision",
+                    "rights_review_status": "reviewed",
+                },
+            },
+        ],
+    )
+    evidence["source_observability"] = source_observability
+    evidence["schema"] = {"record_schema_version": "2.0.0"}
+    evidence["hugging_face"]["remote_manifest_verified"] = False
+    evidence["metadata_packages"]["packages"] = evidence["metadata_packages"]["packages"][:-1]
+    previous_evidence = {
+        "source_coverage": {
+            "sources": [
+                {"source_id": "hdc", "url": "https://old.example.test/decision"},
+                {"source_id": "hpdt", "url": "https://www.hpdt.org.nz/Search-Decisions"},
+            ]
+        }
+    }
+
+    report = build_archive_anomaly_report(evidence, previous_evidence=previous_evidence)
+
+    anomaly_types = {anomaly["type"] for anomaly in report["anomalies"]}
+    assert report["status"] == "fail"
+    assert "record_count_drop" in anomaly_types
+    assert "source_url_drift" in anomaly_types
+    assert "schema_drift" in anomaly_types
+    assert "remote_manifest_verification" in anomaly_types
+    assert "metadata_inconsistency" in anomaly_types
+
+
+def test_public_claims_and_privacy_scoring_are_generated_from_ledgers(tmp_path: Path) -> None:
+    evidence = _complete_evidence(tmp_path)
+    evidence["source_observability"] = build_source_observability_ledger(
+        root=ROOT,
+        records=[
+            {
+                "id": f"{source}-1",
+                "source": source,
+                "text": "Example text.",
+                "date": "2026-07-02",
+                "url": "https://example.com/decision",
+                "metadata": {
+                    "retrieved_at": "2026-07-02T00:00:00Z",
+                    "parsed_at": "2026-07-02T00:15:00Z",
+                    "document_class": "decision",
+                    "rights_review_status": "reviewed",
+                },
+            }
+            for source in ("hdc", "hpdt", "moj_tribunals", "era", "teachers")
+        ],
+    )
+    privacy = build_privacy_rights_scoring(evidence)
+    claims = build_public_claims(evidence, maturity_report={"score": 100})
+
+    assert privacy["status"] == "leading"
+    assert privacy["score"] == 100
+    assert "validated records across 5 active sources" in claims["markdown"]["README.md"]
+    assert (
+        "Privacy/rights status is summarized as leading." in claims["markdown"]["dataset-card.md"]
+    )
+    assert (
+        "evidence-backed claims are generated from ledgers"
+        in claims["markdown"]["release-notes.md"]
+    )
+
+
+def test_federation_compatibility_report_flags_missing_sections() -> None:
+    report = build_federation_compatibility_report({"release": {}, "source_coverage": {}})
+
+    assert report["status"] == "drift"
+    assert "git" in report["missing_sections"]
+    assert report["profile_version"] == "1.0.0"
+
+
 def test_write_archive_intelligence_report(tmp_path: Path) -> None:
     evidence_path = tmp_path / "release_evidence.json"
     output_path = tmp_path / "archive_maturity.json"
@@ -187,6 +387,27 @@ def test_write_archive_intelligence_report(tmp_path: Path) -> None:
 
     assert output_path.is_file()
     assert json.loads(output_path.read_text(encoding="utf-8"))["score"] == report["score"]
+
+
+def test_write_archive_intelligence_bundle_writes_claim_and_compatibility_artifacts(
+    tmp_path: Path,
+) -> None:
+    artifact_dir = _write_complete_artifact_dir(tmp_path)
+    output_dir = tmp_path / "generated" / "archive-intelligence"
+
+    bundle = write_archive_intelligence_bundle(artifact_dir, output_dir, root=tmp_path)
+
+    assert output_dir.joinpath("archive_maturity.json").is_file()
+    assert output_dir.joinpath("source_observability.json").is_file()
+    assert output_dir.joinpath("privacy_rights_score.json").is_file()
+    assert output_dir.joinpath("anomaly_report.json").is_file()
+    assert output_dir.joinpath("public_claims.json").is_file()
+    assert output_dir.joinpath("federation_compatibility.json").is_file()
+    assert output_dir.joinpath("README.claims.md").is_file()
+    assert output_dir.joinpath("dataset-card.claims.md").is_file()
+    assert output_dir.joinpath("release-notes.claims.md").is_file()
+    assert output_dir.joinpath("github-project-summary.claims.md").is_file()
+    assert bundle["public_claims"]["facts"]["record_count"] == 5
 
 
 def test_archive_intelligence_loads_sibling_metadata_manifest(tmp_path: Path) -> None:
