@@ -1,0 +1,7 @@
+Governance Phase 4 supply-chain enforcement:
+- Added pull_request Dependency Review workflow pinned to actions/dependency-review-action SHA for v5.0.0.
+- SHA-pinned monthly publication workflow actions: checkout v6, setup-uv v7, setup-python v6, upload-artifact v5, attest-build-provenance v3.
+- Renovate GitHub Actions updates now require review and Dependency Dashboard approval instead of automerge.
+- Zizmor remains report-only with uploaded artifact while non-publication workflow pinning debt is remediated.
+- Local validation: 15 tests passed; Ruff check passed.
+- Protected branch checks for 16d581a passed: Code Quality, Tests, CodeQL, OSV, Docs.
