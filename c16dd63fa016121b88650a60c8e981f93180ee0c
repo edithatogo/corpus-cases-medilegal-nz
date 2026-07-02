@@ -1,0 +1,5 @@
+Governance Phase 3 branch protection proof:
+- Applied master branch protection with strict required status checks: tests (3.12), tests (3.14), Python, Evidence, And Workflow Checks, Analyze Python, OSV Scanner, Astro docs.
+- Disabled force pushes and deletions.
+- Enforce admins remains false, and the push confirmed admin bypass while GitHub now expects 6 required checks.
+- Dependency-update publication guards remain in monthly publication and code quality workflows.
