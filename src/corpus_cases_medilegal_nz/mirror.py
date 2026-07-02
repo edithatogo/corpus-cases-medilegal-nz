@@ -63,6 +63,8 @@ def mirror_sync_readiness(
     ]
     credential_checks = (
         ("GIT_MIRROR_URL", ("GIT_MIRROR_URL",)),
+        ("GIT_MIRROR_URL_GITLAB", ("GIT_MIRROR_URL_GITLAB",)),
+        ("GIT_MIRROR_URL_CODEBERG", ("GIT_MIRROR_URL_CODEBERG",)),
         ("GIT_MIRROR_SSH_PRIVATE_KEY", ("GIT_MIRROR_SSH_PRIVATE_KEY",)),
     )
     for name, aliases in credential_checks:
@@ -89,6 +91,8 @@ def mirror_sync_readiness(
         "manual_verification": [
             'gh workflow run "Mirror Sync" --repo edithatogo/corpus-cases-medilegal-nz --ref master',
             'gh run list --repo edithatogo/corpus-cases-medilegal-nz --workflow "Mirror Sync"',
+            'git ls-remote https://gitlab.com/edithatogo/corpus-cases-medilegal-nz.git HEAD',
+            'git ls-remote https://codeberg.org/edithatogo/corpus-cases-medilegal-nz.git HEAD',
         ],
         "workflow_path": workflow_path.as_posix(),
         "push_trigger_branches": ["main", "master"],

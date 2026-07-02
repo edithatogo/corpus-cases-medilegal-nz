@@ -8,6 +8,7 @@ __pycache__/
 .venv/
 .env
 .env.*
+!.env.example
 pytest-cache-files-*/
 
 # Generated corpus and archives: never commit data to GitHub

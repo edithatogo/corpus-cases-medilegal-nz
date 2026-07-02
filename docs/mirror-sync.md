@@ -7,10 +7,18 @@ It runs on pushes to `main` and `master`, and it is also manually dispatchable.
 ## Required Secrets
 
 - `GIT_MIRROR_URL`
+- `GIT_MIRROR_URL_GITLAB`
+- `GIT_MIRROR_URL_CODEBERG`
 - `GIT_MIRROR_SSH_PRIVATE_KEY`
 
-If either secret is missing, the workflow exits cleanly after logging that the
-mirror step is skipped.
+If no mirror URL is set, the workflow exits cleanly after logging that the
+mirror step is skipped. If the SSH private key is missing, the workflow also
+exits cleanly.
+
+The repository currently uses GitLab and Codeberg as the public mirror
+targets. The single `GIT_MIRROR_URL` secret remains as a backward-compatible
+fallback, but the preferred configuration is to set the GitLab and Codeberg
+URLs explicitly.
 
 ## Readiness Checks
 
@@ -33,6 +41,8 @@ python scripts/mirror_readiness.py
 ```bash
 gh workflow run "Mirror Sync" --repo edithatogo/corpus-cases-medilegal-nz --ref master
 gh run list --repo edithatogo/corpus-cases-medilegal-nz --workflow "Mirror Sync"
+git ls-remote https://gitlab.com/edithatogo/corpus-cases-medilegal-nz.git HEAD
+git ls-remote https://codeberg.org/edithatogo/corpus-cases-medilegal-nz.git HEAD
 ```
 
 Expected outcome:
@@ -40,4 +50,3 @@ Expected outcome:
 - The workflow dispatch is accepted by GitHub.
 - The run completes successfully.
 - When the mirror secrets are absent, the job logs a guarded skip.
-
