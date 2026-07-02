@@ -1,0 +1,5 @@
+Monthly dynamic archive publication Phase 8 dry-run proof:
+- Initial dry-run 28557593684 succeeded mechanically but artifact evidence had quality.record_count=0 and collection_quality_gates.status=blocked.
+- Fixed workflow ordering in 21968e6 by running collection-proof before release evidence.
+- Corrected dry-run 28557667012 succeeded with release.archive_version=2026.07.0, quality.record_count=5, collection_quality_gates.status=pass, validated_records=5, HF dry_run=true, Zenodo dry_run=true, publish_handoff_only=true.
+- Issue evidence: https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/1#issuecomment-4861228232
