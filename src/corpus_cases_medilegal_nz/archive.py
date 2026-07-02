@@ -964,20 +964,24 @@ def publication_readiness(
     for relative in local_required:
         exists = (root / relative).exists()
         checks.append({"id": relative, "status": "ok" if exists else "missing"})
-    for name in (
-        "HF_TOKEN",
-        "HF_REPO_ID",
-        "ZENODO_ACCESS_TOKEN",
-        "ZENODO_SANDBOX_ACCESS_TOKEN",
-        "ZENODO_API_URL",
-        "ZENODO_SANDBOX_API_URL",
-        "ARCHIVE_CREATORS_JSON",
-    ):
+    credential_checks = (
+        ("HF_TOKEN", ("HF_TOKEN",)),
+        ("HF_REPO_ID", ("HF_REPO_ID",)),
+        ("ZENODO_ACCESS_TOKEN", ("ZENODO_ACCESS_TOKEN", "ZENODO_TOKEN")),
+        ("ZENODO_SANDBOX_ACCESS_TOKEN", ("ZENODO_SANDBOX_ACCESS_TOKEN", "ZENODO_SANDBOX_TOKEN")),
+        ("ZENODO_API_URL", ("ZENODO_API_URL",)),
+        ("ZENODO_SANDBOX_API_URL", ("ZENODO_SANDBOX_API_URL",)),
+        ("ARCHIVE_CREATORS_JSON", ("ARCHIVE_CREATORS_JSON",)),
+    )
+    for name, aliases in credential_checks:
+        configured_aliases = [alias for alias in aliases if env.get(alias)]
         checks.append(
             {
                 "id": name,
-                "status": "configured" if env.get(name) else "gated",
+                "status": "configured" if configured_aliases else "gated",
                 "secret": name.endswith("TOKEN") or name == "ARCHIVE_CREATORS_JSON",
+                "accepted_names": list(aliases),
+                "configured_names": configured_aliases,
             }
         )
     blockers = [check["id"] for check in checks if check["status"] == "missing"]

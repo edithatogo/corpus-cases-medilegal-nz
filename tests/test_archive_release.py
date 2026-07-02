@@ -167,3 +167,19 @@ def test_publication_readiness_reports_gated_secrets_not_local_blockers() -> Non
     assert readiness["status"] == "ready"
     assert "HF_TOKEN" in readiness["gated_external_writes"]
     assert readiness["protected_environment"] == "zenodo-production"
+
+
+def test_publication_readiness_accepts_zenodo_secret_aliases() -> None:
+    readiness = publication_readiness(
+        environment={
+            "ZENODO_TOKEN": "legacy-production-token",
+            "ZENODO_SANDBOX_TOKEN": "legacy-sandbox-token",
+        },
+        root=ROOT,
+    )
+    checks = {check["id"]: check for check in readiness["checks"]}
+
+    assert checks["ZENODO_ACCESS_TOKEN"]["status"] == "configured"
+    assert checks["ZENODO_ACCESS_TOKEN"]["configured_names"] == ["ZENODO_TOKEN"]
+    assert checks["ZENODO_SANDBOX_ACCESS_TOKEN"]["status"] == "configured"
+    assert checks["ZENODO_SANDBOX_ACCESS_TOKEN"]["configured_names"] == ["ZENODO_SANDBOX_TOKEN"]

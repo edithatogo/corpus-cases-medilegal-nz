@@ -14,6 +14,7 @@ def test_monthly_workflow_has_publication_guards_and_surfaces() -> None:
     assert "persist-credentials: false" in workflow
     assert "HF_TOKEN" in workflow
     assert "ZENODO_ACCESS_TOKEN" in workflow
+    assert "secrets.ZENODO_ACCESS_TOKEN || secrets.ZENODO_TOKEN" in workflow
     assert "ARCHIVE_CREATORS_JSON" in workflow
     assert "actions/attest-build-provenance@v3" in workflow
     assert "github.actor != 'dependabot[bot]'" in workflow

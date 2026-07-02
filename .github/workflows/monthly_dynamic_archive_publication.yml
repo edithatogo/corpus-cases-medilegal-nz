@@ -194,7 +194,7 @@ jobs:
       - name: Upload Zenodo draft or new version
         if: env.PUBLICATION_MODE == 'zenodo-draft' || env.PUBLICATION_MODE == 'full'
         env:
-          ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+          ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN || secrets.ZENODO_TOKEN }}
           ARCHIVE_CREATORS_JSON: ${{ secrets.ARCHIVE_CREATORS_JSON }}
           ARCHIVE_VERSION: ${{ steps.version.outputs.archive_version }}
           BUNDLE: ${{ steps.version.outputs.bundle }}
