@@ -72,7 +72,11 @@
 
 ## Phase 6: Documentation And First Governance Proof
 
-- [ ] Task: Update governance documentation.
-- [ ] Task: Run publication-readiness/doctor checks against live GitHub settings.
-- [ ] Task: Attach governance proof to the GitHub issue/project.
-- [ ] Task: Conductor - User Manual Verification 'Phase 6: Documentation And First Governance Proof' (Protocol in workflow.md)
+- [x] Task: Update governance documentation.
+    - Evidence: `docs/monthly-dynamic-archive-publication.md` now documents the attestation verification manifest, governance gates, protected Zenodo handoff, Dependency Review, Renovate review requirements, and strict readiness command.
+- [x] Task: Run publication-readiness/doctor checks against live GitHub settings.
+    - Evidence: `phase6_governance_proof_evidence.md` records live `zenodo-production` environment protection, live `master` branch protection, configured secret/variable names, and strict `publication-readiness --strict` output with `status: ready`.
+- [x] Task: Attach governance proof to the GitHub issue/project.
+    - Evidence: issue `#1` is linked to `Rare Insights on Open Policy from Aotearoa` and `corpus-cases-medilegal-nz Archive Roadmap`; Phase 6 proof is attached as an issue comment and the repo roadmap project item is marked `Done`.
+- [x] Task: Conductor - User Manual Verification 'Phase 6: Documentation And First Governance Proof' (Protocol in workflow.md)
+    - Evidence: documentation, live readiness, GitHub issue/project proof, and local checks are recorded in `phase6_governance_proof_evidence.md`; post-push GitHub check results are recorded on the implementation commit.

@@ -71,6 +71,7 @@ Each release build writes deterministic artifacts under
 - `manifests/public_surface_audit.json`
 - `manifests/legal_provenance.json`
 - `manifests/release_ladder.json`
+- `manifests/attestation_verification.json`
 - `manifests/checksum_manifest.json`
 - `manifests/zenodo-metadata.json`
 - `metadata/metadata_packages_manifest.json`
@@ -81,6 +82,32 @@ Each release build writes deterministic artifacts under
 The public claims in README files, release notes, and dataset cards must be
 derived from these generated ledgers. Do not hand-maintain stronger coverage,
 rights, privacy, DOI, or mirror claims than the evidence supports.
+
+`release_evidence.json` also records the expected artifact-attestation
+verification contract. The attestation evidence names the GitHub artifact
+attestation provider, the SHA-pinned `actions/attest-build-provenance` action,
+the attested artifact globs, the expected GitHub release assets, and the
+`gh attestation verify` commands to run after GitHub has created attestations
+for uploaded assets.
+
+## Governance Gates
+
+The publication path is protected by repository governance as well as workflow
+checks:
+
+- `master` requires strict status checks for the Python test matrix, code
+  quality/evidence checks, CodeQL, OSV scanning, and docs.
+- Force pushes and branch deletion are disabled for `master`.
+- The monthly publication workflow uses least-privilege permissions, explicit
+  dependency-update actor guards, SHA-pinned third-party actions on the
+  publication path, and GitHub artifact attestations.
+- `zenodo-production` is the default protected environment for production DOI
+  handoff. It must require reviewer approval and must not allow admin bypass.
+- Dependency Review runs on pull requests, while Renovate GitHub Actions updates
+  require human review and Dependency Dashboard approval.
+
+The live governance proof for this repository is recorded in
+`conductor/tracks/github_governance_automation_hardening_20260701/`.
 
 ## Publication Workflow
 
@@ -117,6 +144,7 @@ Run readiness checks:
 
 ```bash
 python -m corpus_cases_medilegal_nz.cli publication-readiness
+python -m corpus_cases_medilegal_nz.cli publication-readiness --strict
 python scripts/check_release_evidence.py --require-file
 python scripts/check_metadata_packages.py --require-file
 python scripts/check_public_surface_audit.py --require-file
