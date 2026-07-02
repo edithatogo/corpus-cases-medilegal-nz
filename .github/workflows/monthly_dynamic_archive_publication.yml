@@ -245,10 +245,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p generated/archive-intelligence
-          uv run python scripts/build_archive_intelligence.py \
-            --artifact-dir "$ARTIFACT_DIR" \
-            --output generated/archive-intelligence/archive_maturity.json \
-            $STRICT_MODE
+          args=(
+            --artifact-dir "$ARTIFACT_DIR"
+            --output generated/archive-intelligence/archive_maturity.json
+          )
+          if [ -n "$STRICT_MODE" ]; then
+            args+=("$STRICT_MODE")
+          fi
+          uv run python scripts/build_archive_intelligence.py "${args[@]}"
 
       - name: Build archive intelligence bundle
         run: |
