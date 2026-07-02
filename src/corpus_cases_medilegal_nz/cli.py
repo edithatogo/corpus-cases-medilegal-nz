@@ -13,6 +13,7 @@ from corpus_cases_medilegal_nz.archive import (
     load_jsonl_records,
     publication_readiness,
 )
+from corpus_cases_medilegal_nz.archive_intelligence import write_archive_intelligence_report
 from corpus_cases_medilegal_nz.collection_proof import write_collection_proof
 from corpus_cases_medilegal_nz.hf_sync import main as hf_sync_main
 from corpus_cases_medilegal_nz.parser_contract import build_parser_contract
@@ -37,6 +38,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Check local monthly archive publication readiness.",
     )
     readiness.add_argument("--strict", action="store_true", help="Exit non-zero on blockers.")
+    intelligence = sub.add_parser(
+        "archive-intelligence",
+        help="Build archive maturity intelligence from monthly release evidence.",
+    )
+    intelligence.add_argument(
+        "--release-evidence",
+        default="generated/monthly-publication/manifests/release_evidence.json",
+    )
+    intelligence.add_argument(
+        "--output",
+        default="generated/archive-intelligence/archive_maturity.json",
+    )
     ns = parser.parse_args(argv)
     exit_code = 0
     if ns.command == "sources":
@@ -65,6 +78,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
         if ns.strict and result["status"] != "ready":
             exit_code = 1
+    elif ns.command == "archive-intelligence":
+        result = write_archive_intelligence_report(
+            release_evidence_path=Path(ns.release_evidence),
+            output_path=Path(ns.output),
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
     else:
         parser.error(f"Unhandled command: {ns.command}")
         exit_code = 2

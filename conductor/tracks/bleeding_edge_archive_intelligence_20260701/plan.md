@@ -2,16 +2,19 @@
 
 ## Phase 1: Intelligence Model
 
-- [ ] Task: Define archive maturity scoring dimensions.
-    - [ ] Release evidence completeness.
-    - [ ] Source coverage completeness.
-    - [ ] Collection and parsing progress.
-    - [ ] Metadata package completeness.
-    - [ ] Public-surface consistency.
-    - [ ] Security and provenance posture.
-    - [ ] Remote publication proof.
-- [ ] Task: Define severity levels and score explanations.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Intelligence Model' (Protocol in workflow.md)
+- [x] Task: Define archive maturity scoring dimensions.
+    - [x] Release evidence completeness.
+    - [x] Source coverage completeness.
+    - [x] Collection and parsing progress.
+    - [x] Metadata package completeness.
+    - [x] Public-surface consistency.
+    - [x] Security and provenance posture.
+    - [x] Remote publication proof.
+    - Evidence: `src/corpus_cases_medilegal_nz/archive_intelligence.py` defines the weighted seven-dimension model and `tests/test_archive_intelligence.py` verifies that model weights sum to 100 and dimensions remain stable.
+- [x] Task: Define severity levels and score explanations.
+    - Evidence: `archive_intelligence.py` defines deterministic `leading`, `strong`, `developing`, `fragile`, and `blocked` severity thresholds with per-dimension explanations and evidence payloads.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Intelligence Model' (Protocol in workflow.md)
+    - Evidence: `phase1_intelligence_model_evidence.md` records the generated local maturity report, score, blocking dimension, CLI/script entrypoints, and focused validation results.
 
 ## Phase 2: Source Observability Ledger
 

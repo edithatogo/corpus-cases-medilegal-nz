@@ -894,6 +894,7 @@ def build_release_artifacts(
     )
     schema_manifest = export_json_schemas(schemas_dir)
     metadata_manifest = write_metadata_packages(output_dir, evidence)
+    evidence["metadata_packages"] = metadata_manifest
     write_json(sbom_dir / "sbom.cyclonedx.json", build_sbom(root))
     write_json(sbom_dir / "sbom.spdx.json", build_spdx(root))
     write_json(

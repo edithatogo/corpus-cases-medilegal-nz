@@ -84,7 +84,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## [ ] Track: Bleeding-Edge Archive Intelligence
 *Link: [./conductor/tracks/bleeding_edge_archive_intelligence_20260701/](./conductor/tracks/bleeding_edge_archive_intelligence_20260701/)*
-*Status: NEW - plan captures archive maturity scoring, source observability, claims generation, anomaly detection, telemetry, and cross-repo dashboard compatibility.*
+*Status: IN PROGRESS - Phase 1 archive maturity scoring model, CLI/script entrypoints, generated local evidence, and tests are complete; next is source observability ledger hardening.*
 
 ---
 
