@@ -30,3 +30,4 @@
 - 2026-07-02: Verified live GitHub Mirror Sync push runs completed successfully with guarded secret skips, and a manual `workflow_dispatch` run (`28582552048`) was accepted and completed successfully on `master`.
 - 2026-07-03: Public GitLab and Codeberg mirror endpoints were verified as reachable; env templates now store mirror URLs and tokens in ignored local env files.
 - 2026-07-03: Strict mirror readiness now fails closed unless the full mirror target set is configured, so the track can distinguish partial from complete mirror coverage.
+- 2026-07-02: `mirror-readiness --strict` returns `status: ready` when `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, and `GIT_MIRROR_SSH_PRIVATE_KEY` are all configured.
