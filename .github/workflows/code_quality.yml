@@ -92,7 +92,19 @@ jobs:
 
       - name: Zizmor workflow hardening scan
         continue-on-error: true
-        run: uvx zizmor --pedantic .github/workflows
+        run: |
+          set -euo pipefail
+          mkdir -p generated/security
+          uvx zizmor --pedantic .github/workflows > generated/security/zizmor-report.txt 2>&1 || true
+          cat generated/security/zizmor-report.txt
+
+      - name: Upload Zizmor report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: zizmor-report
+          path: generated/security/zizmor-report.txt
+          if-no-files-found: error
 
   no-publication-from-dependency-updates:
     name: Dependency Update Publication Guard

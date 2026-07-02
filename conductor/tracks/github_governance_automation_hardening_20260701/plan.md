@@ -50,6 +50,7 @@
     - [ ] Typos.
     - [ ] Taplo.
     - [ ] Zizmor.
+    - Evidence: baseline Zizmor debt is currently reported as an uploaded artifact rather than a hard gate; action pinning/remediation remains required before converting Zizmor to strict gating.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Supply Chain Enforcement' (Protocol in workflow.md)
 
 ## Phase 5: Attestation Verification
