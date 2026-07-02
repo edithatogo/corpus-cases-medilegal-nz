@@ -70,9 +70,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: GitHub RIOPA Project Synchronisation
+## [x] Track: GitHub RIOPA Project Synchronisation
 *Link: [./conductor/tracks/github_riopa_project_synchronisation_20260701/](./conductor/tracks/github_riopa_project_synchronisation_20260701/)*
-*Status: IN PROGRESS - project schema audit, RIOPA mirror-source fallback, sub-issue work breakdown, and idempotent sync automation are complete; next is documentation and final evidence.*
+*Status: ✅ COMPLETE - project schema audit, RIOPA mirror-source fallback, sub-issue work breakdown, idempotent sync automation, operating documentation, and final in-sync evidence are complete.*
 
 ---
 

@@ -64,7 +64,11 @@
 
 ## Phase 5: Documentation And Evidence
 
-- [ ] Task: Document repo-to-RIOPA synchronization rules.
-- [ ] Task: Update issue/project operating notes.
-- [ ] Task: Run sync verification and attach evidence to the track.
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: Documentation And Evidence' (Protocol in workflow.md)
+- [x] Task: Document repo-to-RIOPA synchronization rules.
+    - Evidence: `docs/riopa-project-synchronisation.md` documents the RIOPA and repository project surfaces, hidden marker contract, `other` mirror-source fallback, dry-run/apply commands, workflow behavior, token expectations, generated evidence artifact, and operating notes.
+- [x] Task: Update issue/project operating notes.
+    - Evidence: issue `#8` now carries the sync-automation operating-note comment with the final dry-run command, evidence path, and RIOPA fallback boundary.
+- [x] Task: Run sync verification and attach evidence to the track.
+    - Evidence: `phase5_documentation_evidence.md` records the final sync dry-run result: `status: in_sync`, `actions: []`, `duplicate_markers: {}`, and seven desired subissues.
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Documentation And Evidence' (Protocol in workflow.md)
+    - Evidence: `phase5_documentation_evidence.md` records local sync verification, focused tests, Ruff checks, and Git whitespace validation.

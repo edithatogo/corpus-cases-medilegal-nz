@@ -212,6 +212,8 @@ release-evidence surface, Hugging Face as the live mutable dataset surface, and
 Zenodo as the immutable DOI snapshot surface. See
 [docs/monthly-dynamic-archive-publication.md](docs/monthly-dynamic-archive-publication.md)
 for the release contract, evidence ledgers, and protected Zenodo handoff.
+The GitHub project-board synchronisation contract is documented in
+[docs/riopa-project-synchronisation.md](docs/riopa-project-synchronisation.md).
 
 ---
 
