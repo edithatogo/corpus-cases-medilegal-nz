@@ -94,8 +94,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Privacy, Takedown, And Redaction Governance
-*Link: [./conductor/tracks/privacy_takedown_governance_20260701/](./conductor/tracks/privacy_takedown_governance_20260701/)*
-*Status: NEW - plan captures privacy risk scoring, takedown/correction workflow, redaction/exclusion ledgers, and release-blocking privacy gates.*
-
 ---

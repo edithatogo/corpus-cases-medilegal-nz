@@ -209,8 +209,9 @@ de-anonymisation claims are source-specific. Release evidence therefore records:
 - attribution and known exclusions;
 - takedown contact route;
 - de-anonymisation caveats;
+- privacy governance and redaction/exclusion ledgers;
 - public surface status for GitHub, Hugging Face, Zenodo, and OSF.
 
 Any correction request should be handled by opening a tracked issue, updating
-the source coverage or legal provenance ledger, and issuing a new monthly
-archive version if published artifacts need to change.
+the source coverage, privacy governance, or legal provenance ledgers, and
+issuing a new monthly archive version if published artifacts need to change.

@@ -8,6 +8,7 @@ from corpus_cases_medilegal_nz.archive import (
     build_archive_bundle,
     build_collection_quality_gates,
     build_dataset_diff,
+    build_privacy_governance,
     build_quality_report,
     build_release_artifacts,
     build_release_evidence,
@@ -150,6 +151,8 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert (output_dir / "metadata/huggingface-dataset-card-metadata.json").is_file()
     assert (output_dir / "sbom/sbom.cyclonedx.json").is_file()
     assert (output_dir / "sbom/sbom.spdx.json").is_file()
+    assert (output_dir / "manifests/privacy_governance.json").is_file()
+    assert (output_dir / "manifests/redaction_exclusion_ledger.json").is_file()
     assert summary["checksum_manifest"]["file_count"] > 0
 
 
@@ -249,3 +252,55 @@ def test_publication_readiness_detects_configured_protected_environment() -> Non
     assert readiness["status"] == "ready"
     assert checks["github_environment:zenodo-production"]["status"] == "configured"
     assert checks["github_environment_protection:zenodo-production"]["status"] == "configured"
+
+
+def test_privacy_governance_normalizes_requests_without_requester_identity(tmp_path: Path) -> None:
+    privacy_dir = tmp_path / "data/privacy"
+    privacy_dir.mkdir(parents=True)
+    (privacy_dir / "privacy_events.jsonl").write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "event_id": "event-1",
+                        "event_type": "takedown",
+                        "status": "pending",
+                        "source_id": "hdc",
+                        "record_id": "hdc-001",
+                        "requester_name": "Private Person",
+                        "requester_contact": "private@example.test",
+                        "public_summary": "Requested takedown for one public decision.",
+                    }
+                ),
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    governance = build_privacy_governance(root=tmp_path)
+
+    assert governance["status"] == "blocked"
+    assert governance["blockers"] == ["event-1"]
+    assert governance["ledger"]["events"][0]["event_type"] == "takedown"
+    assert governance["ledger"]["events"][0]["record_id"] == "hdc-001"
+    assert governance["ledger"]["events"][0]["public_summary"] == (
+        "Requested takedown for one public decision."
+    )
+    assert "requester_name" not in governance["ledger"]["events"][0]
+    assert "requester_contact" not in governance["ledger"]["events"][0]
+
+
+def test_publication_readiness_blocks_on_privacy_governance(tmp_path: Path) -> None:
+    privacy_report = tmp_path / "generated/monthly-publication/manifests/privacy_governance.json"
+    privacy_report.parent.mkdir(parents=True, exist_ok=True)
+    privacy_report.write_text(
+        json.dumps({"schema_version": "1.0.0", "status": "blocked", "blockers": ["event-1"]}),
+        encoding="utf-8",
+    )
+
+    readiness = publication_readiness(environment={}, root=tmp_path)
+
+    assert readiness["status"] == "blocked"
+    assert "privacy_governance" in readiness["blockers"]
+    assert readiness["privacy_blockers"] == ["event-1"]

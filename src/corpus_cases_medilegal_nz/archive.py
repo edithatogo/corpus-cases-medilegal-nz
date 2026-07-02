@@ -61,6 +61,9 @@ def release_asset_names(archive_version: str) -> list[str]:
         "checksum_manifest.json",
         "source_coverage.json",
         "public_surface_audit.json",
+        "privacy_governance.json",
+        "redaction_exclusion_ledger.json",
+        "legal_provenance.json",
         "metadata_packages_manifest.json",
         "sbom.cyclonedx.json",
         "sbom.spdx.json",
@@ -520,13 +523,201 @@ def build_legal_provenance() -> JsonObject:
                 "Public decisions may contain sensitive medicolegal context. Releases must not "
                 "claim anonymisation beyond the source publication."
             ),
-            "takedown_contact": "Use the GitHub repository issue/contact path for correction requests.",
+            "takedown_contact": (
+                "Use the GitHub repository issue/contact path for takedown, correction, and "
+                "redaction requests."
+            ),
+            "intake_policy": (
+                "Public requests are triaged through the issue tracker, then normalized into "
+                "a privacy event ledger without persisting requester identity in release "
+                "artifacts."
+            ),
+            "triage_sla": "Acknowledge within 2 business days and resolve before the next canonical release.",
+            "correction_policy": (
+                "Substantive corrections trigger a new monthly archive version when the "
+                "public record changes."
+            ),
+            "redaction_policy": (
+                "Only the minimum public-safe excerpt, tombstone, or exclusion note required "
+                "to preserve auditability is retained."
+            ),
+            "rights_policy": (
+                "Redistribution claims remain source-specific and evidence-backed; the archive "
+                "does not overstate rights clearance."
+            ),
         },
         "known_exclusions": [
             "Private credentials and local environment files.",
             "Unreviewed source artifacts without rights evidence.",
             "Experimental endpoint artifacts not promoted by a release ladder track.",
         ],
+    }
+
+
+def _privacy_event_id(event: Mapping[str, Any], index: int) -> str:
+    """Return a stable identifier for a privacy event."""
+    value = str(event.get("event_id") or event.get("id") or "").strip()
+    return value or f"privacy-event-{index:04d}"
+
+
+def _privacy_event_record_id(event: Mapping[str, Any]) -> str:
+    """Return the public record identifier for a privacy event."""
+    return str(event.get("record_id") or event.get("case_id") or event.get("source_record_id") or "").strip()
+
+
+def _privacy_event_source_id(event: Mapping[str, Any]) -> str:
+    """Return the source identifier for a privacy event."""
+    return str(event.get("source_id") or event.get("source") or "").strip()
+
+
+def _privacy_event_type(event: Mapping[str, Any]) -> str:
+    """Return the normalized privacy event type."""
+    return str(event.get("event_type") or event.get("type") or "note").strip().lower()
+
+
+def _privacy_event_status(event: Mapping[str, Any]) -> str:
+    """Return the normalized privacy event status."""
+    return str(event.get("status") or "pending").strip().lower()
+
+
+def _privacy_event_public_summary(event: Mapping[str, Any], event_type: str, record_id: str) -> str:
+    """Return a safe public summary for a privacy event."""
+    summary = str(
+        event.get("public_summary")
+        or event.get("summary")
+        or event.get("notes")
+        or ""
+    ).strip()
+    if summary:
+        return summary
+    if record_id:
+        return f"{event_type} event for record {record_id}."
+    source_id = _privacy_event_source_id(event)
+    if source_id:
+        return f"{event_type} event for source {source_id}."
+    return f"{event_type} event."
+
+
+def build_redaction_exclusion_ledger(
+    records: Iterable[Mapping[str, Any]] | None = None,
+    privacy_events: Iterable[Mapping[str, Any]] | None = None,
+    root: Path = Path(),
+) -> JsonObject:
+    """Build a public-safe ledger of redactions, exclusions, and takedown actions."""
+    root = Path(root)
+    if privacy_events is None:
+        privacy_events = load_jsonl_records(root / "data/privacy/privacy_events.jsonl")
+    normalized_events: list[JsonObject] = []
+    redacted_records: set[str] = set()
+    excluded_records: set[str] = set()
+    tombstoned_records: set[str] = set()
+    corrected_records: set[str] = set()
+    blocking_events: list[str] = []
+    for index, event in enumerate(privacy_events, start=1):
+        if not isinstance(event, Mapping):
+            continue
+        event_type = _privacy_event_type(event)
+        status = _privacy_event_status(event)
+        record_id = _privacy_event_record_id(event)
+        source_id = _privacy_event_source_id(event)
+        release_blocking = bool(
+            event.get("release_blocking")
+            if "release_blocking" in event
+            else event_type in {"takedown", "correction", "redaction"}
+        )
+        public_summary = _privacy_event_public_summary(event, event_type, record_id)
+        normalized = {
+            "event_id": _privacy_event_id(event, index),
+            "event_type": event_type,
+            "status": status,
+            "source_id": source_id,
+            "record_id": record_id,
+            "public_summary": public_summary,
+            "release_blocking": release_blocking,
+        }
+        if event.get("acted_on_at"):
+            normalized["acted_on_at"] = str(event["acted_on_at"])
+        if event.get("replacement_release_version"):
+            normalized["replacement_release_version"] = str(event["replacement_release_version"])
+        if event.get("public_tombstone"):
+            normalized["public_tombstone"] = str(event["public_tombstone"])
+        normalized_events.append(normalized)
+        if record_id and event_type in {"redaction", "takedown", "exclusion"}:
+            redacted_records.add(record_id)
+            excluded_records.add(record_id)
+        if record_id and event_type == "correction":
+            corrected_records.add(record_id)
+        if record_id and event_type in {"takedown", "redaction"} and status in {"resolved", "completed"}:
+            tombstoned_records.add(record_id)
+        if release_blocking and status not in {"resolved", "completed", "withdrawn", "dismissed"}:
+            blocking_events.append(normalized["event_id"])
+    current_records = list(records or [])
+    current_record_ids = sorted(
+        {
+            _record_id(record)
+            for record in current_records
+            if isinstance(record, Mapping) and _record_id(record)
+        }
+    )
+    return {
+        "schema_version": "1.0.0",
+        "generated_at": utc_now_iso(),
+        "source_path": (root / "data/privacy/privacy_events.jsonl").as_posix(),
+        "status": "blocked" if blocking_events else "pass",
+        "summary": {
+            "event_count": len(normalized_events),
+            "blocking_event_count": len(blocking_events),
+            "redacted_record_count": len(redacted_records),
+            "excluded_record_count": len(excluded_records),
+            "tombstoned_record_count": len(tombstoned_records),
+            "corrected_record_count": len(corrected_records),
+            "current_record_count": len(current_record_ids),
+        },
+        "records": {
+            "current": current_record_ids,
+            "redacted": sorted(redacted_records),
+            "excluded": sorted(excluded_records),
+            "tombstoned": sorted(tombstoned_records),
+            "corrected": sorted(corrected_records),
+        },
+        "events": normalized_events,
+        "blockers": blocking_events,
+        "public_note": (
+            "Requester identity is not persisted in release artifacts; only public-safe "
+            "summaries and record identifiers are retained."
+        ),
+    }
+
+
+def build_privacy_governance(
+    records: Iterable[Mapping[str, Any]] | None = None,
+    privacy_events: Iterable[Mapping[str, Any]] | None = None,
+    root: Path = Path(),
+) -> JsonObject:
+    """Build the publication-facing privacy, takedown, and redaction governance ledger."""
+    ledger = build_redaction_exclusion_ledger(records=records, privacy_events=privacy_events, root=root)
+    return {
+        "schema_version": "1.0.0",
+        "generated_at": utc_now_iso(),
+        "status": ledger["status"],
+        "policy": {
+            "intake_route": "GitHub issue/contact path",
+            "triage_sla": "Acknowledge within 2 business days.",
+            "correction_policy": (
+                "Corrective changes update the ledgers first and then publish a new monthly "
+                "archive version when the public record changes."
+            ),
+            "redaction_policy": (
+                "Only public-safe excerpts, tombstones, or exclusions are retained in release "
+                "artifacts."
+            ),
+            "release_gate": (
+                "Any unresolved release-blocking privacy event blocks canonical publication."
+            ),
+        },
+        "summary": ledger["summary"],
+        "ledger": ledger,
+        "blockers": ledger["blockers"],
     }
 
 
@@ -699,6 +890,8 @@ def build_release_evidence(
     collection_audit = build_source_collection_audit(root=root, records=records)
     dataset_diff = build_dataset_diff(records)
     collection_quality_gates = build_collection_quality_gates(records)
+    privacy_governance = build_privacy_governance(records=records, root=root)
+    redaction_exclusion_ledger = privacy_governance["ledger"]
     public_surface = build_public_surface_audit(
         archive_version=version,
         hf_repo_id=hf_repo_id,
@@ -718,6 +911,8 @@ def build_release_evidence(
                 "Monthly medilegal corpus archive. Current publication coverage is "
                 "source-specific and evidence-backed by source_coverage.json."
             ),
+            "privacy_status": privacy_governance["status"],
+            "privacy_blockers": privacy_governance["blockers"],
         },
         "git": {
             "commit_sha": commit_sha or os.environ.get("GITHUB_SHA", ""),
@@ -754,6 +949,8 @@ def build_release_evidence(
         "dataset_diff": dataset_diff,
         "public_surface": public_surface,
         "legal_provenance": build_legal_provenance(),
+        "privacy_governance": privacy_governance,
+        "redaction_exclusion_ledger": redaction_exclusion_ledger,
         "release_ladder": build_release_ladder(version),
         "attestation_verification": build_attestation_verification(version),
     }
@@ -887,6 +1084,11 @@ def build_release_artifacts(
     write_json(manifests_dir / "dataset_diff.json", evidence["dataset_diff"])
     write_json(manifests_dir / "public_surface_audit.json", evidence["public_surface"])
     write_json(manifests_dir / "legal_provenance.json", evidence["legal_provenance"])
+    write_json(manifests_dir / "privacy_governance.json", evidence["privacy_governance"])
+    write_json(
+        manifests_dir / "redaction_exclusion_ledger.json",
+        evidence["redaction_exclusion_ledger"],
+    )
     write_json(manifests_dir / "release_ladder.json", evidence["release_ladder"])
     write_json(
         manifests_dir / "attestation_verification.json",
@@ -960,6 +1162,8 @@ def validate_release_evidence(payload: Mapping[str, Any]) -> list[str]:
         "source_coverage",
         "public_surface",
         "checksums",
+        "privacy_governance",
+        "redaction_exclusion_ledger",
         "attestation_verification",
     ):
         if key not in payload:
@@ -991,6 +1195,25 @@ def validate_release_evidence(payload: Mapping[str, Any]) -> list[str]:
             failures.append("checksums.sha256sums_path is required")
     else:
         failures.append("checksums must be an object")
+    privacy = payload.get("privacy_governance", {})
+    if isinstance(privacy, Mapping):
+        if privacy.get("status") not in {"pass", "blocked"}:
+            failures.append("privacy_governance.status must be pass or blocked")
+        ledger = privacy.get("ledger", {})
+        if not isinstance(ledger, Mapping):
+            failures.append("privacy_governance.ledger must be an object")
+        elif ledger.get("status") not in {"pass", "blocked"}:
+            failures.append("privacy_governance.ledger.status must be pass or blocked")
+    else:
+        failures.append("privacy_governance must be an object")
+    redaction = payload.get("redaction_exclusion_ledger", {})
+    if isinstance(redaction, Mapping):
+        if redaction.get("status") not in {"pass", "blocked"}:
+            failures.append("redaction_exclusion_ledger.status must be pass or blocked")
+        if not isinstance(redaction.get("events", []), list):
+            failures.append("redaction_exclusion_ledger.events must be a list")
+    else:
+        failures.append("redaction_exclusion_ledger must be an object")
     attestation = payload.get("attestation_verification", {})
     if isinstance(attestation, Mapping):
         if attestation.get("provider") != ATTESTATION_PROVIDER:
@@ -1089,7 +1312,52 @@ def publication_readiness(
             "source": "GITHUB_PROTECTED_ENVIRONMENT_NAMES",
         }
     )
+    privacy_report_path = root / "generated/monthly-publication/manifests/privacy_governance.json"
+    privacy_report: Mapping[str, Any] | None = None
+    privacy_status = "unknown"
+    privacy_blockers: list[str] = []
+    if privacy_report_path.is_file():
+        loaded = json.loads(privacy_report_path.read_text(encoding="utf-8"))
+        if isinstance(loaded, Mapping):
+            privacy_report = loaded
+            privacy_status = str(loaded.get("status") or "unknown")
+            blockers = loaded.get("blockers", [])
+            if isinstance(blockers, list):
+                privacy_blockers = [str(blocker) for blocker in blockers if str(blocker).strip()]
+            checks.append(
+                {
+                    "id": "privacy_governance",
+                    "status": "configured"
+                    if privacy_status == "pass"
+                    else "blocked"
+                    if privacy_status == "blocked"
+                    else "missing",
+                    "secret": False,
+                    "source": privacy_report_path.as_posix(),
+                    "blockers": privacy_blockers,
+                }
+            )
+        else:
+            checks.append(
+                {
+                    "id": "privacy_governance",
+                    "status": "missing",
+                    "secret": False,
+                    "source": privacy_report_path.as_posix(),
+                }
+            )
+    else:
+        checks.append(
+            {
+                "id": "privacy_governance",
+                "status": "unknown",
+                "secret": False,
+                "source": privacy_report_path.as_posix(),
+            }
+        )
     blockers = [check["id"] for check in checks if check["status"] == "missing"]
+    if privacy_report is not None and privacy_status == "blocked":
+        blockers.append("privacy_governance")
     return {
         "schema_version": "1.0.0",
         "generated_at": utc_now_iso(),
@@ -1098,6 +1366,8 @@ def publication_readiness(
         "blockers": blockers,
         "gated_external_writes": [check["id"] for check in checks if check["status"] == "gated"],
         "protected_environment": protected_environment,
+        "privacy_governance": privacy_report,
+        "privacy_blockers": privacy_blockers,
     }
 
 
