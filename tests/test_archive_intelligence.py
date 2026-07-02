@@ -378,6 +378,24 @@ def test_federation_compatibility_report_flags_missing_sections() -> None:
     assert report["profile_version"] == "1.0.0"
 
 
+def test_federation_compatibility_report_accepts_complete_archive_family_evidence(
+    tmp_path: Path,
+) -> None:
+    evidence = _complete_evidence(tmp_path)
+
+    report = build_federation_compatibility_report(evidence)
+
+    assert report["status"] == "compatible"
+    assert report["missing_sections"] == []
+    assert report["target_repositories"] == [
+        "corpus-cases-medilegal-nz",
+        "corpus-law-nz",
+        "corpus-nz-hansard",
+        "fyi-archive",
+        "hathi-nz",
+    ]
+
+
 def test_write_archive_intelligence_report(tmp_path: Path) -> None:
     evidence_path = tmp_path / "release_evidence.json"
     output_path = tmp_path / "archive_maturity.json"

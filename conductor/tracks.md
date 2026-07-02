@@ -106,4 +106,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## [ ] Track: Cross-Repo Archive Federation
 *Link: [./conductor/tracks/cross_repo_archive_federation_20260701/](./conductor/tracks/cross_repo_archive_federation_20260701/)*
-*Status: NEW - plan captures shared archive-family schemas, evidence profile versioning, federation drift reports, and RIOPA-compatible cross-repo issue/project integration.*
+*Status: ✅ COMPLETE - shared archive-family contract, federation compatibility report, drift classification, compatibility tests, and RIOPA-compatible blocker follow-up evidence are complete.*
