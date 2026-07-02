@@ -61,10 +61,14 @@
 
 ## Phase 5: Attestation Verification
 
-- [ ] Task: Add artifact attestation verification to release-readiness checks.
-- [ ] Task: Record attestation verification evidence in release evidence.
-- [ ] Task: Add tests for missing/invalid attestation metadata.
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: Attestation Verification' (Protocol in workflow.md)
+- [x] Task: Add artifact attestation verification to release-readiness checks.
+    - Evidence: `scripts/check_release_evidence.py` now fails through `validate_release_evidence` when the required attestation verification contract is missing or malformed.
+- [x] Task: Record attestation verification evidence in release evidence.
+    - Evidence: `release_evidence.json` now includes `attestation_verification`, and `build_release_artifacts` writes `manifests/attestation_verification.json` with provider, SHA-pinned attestation action, subject paths, expected release assets, and `gh attestation verify` commands.
+- [x] Task: Add tests for missing/invalid attestation metadata.
+    - Evidence: `tests/test_archive_release.py` covers generated attestation evidence, missing metadata rejection, invalid provider/status/action pin rejection, and empty required list rejection.
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Attestation Verification' (Protocol in workflow.md)
+    - Evidence: `attestation_verification_evidence.md` records focused tests, Ruff checks, generated artifact proof, and release evidence validation output.
 
 ## Phase 6: Documentation And First Governance Proof
 

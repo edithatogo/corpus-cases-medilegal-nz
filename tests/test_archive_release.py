@@ -10,6 +10,7 @@ from corpus_cases_medilegal_nz.archive import (
     build_dataset_diff,
     build_quality_report,
     build_release_artifacts,
+    build_release_evidence,
     build_source_collection_audit,
     derive_archive_version,
     publication_readiness,
@@ -130,10 +131,15 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert evidence["source_collection_audit"]["stage_counts"]["planned"] == 8
     assert evidence["collection_quality_gates"]["status"] in {"pass", "blocked"}
     assert evidence["public_surface"]["surfaces"]["osf"]["status"] == "inactive"
+    assert evidence["attestation_verification"]["provider"] == "github-artifact-attestations"
+    assert (
+        "release_evidence.json" in evidence["attestation_verification"]["required_release_assets"]
+    )
     assert (output_dir / "SHA256SUMS").is_file()
     assert (output_dir / "manifests/parser_contract.json").is_file()
     assert (output_dir / "manifests/source_collection_audit.json").is_file()
     assert (output_dir / "manifests/collection_quality_gates.json").is_file()
+    assert (output_dir / "manifests/attestation_verification.json").is_file()
     assert (output_dir / "metadata/croissant.jsonld").is_file()
     assert (output_dir / "metadata/ro-crate-metadata.json").is_file()
     assert (output_dir / "metadata/datapackage.json").is_file()
@@ -145,6 +151,36 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert (output_dir / "sbom/sbom.cyclonedx.json").is_file()
     assert (output_dir / "sbom/sbom.spdx.json").is_file()
     assert summary["checksum_manifest"]["file_count"] > 0
+
+
+def test_release_evidence_requires_attestation_verification() -> None:
+    evidence = build_release_evidence(root=ROOT, archive_version="2026.07.0")
+    evidence.pop("attestation_verification")
+
+    assert "Missing release evidence key: attestation_verification" in validate_release_evidence(
+        evidence
+    )
+
+
+def test_release_evidence_rejects_invalid_attestation_metadata() -> None:
+    evidence = build_release_evidence(root=ROOT, archive_version="2026.07.0")
+    evidence["attestation_verification"] = {
+        "status": "unknown",
+        "provider": "other",
+        "attestation_action": "actions/attest-build-provenance@v3",
+        "subject_paths": [],
+        "required_release_assets": [],
+        "verification_commands": [],
+    }
+
+    failures = validate_release_evidence(evidence)
+
+    assert "attestation_verification.provider must be github-artifact-attestations" in failures
+    assert "attestation_verification.attestation_action must be pinned" in failures
+    assert "attestation_verification.status must be expected or verified" in failures
+    assert "attestation_verification.subject_paths must be a non-empty list" in failures
+    assert "attestation_verification.required_release_assets must be a non-empty list" in failures
+    assert "attestation_verification.verification_commands must be a non-empty list" in failures
 
 
 def test_archive_bundle_is_reproducible(tmp_path: Path) -> None:

@@ -27,6 +27,9 @@ from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY
 
 DEFAULT_HF_REPO_ID = "edithatogo/corpus-cases-medilegal-nz"
 DEFAULT_ZENODO_ENVIRONMENT = "zenodo-production"
+DEFAULT_GITHUB_REPO = "edithatogo/corpus-cases-medilegal-nz"
+ATTESTATION_PROVIDER = "github-artifact-attestations"
+ATTESTATION_ACTION = "actions/attest-build-provenance@43d14bc2b83dec42d39ecae14e916627a18bb661"
 RELEASE_EVIDENCE_SCHEMA_VERSION = "1.0.0"
 SCHEMA_VERSION = "1.0.0"
 
@@ -47,6 +50,21 @@ def derive_archive_version(as_of: date | None = None) -> str:
 def release_tag(archive_version: str) -> str:
     """Return the GitHub dataset release tag for an archive version."""
     return f"dataset-v{archive_version}"
+
+
+def release_asset_names(archive_version: str) -> list[str]:
+    """Return GitHub release asset names expected for an archive version."""
+    return [
+        f"corpus-cases-medilegal-nz-{archive_version}.tar.gz",
+        "SHA256SUMS",
+        "release_evidence.json",
+        "checksum_manifest.json",
+        "source_coverage.json",
+        "public_surface_audit.json",
+        "metadata_packages_manifest.json",
+        "sbom.cyclonedx.json",
+        "sbom.spdx.json",
+    ]
 
 
 def sha256_file(path: Path) -> str:
@@ -586,6 +604,36 @@ def build_release_ladder(archive_version: str) -> JsonObject:
     }
 
 
+def build_attestation_verification(
+    archive_version: str,
+    github_repo: str = DEFAULT_GITHUB_REPO,
+) -> JsonObject:
+    """Build the expected GitHub artifact-attestation verification contract."""
+    assets = release_asset_names(archive_version)
+    release = release_tag(archive_version)
+    return {
+        "schema_version": "1.0.0",
+        "status": "expected",
+        "provider": ATTESTATION_PROVIDER,
+        "attestation_action": ATTESTATION_ACTION,
+        "workflow": ".github/workflows/monthly_dynamic_archive_publication.yml",
+        "github_repo": github_repo,
+        "release_tag": release,
+        "subject_paths": [
+            "generated/monthly-publication/**",
+            "generated/monthly-publication-bundles/**",
+        ],
+        "required_release_assets": assets,
+        "verification_commands": [
+            f"gh attestation verify {asset} --repo {github_repo}" for asset in assets
+        ],
+        "notes": [
+            "GitHub creates attestations after workflow artifact generation.",
+            "Release readiness requires this contract before publication; live verification runs after assets exist.",
+        ],
+    }
+
+
 def build_zenodo_metadata(
     archive_version: str,
     creators_json: str | None = None,
@@ -707,6 +755,7 @@ def build_release_evidence(
         "public_surface": public_surface,
         "legal_provenance": build_legal_provenance(),
         "release_ladder": build_release_ladder(version),
+        "attestation_verification": build_attestation_verification(version),
     }
 
 
@@ -839,6 +888,10 @@ def build_release_artifacts(
     write_json(manifests_dir / "public_surface_audit.json", evidence["public_surface"])
     write_json(manifests_dir / "legal_provenance.json", evidence["legal_provenance"])
     write_json(manifests_dir / "release_ladder.json", evidence["release_ladder"])
+    write_json(
+        manifests_dir / "attestation_verification.json",
+        evidence["attestation_verification"],
+    )
     schema_manifest = export_json_schemas(schemas_dir)
     metadata_manifest = write_metadata_packages(output_dir, evidence)
     write_json(sbom_dir / "sbom.cyclonedx.json", build_sbom(root))
@@ -906,6 +959,7 @@ def validate_release_evidence(payload: Mapping[str, Any]) -> list[str]:
         "source_coverage",
         "public_surface",
         "checksums",
+        "attestation_verification",
     ):
         if key not in payload:
             failures.append(f"Missing release evidence key: {key}")
@@ -936,6 +990,25 @@ def validate_release_evidence(payload: Mapping[str, Any]) -> list[str]:
             failures.append("checksums.sha256sums_path is required")
     else:
         failures.append("checksums must be an object")
+    attestation = payload.get("attestation_verification", {})
+    if isinstance(attestation, Mapping):
+        if attestation.get("provider") != ATTESTATION_PROVIDER:
+            failures.append(
+                "attestation_verification.provider must be github-artifact-attestations"
+            )
+        if not re.fullmatch(
+            r"actions/attest-build-provenance@[0-9a-f]{40}",
+            str(attestation.get("attestation_action", "")),
+        ):
+            failures.append("attestation_verification.attestation_action must be pinned")
+        if attestation.get("status") not in {"expected", "verified"}:
+            failures.append("attestation_verification.status must be expected or verified")
+        for field in ("subject_paths", "required_release_assets", "verification_commands"):
+            values = attestation.get(field)
+            if not isinstance(values, list) or not values:
+                failures.append(f"attestation_verification.{field} must be a non-empty list")
+    else:
+        failures.append("attestation_verification must be an object")
     return failures
 
 

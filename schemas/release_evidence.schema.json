@@ -17,7 +17,8 @@
     "dataset_diff",
     "public_surface",
     "legal_provenance",
-    "release_ladder"
+    "release_ladder",
+    "attestation_verification"
   ],
   "properties": {
     "schema_version": {
@@ -172,6 +173,84 @@
     },
     "release_ladder": {
       "type": "object"
+    },
+    "attestation_verification": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "provider",
+        "attestation_action",
+        "workflow",
+        "github_repo",
+        "release_tag",
+        "subject_paths",
+        "required_release_assets",
+        "verification_commands"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "1.0.0"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "expected",
+            "verified"
+          ]
+        },
+        "provider": {
+          "type": "string",
+          "const": "github-artifact-attestations"
+        },
+        "attestation_action": {
+          "type": "string",
+          "pattern": "^actions/attest-build-provenance@[0-9a-f]{40}$"
+        },
+        "workflow": {
+          "type": "string",
+          "minLength": 1
+        },
+        "github_repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "release_tag": {
+          "type": "string",
+          "pattern": "^dataset-v\\d{4}\\.\\d{2}\\.0$"
+        },
+        "subject_paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required_release_assets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "verification_commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }
