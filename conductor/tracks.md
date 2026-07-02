@@ -103,7 +103,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Status: NEW - plan captures privacy risk scoring, takedown/correction workflow, redaction/exclusion ledgers, and release-blocking privacy gates.*
 
 ---
-
-## [ ] Track: Cross-Repo Archive Federation
-*Link: [./conductor/tracks/cross_repo_archive_federation_20260701/](./conductor/tracks/cross_repo_archive_federation_20260701/)*
-*Status: ✅ COMPLETE - shared archive-family contract, federation compatibility report, drift classification, compatibility tests, and RIOPA-compatible blocker follow-up evidence are complete.*
