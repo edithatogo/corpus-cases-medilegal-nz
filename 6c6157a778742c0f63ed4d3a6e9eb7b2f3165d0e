@@ -1,0 +1,6 @@
+Zenodo draft proof:
+- Run 28557891130 succeeded in zenodo-draft mode.
+- Zenodo draft deposition_id=21119990, record_url=https://zenodo.org/deposit/21119990.
+- uploaded=true, files=9, uploaded_files=9, publish_handoff_only=true.
+- DOI/concept DOI empty by design because production DOI was not published.
+- GitHub issue evidence: https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/1#issuecomment-4861258383
