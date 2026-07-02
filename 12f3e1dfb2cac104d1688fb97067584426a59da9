@@ -1,0 +1,18 @@
+RIOPA Phase 5 complete.
+
+Local validation:
+- sync dry-run: status in_sync, actions [], duplicate_markers {}, desired_subissue_count 7
+- pytest tests/test_riopa_project_sync.py tests/test_monthly_publication_workflow.py -q: 7 passed
+- ruff check focused sync/test files: passed
+- ruff format --check focused sync/test files: passed
+- git diff --check scoped docs/conductor files: passed
+
+GitHub verification for commit 12f3e1dfb2cac104d1688fb97067584426a59da9:
+- Tests: success, run 28563786635
+- Code Quality And Workflow Hardening: success, run 28563786632
+- CodeQL: success, run 28563786620
+- Docs: success, run 28563786624
+- OSV Scan: success, run 28563786629
+- Mirror Sync: success, run 28563786639
+
+Issue operating note: https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/8#issuecomment-4861980645
