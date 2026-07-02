@@ -333,6 +333,63 @@ def build_source_collection_audit(
     }
 
 
+def build_collection_quality_gates(
+    records: Iterable[Mapping[str, Any]],
+    previous_records: Iterable[Mapping[str, Any]] | None = None,
+    *,
+    parser_complete_sources: Iterable[str] = CORE_SOURCE_IDS,
+    drift_warning_ratio: float = 0.5,
+) -> JsonObject:
+    """Build parser-complete zero-record gates and source drift warnings."""
+    current_counts = Counter(str(record.get("source", "")) for record in records)
+    previous_counts = Counter(str(record.get("source", "")) for record in previous_records or [])
+    parser_complete = sorted(set(parser_complete_sources))
+    blockers: list[str] = []
+    warnings: list[str] = []
+    summaries: list[JsonObject] = []
+
+    for source_id in parser_complete:
+        current_count = current_counts[source_id]
+        previous_count = previous_counts[source_id]
+        source_blockers: list[str] = []
+        source_warnings: list[str] = []
+        if current_count == 0:
+            message = f"{source_id} is parser-complete but has zero current records."
+            blockers.append(message)
+            source_blockers.append(message)
+        if previous_count > 0:
+            drop_ratio = (previous_count - current_count) / previous_count
+            if drop_ratio >= drift_warning_ratio:
+                message = (
+                    f"{source_id} record count dropped from {previous_count} "
+                    f"to {current_count} ({drop_ratio:.0%})."
+                )
+                warnings.append(message)
+                source_warnings.append(message)
+        summaries.append(
+            {
+                "source_id": source_id,
+                "parser_complete": True,
+                "record_count": current_count,
+                "previous_record_count": previous_count,
+                "status": "blocked" if source_blockers else "pass",
+                "blockers": source_blockers,
+                "warnings": source_warnings,
+            }
+        )
+
+    return {
+        "schema_version": "1.0.0",
+        "generated_at": utc_now_iso(),
+        "status": "blocked" if blockers else "pass",
+        "parser_complete_sources": parser_complete,
+        "drift_warning_ratio": drift_warning_ratio,
+        "blockers": blockers,
+        "warnings": warnings,
+        "source_validation_summaries": summaries,
+    }
+
+
 def _next_source_action(stage: str) -> str:
     actions = {
         "validated_records": "monitor record-count drift and quality regressions.",
@@ -593,6 +650,7 @@ def build_release_evidence(
     coverage = build_source_coverage(root=root, records=records)
     collection_audit = build_source_collection_audit(root=root, records=records)
     dataset_diff = build_dataset_diff(records)
+    collection_quality_gates = build_collection_quality_gates(records)
     public_surface = build_public_surface_audit(
         archive_version=version,
         hf_repo_id=hf_repo_id,
@@ -644,6 +702,7 @@ def build_release_evidence(
         "parser_contract": build_parser_contract(),
         "source_coverage": coverage,
         "source_collection_audit": collection_audit,
+        "collection_quality_gates": collection_quality_gates,
         "dataset_diff": dataset_diff,
         "public_surface": public_surface,
         "legal_provenance": build_legal_provenance(),
@@ -771,6 +830,10 @@ def build_release_artifacts(
         evidence["source_collection_audit"],
     )
     write_json(manifests_dir / "dataset_quality.json", evidence["quality"])
+    write_json(
+        manifests_dir / "collection_quality_gates.json",
+        evidence["collection_quality_gates"],
+    )
     write_json(manifests_dir / "parser_contract.json", evidence["parser_contract"])
     write_json(manifests_dir / "dataset_diff.json", evidence["dataset_diff"])
     write_json(manifests_dir / "public_surface_audit.json", evidence["public_surface"])

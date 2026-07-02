@@ -59,10 +59,14 @@
 
 ## Phase 5: Quality Gates
 
-- [ ] Task: Add parser-complete zero-record gates.
-- [ ] Task: Add record-count drift warnings.
-- [ ] Task: Add source-specific validation summaries.
-- [ ] Task: Update release evidence to report parser and collection state.
+- [x] Task: Add parser-complete zero-record gates.
+    - Evidence: `build_collection_quality_gates` blocks parser-complete sources with zero records and `collection-proof` reports no blockers for the five validated core sources.
+- [x] Task: Add record-count drift warnings.
+    - Evidence: `build_collection_quality_gates` compares current and previous source counts and emits drift warnings when counts drop by at least the configured threshold.
+- [x] Task: Add source-specific validation summaries.
+    - Evidence: `collection_quality_gates.json` includes per-source record counts, previous counts, pass/blocked status, blockers, and warnings for HDC, HPDT, MoJ Tribunals, ERA, and Teachers.
+- [x] Task: Update release evidence to report parser and collection state.
+    - Evidence: release artifacts now include `collection_quality_gates` in `release_evidence.json` and write `manifests/collection_quality_gates.json` alongside source coverage, collection audit, parser contract, and dataset diff ledgers.
 - [ ] Task: Conductor - User Manual Verification 'Phase 5: Quality Gates' (Protocol in workflow.md)
 
 ## Phase 6: First Non-Zero Collection Proof
@@ -71,5 +75,6 @@
     - Evidence: `collection-proof` produced five local fixture-backed records, one each for HDC, HPDT, MoJ Tribunals, ERA, and Teachers.
 - [x] Task: Validate generated artifacts and ledgers.
     - Evidence: `source-audit` now reads `data/processed/jsonl/records.jsonl` and reports five `validated_records` core sources with satisfied parser contracts.
-- [ ] Task: Attach collection proof to the GitHub issue/project.
+- [x] Task: Attach collection proof to the GitHub issue/project.
+    - Evidence: collection proof evidence is recorded in `collection_proof_evidence.md` and attached to GitHub issue `https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/1#issuecomment-4861166064`, the project-linked evidence anchor for the monthly archive publication track.
 - [ ] Task: Conductor - User Manual Verification 'Phase 6: First Non-Zero Collection Proof' (Protocol in workflow.md)

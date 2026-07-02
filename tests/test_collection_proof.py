@@ -27,9 +27,11 @@ def test_write_collection_proof_exports_archive_compatible_records(tmp_path: Pat
     assert evidence["record_count"] == 5
     assert len(records) == 5
     assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == 5
+    assert evidence["collection_quality_gates"]["status"] == "pass"
     assert evidence["dataset_diff"]["counts"]["added"] == 5
     assert evidence["dataset_diff"]["counts"]["current"] == 5
     assert (output_dir / "manifests" / "dataset_diff.json").is_file()
+    assert (output_dir / "manifests" / "collection_quality_gates.json").is_file()
     assert (output_dir / "jsonl" / "cases.jsonl").is_file()
     assert (output_dir / "markdown").is_dir()
     assert (output_dir / "text").is_dir()

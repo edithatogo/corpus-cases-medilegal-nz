@@ -6,6 +6,7 @@ from pathlib import Path
 
 from corpus_cases_medilegal_nz.archive import (
     build_archive_bundle,
+    build_collection_quality_gates,
     build_dataset_diff,
     build_quality_report,
     build_release_artifacts,
@@ -86,6 +87,28 @@ def test_source_collection_audit_marks_sources_with_records_validated() -> None:
     assert by_source["hdc"]["record_count"] == 1
 
 
+def test_collection_quality_gates_block_parser_complete_zero_records() -> None:
+    gates = build_collection_quality_gates(records=[])
+
+    assert gates["status"] == "blocked"
+    assert len(gates["blockers"]) == 5
+    assert all(summary["status"] == "blocked" for summary in gates["source_validation_summaries"])
+
+
+def test_collection_quality_gates_warn_on_record_count_drift() -> None:
+    gates = build_collection_quality_gates(
+        records=[{"case_id": "hdc-1", "source": "hdc"}],
+        previous_records=[
+            {"case_id": "hdc-1", "source": "hdc"},
+            {"case_id": "hdc-2", "source": "hdc"},
+            {"case_id": "hpdt-1", "source": "hpdt"},
+        ],
+    )
+
+    assert gates["status"] == "blocked"
+    assert any("hdc record count dropped" in warning for warning in gates["warnings"])
+
+
 def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None:
     output_dir = tmp_path / "monthly-publication"
 
@@ -105,10 +128,12 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert evidence["zenodo"]["publish_handoff_only"] is True
     assert evidence["parser_contract"]["provider"]["package"] == "nlp_policy_nz"
     assert evidence["source_collection_audit"]["stage_counts"]["planned"] == 8
+    assert evidence["collection_quality_gates"]["status"] in {"pass", "blocked"}
     assert evidence["public_surface"]["surfaces"]["osf"]["status"] == "inactive"
     assert (output_dir / "SHA256SUMS").is_file()
     assert (output_dir / "manifests/parser_contract.json").is_file()
     assert (output_dir / "manifests/source_collection_audit.json").is_file()
+    assert (output_dir / "manifests/collection_quality_gates.json").is_file()
     assert (output_dir / "metadata/croissant.jsonld").is_file()
     assert (output_dir / "metadata/ro-crate-metadata.json").is_file()
     assert (output_dir / "metadata/datapackage.json").is_file()

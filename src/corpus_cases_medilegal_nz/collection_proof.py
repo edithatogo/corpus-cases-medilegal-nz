@@ -10,6 +10,7 @@ from typing import Any
 import polars as pl
 
 from corpus_cases_medilegal_nz.archive import (
+    build_collection_quality_gates,
     build_dataset_diff,
     build_source_collection_audit,
     load_jsonl_records,
@@ -62,8 +63,16 @@ def write_collection_proof(
     previous_records = load_jsonl_records(previous_records_path) if previous_records_path else []
     paths = _write_processed_artifacts(output_dir=output_dir, records=records)
     dataset_diff = build_dataset_diff(current_records=records, previous_records=previous_records)
+    collection_quality_gates = build_collection_quality_gates(
+        records=records,
+        previous_records=previous_records,
+    )
     manifests_dir = output_dir / "manifests"
     dataset_diff_path = write_json(manifests_dir / "dataset_diff.json", dataset_diff)
+    quality_gates_path = write_json(
+        manifests_dir / "collection_quality_gates.json",
+        collection_quality_gates,
+    )
     audit = build_source_collection_audit(records=records)
     evidence = {
         "schema_version": "1.0.0",
@@ -74,12 +83,14 @@ def write_collection_proof(
         },
         "artifacts": {key: str(value) for key, value in paths.items()},
         "dataset_diff": dataset_diff,
+        "collection_quality_gates": collection_quality_gates,
         "source_collection_audit": audit,
     }
     evidence_path = output_dir / "collection_proof.json"
     write_json(evidence_path, evidence)
     evidence["artifacts"]["collection_proof"] = str(evidence_path)
     evidence["artifacts"]["dataset_diff"] = str(dataset_diff_path)
+    evidence["artifacts"]["collection_quality_gates"] = str(quality_gates_path)
     return evidence
 
 
