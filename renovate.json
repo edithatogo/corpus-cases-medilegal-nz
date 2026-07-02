@@ -55,13 +55,12 @@
       "labels": ["dependencies", "major-update", "requires-review"]
     },
     {
-      "groupName": "GitHub Actions (Auto-merge)",
+      "groupName": "GitHub Actions (Require Review)",
       "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true,
-      "automergeType": "branch",
+      "automerge": false,
+      "dependencyDashboardApproval": true,
       "commitMessagePrefix": "chore(ci):",
-      "labels": ["dependencies", "github-actions", "automated", "auto-merge"]
+      "labels": ["dependencies", "github-actions", "requires-review"]
     },
     {
       "groupName": "Node.js (Auto-merge)",

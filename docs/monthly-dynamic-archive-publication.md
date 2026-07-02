@@ -101,6 +101,10 @@ GitHub environment and human review before any Zenodo publish action is taken.
 The `zenodo-production` environment should require reviewer approval and should
 not allow admin bypass for production DOI handoff runs.
 
+The monthly publication workflow pins third-party GitHub Actions to immutable
+commit SHAs. Renovate may propose action updates, but GitHub Actions updates
+require human review and must not automerge.
+
 ## Local Commands
 
 Build release artifacts:
