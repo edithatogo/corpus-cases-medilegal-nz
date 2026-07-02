@@ -51,3 +51,40 @@ def test_mirror_readiness_reports_workflow_and_secret_gating() -> None:
     assert "GIT_MIRROR_URL_GITLAB" in report["blockers"]
     assert "GIT_MIRROR_URL_CODEBERG" in report["blockers"]
     assert "GIT_MIRROR_SSH_PRIVATE_KEY" in report["blockers"]
+
+
+def test_mirror_readiness_strict_requires_all_mirror_targets() -> None:
+    report = mirror_sync_readiness(
+        environment={
+            "GIT_MIRROR_URL": "git@gitlab.com:edithatogo/corpus-cases-medilegal-nz.git",
+            "GIT_MIRROR_URL_GITLAB": "git@gitlab.com:edithatogo/corpus-cases-medilegal-nz.git",
+            "GIT_MIRROR_URL_CODEBERG": "git@codeberg.org:edithatogo/corpus-cases-medilegal-nz.git",
+            "GIT_MIRROR_SSH_PRIVATE_KEY": "key",
+        },
+        root=Path(),
+        require_complete_mirror_set=True,
+    )
+
+    checks = {check["id"]: check for check in report["checks"]}
+
+    assert report["status"] == "ready"
+    assert report["strict_mode"] is True
+    assert checks["mirror_target_set"]["status"] == "configured"
+
+
+def test_mirror_readiness_strict_blocks_when_any_target_is_missing() -> None:
+    report = mirror_sync_readiness(
+        environment={
+            "GIT_MIRROR_URL": "git@gitlab.com:edithatogo/corpus-cases-medilegal-nz.git",
+            "GIT_MIRROR_URL_GITLAB": "git@gitlab.com:edithatogo/corpus-cases-medilegal-nz.git",
+            "GIT_MIRROR_SSH_PRIVATE_KEY": "key",
+        },
+        root=Path(),
+        require_complete_mirror_set=True,
+    )
+
+    checks = {check["id"]: check for check in report["checks"]}
+
+    assert report["status"] == "blocked"
+    assert checks["mirror_target_set"]["status"] == "gated"
+    assert "mirror_target_set" in report["blockers"]

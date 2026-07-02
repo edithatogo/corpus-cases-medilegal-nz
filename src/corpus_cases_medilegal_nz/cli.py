@@ -92,7 +92,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if ns.strict and result["status"] != "ready":
             exit_code = 1
     elif ns.command == "mirror-readiness":
-        result = mirror_sync_readiness()
+        result = mirror_sync_readiness(require_complete_mirror_set=ns.strict)
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
         if ns.strict and result["status"] != "ready":
             exit_code = 1

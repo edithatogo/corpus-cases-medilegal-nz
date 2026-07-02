@@ -30,6 +30,13 @@ python -m corpus_cases_medilegal_nz.cli mirror-readiness
 python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict
 ```
 
+`--strict` requires the full mirror target set to be configured:
+
+- `GIT_MIRROR_URL`
+- `GIT_MIRROR_URL_GITLAB`
+- `GIT_MIRROR_URL_CODEBERG`
+- `GIT_MIRROR_SSH_PRIVATE_KEY`
+
 Or use the wrapper script:
 
 ```bash

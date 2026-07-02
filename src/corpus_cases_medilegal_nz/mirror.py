@@ -30,6 +30,7 @@ def _workflow_text(root: Path) -> str:
 def mirror_sync_readiness(
     environment: Mapping[str, str] | None = None,
     root: Path = Path(),
+    require_complete_mirror_set: bool = False,
 ) -> JsonObject:
     """Check readiness for the mirror sync workflow."""
     env = environment or os.environ
@@ -78,6 +79,28 @@ def mirror_sync_readiness(
                 "configured_names": configured_aliases,
             }
         )
+    if require_complete_mirror_set:
+        required_target_ids = (
+            "GIT_MIRROR_URL",
+            "GIT_MIRROR_URL_GITLAB",
+            "GIT_MIRROR_URL_CODEBERG",
+        )
+        configured_targets = [
+            check["id"]
+            for check in checks
+            if check["id"] in required_target_ids and check["status"] == "configured"
+        ]
+        checks.append(
+            {
+                "id": "mirror_target_set",
+                "status": "configured"
+                if set(configured_targets) == set(required_target_ids)
+                else "gated",
+                "secret": True,
+                "accepted_names": list(required_target_ids),
+                "configured_names": configured_targets,
+            }
+        )
     blockers = [check["id"] for check in checks if check["status"] in {"missing", "gated"}]
     return {
         "schema_version": "1.0.0",
@@ -96,4 +119,5 @@ def mirror_sync_readiness(
         ],
         "workflow_path": workflow_path.as_posix(),
         "push_trigger_branches": ["main", "master"],
+        "strict_mode": require_complete_mirror_set,
     }
