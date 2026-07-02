@@ -29,17 +29,21 @@
 
 ## Phase 3: Sub-Issue Work Breakdown
 
-- [ ] Task: Create sub-issues under issue #1.
-    - [ ] Hugging Face remote proof.
-    - [ ] Zenodo draft/new-version proof.
-    - [ ] Protected Zenodo production handoff.
-    - [ ] GitHub release assets and attestations.
-    - [ ] Public-surface and metadata evidence.
-    - [ ] Collection/parser completion.
-    - [ ] RIOPA/project sync automation.
-- [ ] Task: Add all sub-issues to repo project #7 and RIOPA.
-- [ ] Task: Populate project fields for each sub-issue.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Sub-Issue Work Breakdown' (Protocol in workflow.md)
+- [x] Task: Create sub-issues under issue #1.
+    - [x] Hugging Face remote proof.
+    - [x] Zenodo draft/new-version proof.
+    - [x] Protected Zenodo production handoff.
+    - [x] GitHub release assets and attestations.
+    - [x] Public-surface and metadata evidence.
+    - [x] Collection/parser completion.
+    - [x] RIOPA/project sync automation.
+    - Evidence: issues `#2`-`#8` were created under parent issue `#1` with stable `riopa-subissue-id` markers.
+- [x] Task: Add all sub-issues to repo project #7 and RIOPA.
+    - Evidence: `phase3_subissue_work_breakdown.md` records readback showing all sub-issues are present in both `Rare Insights on Open Policy from Aotearoa` and `corpus-cases-medilegal-nz Archive Roadmap`.
+- [x] Task: Populate project fields for each sub-issue.
+    - Evidence: issues `#2`-`#7` read back as `Done` on both project boards, issue `#8` reads back as `In Progress`, and all RIOPA sub-issue items use `Mirror source: other`.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Sub-Issue Work Breakdown' (Protocol in workflow.md)
+    - Evidence: live `gh issue view`, `gh issue list`, and `gh project item-list` verification is recorded in `phase3_subissue_work_breakdown.md`.
 
 ## Phase 4: Sync Automation
 
