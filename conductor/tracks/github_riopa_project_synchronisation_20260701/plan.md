@@ -2,14 +2,17 @@
 
 ## Phase 1: Project Schema Audit
 
-- [ ] Task: Capture live RIOPA and repo project field schemas.
-    - [ ] Record project IDs, field IDs, option IDs, and current item IDs.
-    - [ ] Compare medilegal project fields against sibling roadmap boards.
-    - [ ] Identify fields that can be created through available GitHub APIs.
-- [ ] Task: Define the medilegal project field contract.
-    - [ ] Specify field names, allowed values, and mapping to Conductor track status.
-    - [ ] Document fallback behavior for unsupported field mutations.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Project Schema Audit' (Protocol in workflow.md)
+- [x] Task: Capture live RIOPA and repo project field schemas.
+    - [x] Record project IDs, field IDs, option IDs, and current item IDs.
+    - [x] Compare medilegal project fields against sibling roadmap boards.
+    - [x] Identify fields that can be created through available GitHub APIs.
+    - Evidence: `phase1_project_schema_audit.md` records live RIOPA project #4 and repo roadmap project #7 IDs, field IDs/options, issue #1 item IDs, and sibling board comparisons.
+- [x] Task: Define the medilegal project field contract.
+    - [x] Specify field names, allowed values, and mapping to Conductor track status.
+    - [x] Document fallback behavior for unsupported field mutations.
+    - Evidence: `phase1_project_schema_audit.md` defines the medilegal project field contract and fallback behavior for missing project fields and missing dedicated RIOPA mirror-source options.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Project Schema Audit' (Protocol in workflow.md)
+    - Evidence: live `gh project view`, `gh project field-list`, `gh project item-list`, and `gh issue view` readbacks completed; no project or issue writes were made in Phase 1.
 
 ## Phase 2: RIOPA Mirror Alignment
 

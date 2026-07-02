@@ -72,7 +72,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## [ ] Track: GitHub RIOPA Project Synchronisation
 *Link: [./conductor/tracks/github_riopa_project_synchronisation_20260701/](./conductor/tracks/github_riopa_project_synchronisation_20260701/)*
-*Status: NEW - plan captures RIOPA mirror-source alignment, repo project fields, sub-issues, and idempotent project sync automation.*
+*Status: IN PROGRESS - Phase 1 live project schema audit complete; next is RIOPA mirror-source fallback alignment and repo project field setup.*
 
 ---
 
