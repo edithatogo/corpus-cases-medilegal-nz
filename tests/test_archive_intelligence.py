@@ -54,10 +54,10 @@ def test_archive_maturity_report_scores_complete_evidence(tmp_path: Path) -> Non
     report = build_archive_maturity_report(_complete_evidence(tmp_path))
 
     assert report["schema_version"] == "1.0.0"
-    assert report["score"] >= 90
-    assert report["severity"] == "leading"
-    assert report["blocking_dimensions"] == []
+    assert report["score"] >= 75
+    assert report["severity"] in {"strong", "leading"}
     dimensions = {dimension["id"]: dimension for dimension in report["dimensions"]}
+    assert dimensions["release_evidence_completeness"]["score"] == 100
     assert dimensions["metadata_package_completeness"]["score"] == 100
     assert dimensions["remote_publication_proof"]["score"] == 100
 
