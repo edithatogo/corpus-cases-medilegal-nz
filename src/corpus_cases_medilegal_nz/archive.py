@@ -988,7 +988,9 @@ def publication_readiness(
     environment_names = _csv_set(env.get("GITHUB_ENVIRONMENT_NAMES", ""))
     protected_environment_names = _csv_set(env.get("GITHUB_PROTECTED_ENVIRONMENT_NAMES", ""))
     if environment_names:
-        environment_status = "configured" if protected_environment in environment_names else "missing"
+        environment_status = (
+            "configured" if protected_environment in environment_names else "missing"
+        )
     else:
         environment_status = "unknown"
     if protected_environment_names:
