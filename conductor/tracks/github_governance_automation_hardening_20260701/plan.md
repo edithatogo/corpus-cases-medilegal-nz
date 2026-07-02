@@ -31,14 +31,17 @@
 
 ## Phase 3: Branch And Ruleset Protection
 
-- [ ] Task: Add branch protection or ruleset requirements for `master`.
-    - [ ] Require Tests.
-    - [ ] Require Code Quality And Workflow Hardening.
-    - [ ] Require CodeQL.
-    - [ ] Require OSV Scan.
-    - [ ] Require Docs where relevant.
-- [ ] Task: Confirm dependency-update actors cannot publish.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Branch And Ruleset Protection' (Protocol in workflow.md)
+- [x] Task: Add branch protection or ruleset requirements for `master`.
+    - [x] Require Tests.
+    - [x] Require Code Quality And Workflow Hardening.
+    - [x] Require CodeQL.
+    - [x] Require OSV Scan.
+    - [x] Require Docs where relevant.
+    - Evidence: `branch_protection_evidence.md` records live `master` branch protection with strict required checks for `tests (3.12)`, `tests (3.14)`, `Python, Evidence, And Workflow Checks`, `Analyze Python`, `OSV Scanner`, and `Astro docs`; force pushes and deletions are disabled.
+- [x] Task: Confirm dependency-update actors cannot publish.
+    - Evidence: monthly publication workflow retains dependency actor guards for Dependabot and Renovate; `Dependency Update Publication Guard` remains represented in the code quality workflow.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Branch And Ruleset Protection' (Protocol in workflow.md)
+    - Evidence: latest candidate checks were green before protection was applied; live branch protection readback confirms required contexts.
 
 ## Phase 4: Supply Chain Enforcement
 
