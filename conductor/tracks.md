@@ -62,7 +62,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## [ ] Track: Implement Multi-Git and Multi-Archive Mirroring Setup
 *Link: [./conductor/tracks/multi_git_archive_mirroring_20260614/](./conductor/tracks/multi_git_archive_mirroring_20260614/)*
-*Status: IN PROGRESS - local mirror workflow hardening and live trigger verification are complete; GitHub secrets and external archive publication remain gated.*
+*Status: IN PROGRESS - local mirror workflow hardening, live trigger verification, public GitLab/Codeberg mirror publication, and strict mirror-set gating are complete; GitHub secrets remain gated.*
 
 ## [x] Track: Monthly Dynamic Archive Publication
 *Link: [./conductor/tracks/monthly_dynamic_archive_publication_20260701/](./conductor/tracks/monthly_dynamic_archive_publication_20260701/)*
