@@ -44,6 +44,21 @@ If this repository uses a local alias such as `zenodo-production-publish`, set
 `ZENODO_PROTECTED_ENVIRONMENT` to that name and keep the protection rules on
 that environment.
 
+During migration, this repository also accepts the legacy secret aliases
+`ZENODO_TOKEN` and `ZENODO_SANDBOX_TOKEN` as fallbacks for the canonical
+`ZENODO_ACCESS_TOKEN` and `ZENODO_SANDBOX_ACCESS_TOKEN` names. New repositories
+should use the canonical names.
+
+`publication-readiness` can also consume live GitHub governance evidence through
+comma-separated environment variables:
+
+- `GITHUB_ENVIRONMENT_NAMES`: observed GitHub environment names.
+- `GITHUB_PROTECTED_ENVIRONMENT_NAMES`: observed environments with reviewer or
+  equivalent protection.
+
+When these are supplied, the readiness report fails closed if the configured
+Zenodo protected environment is missing or unprotected.
+
 ## Release Evidence
 
 Each release build writes deterministic artifacts under
@@ -83,6 +98,8 @@ manual dispatch. It supports these modes:
 Scheduled runs default to the draft-first path. Production Zenodo DOI
 publication is not automatic. It must pass through the configured protected
 GitHub environment and human review before any Zenodo publish action is taken.
+The `zenodo-production` environment should require reviewer approval and should
+not allow admin bypass for production DOI handoff runs.
 
 ## Local Commands
 

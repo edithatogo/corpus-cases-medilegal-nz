@@ -2,26 +2,32 @@
 
 ## Phase 1: Governance Baseline
 
-- [ ] Task: Capture current repository security and governance settings.
-    - [ ] Branch protection and rulesets.
-    - [ ] Actions permissions and allowed actions.
-    - [ ] Environments and protected reviewers.
-    - [ ] Vulnerability alerts and dependency graph state.
-    - [ ] Secret and variable presence.
-- [ ] Task: Document gaps against the archive-family publication contract.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Governance Baseline' (Protocol in workflow.md)
+- [x] Task: Capture current repository security and governance settings.
+    - [x] Branch protection and rulesets.
+    - [x] Actions permissions and allowed actions.
+    - [x] Environments and protected reviewers.
+    - [x] Vulnerability alerts and dependency graph state.
+    - [x] Secret and variable presence.
+    - Evidence: `governance_baseline_evidence.md` records live `gh api` results for repository visibility, default branch, branch protection, rulesets, Actions policy, environments, vulnerability alerts, Dependabot alerts, secrets, variables, and workflow surface.
+- [x] Task: Document gaps against the archive-family publication contract.
+    - Evidence: `governance_baseline_evidence.md` identifies missing master protection/rulesets, missing environment reviewer protection, disabled vulnerability/Dependabot alerts, unpinned/all-allowed Actions policy, canonical secret/variable gaps, and the need to triage one recent failed workflow before strict gating.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Governance Baseline' (Protocol in workflow.md)
+    - Evidence: live audit commands completed and produced a durable Phase 1 baseline; no repository settings were changed in Phase 1.
 
 ## Phase 2: Protected Publication Controls
 
-- [ ] Task: Configure or document creation of `zenodo-production`.
-    - [ ] Require reviewer approval.
-    - [ ] Confirm workflow handoff uses the protected environment.
-    - [ ] Add readiness detection for missing environment.
-- [ ] Task: Align publication secrets and variables.
-    - [ ] Add readiness checks for canonical names.
-    - [ ] Document migration from legacy names.
-    - [ ] Avoid printing secret values.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Protected Publication Controls' (Protocol in workflow.md)
+- [x] Task: Configure or document creation of `zenodo-production`.
+    - [x] Require reviewer approval.
+    - [x] Confirm workflow handoff uses the protected environment.
+    - [x] Add readiness detection for missing environment.
+    - Evidence: GitHub environment `zenodo-production` now requires reviewer `edithatogo`, disables admin bypass, and the full publication workflow has already exercised `Protected Zenodo Publish Handoff`. `publication_readiness` now detects supplied GitHub environment/protection observations via `GITHUB_ENVIRONMENT_NAMES` and `GITHUB_PROTECTED_ENVIRONMENT_NAMES`.
+- [x] Task: Align publication secrets and variables.
+    - [x] Add readiness checks for canonical names.
+    - [x] Document migration from legacy names.
+    - [x] Avoid printing secret values.
+    - Evidence: readiness checks preserve canonical names, accept documented `ZENODO_TOKEN`/`ZENODO_SANDBOX_TOKEN` aliases, expose only configured names rather than values, and docs explain the alias migration path.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Protected Publication Controls' (Protocol in workflow.md)
+    - Evidence: focused tests cover protected environment readiness states and Zenodo secret aliases; docs now state protected-environment and alias policy.
 
 ## Phase 3: Branch And Ruleset Protection
 

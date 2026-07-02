@@ -984,6 +984,35 @@ def publication_readiness(
                 "configured_names": configured_aliases,
             }
         )
+    protected_environment = env.get("ZENODO_PROTECTED_ENVIRONMENT", DEFAULT_ZENODO_ENVIRONMENT)
+    environment_names = _csv_set(env.get("GITHUB_ENVIRONMENT_NAMES", ""))
+    protected_environment_names = _csv_set(env.get("GITHUB_PROTECTED_ENVIRONMENT_NAMES", ""))
+    if environment_names:
+        environment_status = "configured" if protected_environment in environment_names else "missing"
+    else:
+        environment_status = "unknown"
+    if protected_environment_names:
+        protection_status = (
+            "configured" if protected_environment in protected_environment_names else "missing"
+        )
+    else:
+        protection_status = "unknown"
+    checks.append(
+        {
+            "id": f"github_environment:{protected_environment}",
+            "status": environment_status,
+            "secret": False,
+            "source": "GITHUB_ENVIRONMENT_NAMES",
+        }
+    )
+    checks.append(
+        {
+            "id": f"github_environment_protection:{protected_environment}",
+            "status": protection_status,
+            "secret": False,
+            "source": "GITHUB_PROTECTED_ENVIRONMENT_NAMES",
+        }
+    )
     blockers = [check["id"] for check in checks if check["status"] == "missing"]
     return {
         "schema_version": "1.0.0",
@@ -992,7 +1021,10 @@ def publication_readiness(
         "checks": checks,
         "blockers": blockers,
         "gated_external_writes": [check["id"] for check in checks if check["status"] == "gated"],
-        "protected_environment": env.get(
-            "ZENODO_PROTECTED_ENVIRONMENT", DEFAULT_ZENODO_ENVIRONMENT
-        ),
+        "protected_environment": protected_environment,
     }
+
+
+def _csv_set(value: str) -> set[str]:
+    """Return non-empty comma-separated values as a set."""
+    return {item.strip() for item in value.split(",") if item.strip()}

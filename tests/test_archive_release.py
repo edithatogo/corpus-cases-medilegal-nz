@@ -183,3 +183,33 @@ def test_publication_readiness_accepts_zenodo_secret_aliases() -> None:
     assert checks["ZENODO_ACCESS_TOKEN"]["configured_names"] == ["ZENODO_TOKEN"]
     assert checks["ZENODO_SANDBOX_ACCESS_TOKEN"]["status"] == "configured"
     assert checks["ZENODO_SANDBOX_ACCESS_TOKEN"]["configured_names"] == ["ZENODO_SANDBOX_TOKEN"]
+
+
+def test_publication_readiness_detects_missing_protected_environment() -> None:
+    readiness = publication_readiness(
+        environment={
+            "GITHUB_ENVIRONMENT_NAMES": "staging",
+            "GITHUB_PROTECTED_ENVIRONMENT_NAMES": "staging",
+        },
+        root=ROOT,
+    )
+    checks = {check["id"]: check for check in readiness["checks"]}
+
+    assert readiness["status"] == "blocked"
+    assert checks["github_environment:zenodo-production"]["status"] == "missing"
+    assert checks["github_environment_protection:zenodo-production"]["status"] == "missing"
+
+
+def test_publication_readiness_detects_configured_protected_environment() -> None:
+    readiness = publication_readiness(
+        environment={
+            "GITHUB_ENVIRONMENT_NAMES": "zenodo-production,staging",
+            "GITHUB_PROTECTED_ENVIRONMENT_NAMES": "zenodo-production",
+        },
+        root=ROOT,
+    )
+    checks = {check["id"]: check for check in readiness["checks"]}
+
+    assert readiness["status"] == "ready"
+    assert checks["github_environment:zenodo-production"]["status"] == "configured"
+    assert checks["github_environment_protection:zenodo-production"]["status"] == "configured"

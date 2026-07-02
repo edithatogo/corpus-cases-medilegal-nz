@@ -64,7 +64,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./conductor/tracks/multi_git_archive_mirroring_20260614/](./conductor/tracks/multi_git_archive_mirroring_20260614/)*
 *Status: IN PROGRESS - local mirror workflow hardening complete; GitHub secrets, live trigger verification, and external archive publication remain gated.*
 
-## [ ] Track: Monthly Dynamic Archive Publication
+## [x] Track: Monthly Dynamic Archive Publication
 *Link: [./conductor/tracks/monthly_dynamic_archive_publication_20260701/](./conductor/tracks/monthly_dynamic_archive_publication_20260701/)*
 *Status: ✅ COMPLETE - monthly publication workflow proved with non-zero release evidence, Hugging Face upload/readback, GitHub release assets, Zenodo draft upload, attestations, and protected production handoff.*
 
@@ -76,9 +76,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: GitHub Governance And Automation Hardening
+## [~] Track: GitHub Governance And Automation Hardening
 *Link: [./conductor/tracks/github_governance_automation_hardening_20260701/](./conductor/tracks/github_governance_automation_hardening_20260701/)*
-*Status: NEW - plan captures protected Zenodo environment, branch/ruleset protection, vulnerability alerts, Dependency Review, action policy, and attestation verification.*
+*Status: IN PROGRESS - Phase 1 live governance baseline captured; branch/ruleset protection, protected environment reviewers, vulnerability alerts, dependency review, action policy, and attestation verification remain.*
 
 ---
 
