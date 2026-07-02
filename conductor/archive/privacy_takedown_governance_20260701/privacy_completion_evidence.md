@@ -15,6 +15,8 @@ validated.
   - `legal_provenance.json`
 - Added a publication readiness gate that reads live privacy governance
   evidence from the monthly publication artifact set.
+- Hardened the readiness gate to fail closed when privacy evidence is missing
+  unless an explicit test override supplies a passing report.
 - Added a public-facing governance document at
   `docs/privacy-takedown-governance.md`.
 - Updated the monthly publication workflow to attach the privacy governance
@@ -34,4 +36,3 @@ validated.
 The repository now has an operational, evidence-backed privacy and takedown
 workflow that can block publication on unresolved privacy events while keeping
 release artifacts public-safe.
-

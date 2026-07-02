@@ -1239,6 +1239,7 @@ def validate_release_evidence(payload: Mapping[str, Any]) -> list[str]:
 def publication_readiness(
     environment: Mapping[str, str] | None = None,
     root: Path = Path(),
+    privacy_report: Mapping[str, Any] | None = None,
 ) -> JsonObject:
     """Check local and credential readiness for publication workflows."""
     env = environment or os.environ
@@ -1313,44 +1314,35 @@ def publication_readiness(
         }
     )
     privacy_report_path = root / "generated/monthly-publication/manifests/privacy_governance.json"
-    privacy_report: Mapping[str, Any] | None = None
     privacy_status = "unknown"
     privacy_blockers: list[str] = []
-    if privacy_report_path.is_file():
+    if privacy_report is None and privacy_report_path.is_file():
         loaded = json.loads(privacy_report_path.read_text(encoding="utf-8"))
         if isinstance(loaded, Mapping):
             privacy_report = loaded
-            privacy_status = str(loaded.get("status") or "unknown")
-            blockers = loaded.get("blockers", [])
-            if isinstance(blockers, list):
-                privacy_blockers = [str(blocker) for blocker in blockers if str(blocker).strip()]
-            checks.append(
-                {
-                    "id": "privacy_governance",
-                    "status": "configured"
-                    if privacy_status == "pass"
-                    else "blocked"
-                    if privacy_status == "blocked"
-                    else "missing",
-                    "secret": False,
-                    "source": privacy_report_path.as_posix(),
-                    "blockers": privacy_blockers,
-                }
-            )
-        else:
-            checks.append(
-                {
-                    "id": "privacy_governance",
-                    "status": "missing",
-                    "secret": False,
-                    "source": privacy_report_path.as_posix(),
-                }
-            )
+    if isinstance(privacy_report, Mapping):
+        privacy_status = str(privacy_report.get("status") or "unknown")
+        blockers = privacy_report.get("blockers", [])
+        if isinstance(blockers, list):
+            privacy_blockers = [str(blocker) for blocker in blockers if str(blocker).strip()]
+        checks.append(
+            {
+                "id": "privacy_governance",
+                "status": "configured"
+                if privacy_status == "pass"
+                else "blocked"
+                if privacy_status == "blocked"
+                else "missing",
+                "secret": False,
+                "source": privacy_report_path.as_posix(),
+                "blockers": privacy_blockers,
+            }
+        )
     else:
         checks.append(
             {
                 "id": "privacy_governance",
-                "status": "unknown",
+                "status": "missing",
                 "secret": False,
                 "source": privacy_report_path.as_posix(),
             }

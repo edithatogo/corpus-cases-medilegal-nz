@@ -201,7 +201,11 @@ def test_archive_bundle_is_reproducible(tmp_path: Path) -> None:
 
 
 def test_publication_readiness_reports_gated_secrets_not_local_blockers() -> None:
-    readiness = publication_readiness(environment={}, root=ROOT)
+    readiness = publication_readiness(
+        environment={},
+        root=ROOT,
+        privacy_report={"schema_version": "1.0.0", "status": "pass", "blockers": []},
+    )
 
     assert readiness["status"] == "ready"
     assert "HF_TOKEN" in readiness["gated_external_writes"]
@@ -246,6 +250,7 @@ def test_publication_readiness_detects_configured_protected_environment() -> Non
             "GITHUB_PROTECTED_ENVIRONMENT_NAMES": "zenodo-production",
         },
         root=ROOT,
+        privacy_report={"schema_version": "1.0.0", "status": "pass", "blockers": []},
     )
     checks = {check["id"]: check for check in readiness["checks"]}
 
