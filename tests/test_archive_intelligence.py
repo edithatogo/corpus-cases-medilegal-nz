@@ -6,9 +6,11 @@ from pathlib import Path
 from corpus_cases_medilegal_nz.archive import build_release_evidence, write_metadata_packages
 from corpus_cases_medilegal_nz.archive_intelligence import (
     MATURITY_DIMENSIONS,
+    build_archive_intelligence_from_artifact_dir,
     build_archive_intelligence_from_file,
     build_archive_maturity_report,
     severity_for_score,
+    validate_archive_intelligence_report,
     write_archive_intelligence_report,
 )
 
@@ -100,3 +102,83 @@ def test_archive_intelligence_loads_sibling_metadata_manifest(tmp_path: Path) ->
 
     dimensions = {dimension["id"]: dimension for dimension in report["dimensions"]}
     assert dimensions["metadata_package_completeness"]["score"] == 100
+
+
+def test_archive_intelligence_from_artifact_dir_scores_100_when_publication_evidence_exists(
+    tmp_path: Path,
+) -> None:
+    artifact_dir = tmp_path
+    manifests_dir = artifact_dir / "manifests"
+    metadata_dir = artifact_dir / "metadata"
+    manifests_dir.mkdir()
+    metadata_dir.mkdir()
+    release_evidence = _complete_evidence(tmp_path)
+    release_evidence["release"]["github_release_url"] = ""
+    release_evidence["hugging_face"]["revision"] = ""
+    release_evidence["hugging_face"]["remote_manifest_verified"] = False
+    release_evidence["zenodo"]["draft_id"] = ""
+    release_evidence["zenodo"]["record_url"] = ""
+    (manifests_dir / "release_evidence.json").write_text(
+        json.dumps(release_evidence),
+        encoding="utf-8",
+    )
+    (metadata_dir / "metadata_packages_manifest.json").write_text(
+        json.dumps(release_evidence["metadata_packages"]),
+        encoding="utf-8",
+    )
+    (manifests_dir / "github_release_evidence.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "github_release_tag": "dataset-v2026.07.0",
+                "github_release_url": "https://github.com/edithatogo/corpus-cases-medilegal-nz/releases/tag/dataset-v2026.07.0",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (manifests_dir / "huggingface_publish_evidence.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "repo_id": "edithatogo/corpus-cases-medilegal-nz",
+                "revision": "abc123",
+                "remote_manifest_verified": True,
+                "path_in_repo": "releases/2026.07.0",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (manifests_dir / "zenodo_draft_evidence.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "archive_version": "2026.07.0",
+                "deposition_id": "21119990",
+                "record_url": "https://zenodo.org/deposit/21119990",
+                "doi": "",
+                "concept_doi": "",
+                "publish_handoff_only": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = build_archive_intelligence_from_artifact_dir(artifact_dir)
+
+    assert report["score"] >= 95
+    assert report["severity"] == "leading"
+    dimensions = {dimension["id"]: dimension for dimension in report["dimensions"]}
+    assert dimensions["remote_publication_proof"]["score"] == 100
+
+
+def test_archive_intelligence_strict_mode_rejects_partial_reports(tmp_path: Path) -> None:
+    report = build_archive_maturity_report(_complete_evidence(tmp_path))
+
+    failures = validate_archive_intelligence_report(report, strict=True)
+
+    assert failures == []
+    partial_failures = validate_archive_intelligence_report(
+        {"score": 88.0, "severity": "strong"},
+        strict=True,
+    )
+    assert partial_failures

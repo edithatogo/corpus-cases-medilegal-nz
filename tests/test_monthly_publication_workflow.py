@@ -29,6 +29,19 @@ def test_monthly_workflow_has_publication_guards_and_surfaces() -> None:
     assert workflow.index("Build deterministic collection proof") < workflow.index(
         "Build release evidence"
     )
+    assert "Build GitHub release evidence overlay" in workflow
+    assert "env.PUBLICATION_MODE != 'dry-run'" in workflow
+    assert "Build archive maturity report" in workflow
+    assert workflow.index("Build GitHub release evidence overlay") < workflow.index(
+        "Build archive maturity report"
+    )
+    assert workflow.index("Build archive maturity report") < workflow.index(
+        "Create or update GitHub release"
+    )
+    assert '--artifact-dir "$ARTIFACT_DIR"' in workflow
+    assert "--strict" in workflow
+    assert "generated/archive-intelligence/**" in workflow
+    assert "archive_maturity.json" in workflow
 
 
 def test_security_workflows_are_present() -> None:

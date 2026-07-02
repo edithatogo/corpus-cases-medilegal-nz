@@ -216,6 +216,40 @@ jobs:
             --deposition-id "$ZENODO_DEPOSITION_ID" \
             $NEW_VERSION_ARGS
 
+      - name: Build GitHub release evidence overlay
+        if: env.PUBLICATION_MODE != 'dry-run'
+        env:
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+          TAG: ${{ steps.version.outputs.release_tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$ARTIFACT_DIR/manifests"
+          uv run python - <<'PY'
+          from pathlib import Path
+          import json
+          import os
+
+          from corpus_cases_medilegal_nz.archive import write_json
+
+          manifest = {
+              "schema_version": "1.0.0",
+              "github_release_tag": os.environ["TAG"],
+              "github_release_url": f'{os.environ["REPO_URL"]}/releases/tag/{os.environ["TAG"]}',
+          }
+          write_json(Path(os.environ["ARTIFACT_DIR"]) / "manifests" / "github_release_evidence.json", manifest)
+          PY
+
+      - name: Build archive maturity report
+        env:
+          STRICT_MODE: ${{ env.PUBLICATION_MODE == 'full' && '--strict' || '' }}
+        run: |
+          set -euo pipefail
+          mkdir -p generated/archive-intelligence
+          uv run python scripts/build_archive_intelligence.py \
+            --artifact-dir "$ARTIFACT_DIR" \
+            --output generated/archive-intelligence/archive_maturity.json \
+            $STRICT_MODE
+
       - name: Upload GitHub Actions artifact
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
@@ -223,6 +257,7 @@ jobs:
           path: |
             generated/monthly-publication/**
             generated/monthly-publication-bundles/**
+            generated/archive-intelligence/**
           if-no-files-found: error
 
       - name: Attest release artifacts
@@ -231,6 +266,7 @@ jobs:
           subject-path: |
             generated/monthly-publication/**
             generated/monthly-publication-bundles/**
+            generated/archive-intelligence/**
 
       - name: Create or update GitHub release
         if: env.PUBLICATION_MODE != 'dry-run'
@@ -257,8 +293,10 @@ jobs:
             "$ARTIFACT_DIR/manifests/source_coverage.json" \
             "$ARTIFACT_DIR/manifests/public_surface_audit.json" \
             "$ARTIFACT_DIR/metadata/metadata_packages_manifest.json" \
+            "$ARTIFACT_DIR/manifests/github_release_evidence.json" \
             "$ARTIFACT_DIR/sbom/sbom.cyclonedx.json" \
             "$ARTIFACT_DIR/sbom/sbom.spdx.json" \
+            "generated/archive-intelligence/archive_maturity.json" \
             --clobber
 
   zenodo-production-handoff:

@@ -13,6 +13,10 @@ from corpus_cases_medilegal_nz.archive import utc_now_iso, write_json
 JsonObject = dict[str, Any]
 
 ARCHIVE_INTELLIGENCE_SCHEMA_VERSION = "1.0.0"
+ARTIFACT_MANIFEST_DIRNAME = "manifests"
+HUGGINGFACE_EVIDENCE_FILENAME = "huggingface_publish_evidence.json"
+GITHUB_RELEASE_EVIDENCE_FILENAME = "github_release_evidence.json"
+ZENODO_EVIDENCE_FILENAME = "zenodo_draft_evidence.json"
 
 
 @dataclass(frozen=True)
@@ -93,6 +97,55 @@ REQUIRED_METADATA_PACKAGES = {
     "schema-org-dataset.jsonld",
     "huggingface-dataset-card-metadata.json",
 }
+
+
+def _load_json_object(path: Path) -> JsonObject | None:
+    """Load a JSON object if the path exists."""
+    if not path.is_file():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8-sig"))
+    if not isinstance(payload, Mapping):
+        raise ValueError(f"{path} must contain a JSON object")
+    return dict(payload)
+
+
+def _merge_publication_evidence(evidence: JsonObject, artifact_dir: Path) -> JsonObject:
+    """Merge publication overlays into release evidence for maturity scoring."""
+    merged: JsonObject = dict(evidence)
+    manifest_dir = artifact_dir / ARTIFACT_MANIFEST_DIRNAME
+
+    github_release = _load_json_object(manifest_dir / GITHUB_RELEASE_EVIDENCE_FILENAME)
+    if github_release:
+        release = dict(merged.get("release", {}))
+        if github_release.get("github_release_url"):
+            release["github_release_url"] = github_release["github_release_url"]
+        if github_release.get("github_release_tag"):
+            release["github_release_tag"] = github_release["github_release_tag"]
+        merged["release"] = release
+
+    hugging_face = _load_json_object(manifest_dir / HUGGINGFACE_EVIDENCE_FILENAME)
+    if hugging_face:
+        merged["hugging_face"] = {
+            "repo_id": hugging_face.get("repo_id", merged.get("hugging_face", {}).get("repo_id")),
+            "revision": hugging_face.get("revision", ""),
+            "remote_manifest_verified": hugging_face.get("remote_manifest_verified", False),
+            "path_in_repo": hugging_face.get("path_in_repo", ""),
+        }
+
+    zenodo = _load_json_object(manifest_dir / ZENODO_EVIDENCE_FILENAME)
+    if zenodo:
+        merged["zenodo"] = {
+            "draft_id": zenodo.get("deposition_id", ""),
+            "record_url": zenodo.get("record_url", ""),
+            "doi": zenodo.get("doi", ""),
+            "concept_doi": zenodo.get("concept_doi", ""),
+            "publish_handoff_only": zenodo.get("publish_handoff_only", False),
+        }
+
+    metadata = _load_json_object(artifact_dir / "metadata" / "metadata_packages_manifest.json")
+    if metadata:
+        merged["metadata_packages"] = metadata
+    return merged
 
 
 def severity_for_score(score: float) -> str:
@@ -388,16 +441,41 @@ def build_archive_intelligence_from_file(release_evidence_path: Path) -> JsonObj
     evidence = json.loads(release_evidence_path.read_text(encoding="utf-8-sig"))
     if not isinstance(evidence, Mapping):
         raise ValueError("release evidence must be a JSON object")
-    enriched_evidence = dict(evidence)
-    if "metadata_packages" not in enriched_evidence:
-        metadata_path = (
-            release_evidence_path.parent.parent / "metadata" / "metadata_packages_manifest.json"
+    artifact_dir = (
+        release_evidence_path.parent.parent
+        if release_evidence_path.parent.name == ARTIFACT_MANIFEST_DIRNAME
+        else release_evidence_path.parent
+    )
+    return build_archive_maturity_report(_merge_publication_evidence(dict(evidence), artifact_dir))
+
+
+def build_archive_intelligence_from_artifact_dir(artifact_dir: Path) -> JsonObject:
+    """Load the monthly artifact directory and build archive maturity intelligence."""
+    artifact_dir = Path(artifact_dir)
+    return build_archive_intelligence_from_file(
+        artifact_dir / ARTIFACT_MANIFEST_DIRNAME / "release_evidence.json"
+    )
+
+
+def validate_archive_intelligence_report(
+    report: Mapping[str, Any],
+    *,
+    strict: bool = False,
+    minimum_score: int = 100,
+) -> list[str]:
+    """Validate maturity report thresholds for publication gating."""
+    failures: list[str] = []
+    score = float(report.get("score", 0))
+    severity = str(report.get("severity", ""))
+    if strict and score < minimum_score:
+        failures.append(
+            f"Archive maturity score {score:.2f} is below strict minimum {minimum_score}."
         )
-        if metadata_path.is_file():
-            enriched_evidence["metadata_packages"] = json.loads(
-                metadata_path.read_text(encoding="utf-8-sig")
-            )
-    return build_archive_maturity_report(enriched_evidence)
+    if strict and severity != "leading":
+        failures.append(
+            f"Archive maturity severity {severity!r} is not acceptable for strict mode."
+        )
+    return failures
 
 
 def write_archive_intelligence_report(
@@ -406,5 +484,15 @@ def write_archive_intelligence_report(
 ) -> JsonObject:
     """Write archive maturity intelligence derived from release evidence."""
     report = build_archive_intelligence_from_file(release_evidence_path)
+    write_json(output_path, report)
+    return report
+
+
+def write_archive_intelligence_report_from_artifact_dir(
+    artifact_dir: Path,
+    output_path: Path,
+) -> JsonObject:
+    """Write archive maturity intelligence derived from a monthly artifact directory."""
+    report = build_archive_intelligence_from_artifact_dir(artifact_dir)
     write_json(output_path, report)
     return report

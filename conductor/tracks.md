@@ -86,6 +86,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./conductor/tracks/bleeding_edge_archive_intelligence_20260701/](./conductor/tracks/bleeding_edge_archive_intelligence_20260701/)*
 *Status: IN PROGRESS - Phase 1 archive maturity scoring model, CLI/script entrypoints, generated local evidence, and tests are complete; next is source observability ledger hardening.*
 
+## [ ] Track: Archive Maturity Hardening
+*Link: [./conductor/tracks/archive_maturity_hardening_20260702/](./conductor/tracks/archive_maturity_hardening_20260702/)*
+*Status: IN PROGRESS - publication-evidence overlay, strict maturity gate, and workflow attachment are complete; next is observability, anomaly detection, claims, privacy, and federation hardening.*
+
 ---
 
 ## [x] Track: Source Collection And Parser Completion
