@@ -1,0 +1,7 @@
+Phase 5/6 validation:
+- collection-proof: record_count=5, collection_quality_gates.status=pass.
+- source-audit: validated_records=5, planned=8; hdc, hpdt, moj_tribunals, era, teachers all validated_records.
+- GitHub issue evidence: https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/1#issuecomment-4861166064
+- Targeted tests: uv run --frozen --python 3.12 --extra dev pytest tests/test_archive_release.py tests/test_collection_proof.py -q -> 13 passed.
+- Previous broader phase validation: 101 passed across archive/source/publication suites.
+- Ruff lint and format checks passed for changed implementation/test files.
