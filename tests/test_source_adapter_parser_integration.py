@@ -7,9 +7,17 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from corpus_cases_medilegal_nz.sources.era import EraSourceAdapter
+from corpus_cases_medilegal_nz.sources.coronial import CoronialSourceAdapter
+from corpus_cases_medilegal_nz.sources.human_rights import HumanRightsSourceAdapter
 from corpus_cases_medilegal_nz.sources.hdc import HdcSourceAdapter
 from corpus_cases_medilegal_nz.sources.hpdt import HpdtSourceAdapter
+from corpus_cases_medilegal_nz.sources.ipca import IpcaSourceAdapter
+from corpus_cases_medilegal_nz.sources.law_commission import LawCommissionSourceAdapter
+from corpus_cases_medilegal_nz.sources.moj_courts import MojCourtsSourceAdapter
 from corpus_cases_medilegal_nz.sources.moj_tribunals import MojTribunalsSourceAdapter
+from corpus_cases_medilegal_nz.sources.ombudsman import OmbudsmanSourceAdapter
+from corpus_cases_medilegal_nz.sources.royal_commissions import RoyalCommissionsSourceAdapter
+from corpus_cases_medilegal_nz.sources.privacy import PrivacySourceAdapter
 from corpus_cases_medilegal_nz.sources.teachers import TeachersSourceAdapter
 
 FIXTURES_ROOT = Path(__file__).parent / "fixtures" / "sources"
@@ -17,7 +25,10 @@ FIXTURES_ROOT = Path(__file__).parent / "fixtures" / "sources"
 
 def _fixture_html(source_id: str) -> str:
     manifest = json.loads((FIXTURES_ROOT / "fixture_manifest.json").read_text(encoding="utf-8"))
-    return (FIXTURES_ROOT / manifest["core_sources"][source_id]["html"]).read_text(encoding="utf-8")
+    source_fixture = manifest.get("core_sources", {}).get(source_id) or manifest["extended_sources"][
+        source_id
+    ]
+    return (FIXTURES_ROOT / source_fixture["html"]).read_text(encoding="utf-8")
 
 
 def test_hdc_adapter_fetch_parses_fixture_record() -> None:
@@ -77,12 +88,84 @@ def test_hdc_adapter_fetch_parses_fixture_record() -> None:
             "https://www.teachersdisciplinarytribunal.nz/",
             "TDT-2026-001",
         ),
+        (
+            "privacy",
+            PrivacySourceAdapter,
+            "corpus_cases_medilegal_nz.sources.privacy",
+            "config/privacy_pipeline.yaml",
+            "https://www.privacy.org.nz/resources-and-learning/case-notes-and-court-decisions/",
+            "PRIV-2026-001",
+        ),
+        (
+            "human_rights",
+            HumanRightsSourceAdapter,
+            "corpus_cases_medilegal_nz.sources.human_rights",
+            "config/human_rights_pipeline.yaml",
+            "https://www.justice.govt.nz/tribunals/human-rights/hrrt-decisions/",
+            "HRC-2026-001",
+        ),
+        (
+            "ombudsman",
+            OmbudsmanSourceAdapter,
+            "corpus_cases_medilegal_nz.sources.ombudsman",
+            "config/ombudsman_pipeline.yaml",
+            "https://www.ombudsman.parliament.nz/resources",
+            "OMB-2026-001",
+        ),
+        (
+            "ipca",
+            IpcaSourceAdapter,
+            "corpus_cases_medilegal_nz.sources.ipca",
+            "config/ipca_pipeline.yaml",
+            "https://www.ipca.govt.nz/Site/publications-and-media/Accountability/Archive.aspx",
+            "IPCA-2026-001",
+        ),
+        (
+            "law_commission",
+            LawCommissionSourceAdapter,
+            "corpus_cases_medilegal_nz.sources.law_commission",
+            "config/law_commission_pipeline.yaml",
+            "https://www.lawcom.govt.nz/our-work",
+            "LC-2026-001",
+        ),
+        (
+            "royal_commissions",
+            RoyalCommissionsSourceAdapter,
+            "corpus_cases_medilegal_nz.sources.royal_commissions",
+            "config/royal_commissions_pipeline.yaml",
+            "https://www.waitangitribunal.govt.nz/en/publications/tribunal-reports",
+            "RC-2026-001",
+        ),
+        (
+            "coronial",
+            CoronialSourceAdapter,
+            "corpus_cases_medilegal_nz.sources.coronial",
+            "config/coronial_pipeline.yaml",
+            "https://coronialservices.justice.govt.nz/",
+            "COR-2026-001",
+        ),
+        (
+            "moj_courts",
+            MojCourtsSourceAdapter,
+            "corpus_cases_medilegal_nz.sources.moj_courts",
+            "config/moj_courts_pipeline.yaml",
+            "https://www.justice.govt.nz/courts/decisions/jdo/",
+            "MOJ-COURTS-2026-001",
+        ),
     ],
 )
 def test_requests_adapter_fetch_parses_fixture_record(
     source_id: str,
     adapter_cls: type[
         HpdtSourceAdapter | MojTribunalsSourceAdapter | EraSourceAdapter | TeachersSourceAdapter
+        | PrivacySourceAdapter
+        | HumanRightsSourceAdapter
+        | OmbudsmanSourceAdapter
+        | IpcaSourceAdapter
+        | LawCommissionSourceAdapter
+        | RoyalCommissionsSourceAdapter
+        | CoronialSourceAdapter
+        | MojCourtsSourceAdapter
     ],
     module_path: str,
     config_path: str,

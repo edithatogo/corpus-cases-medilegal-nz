@@ -1,8 +1,8 @@
 pipeline:
   name: privacy
   description: "Privacy Commissioner NZ Decisions Ingestion Pipeline"
-  source_url: ""
-  base_url: ""
+  source_url: "https://www.privacy.org.nz/resources-and-learning/case-notes-and-court-decisions/"
+  base_url: "https://www.privacy.org.nz/"
   paths:
     raw_dir: "data/raw/privacy"
     processed_dir: "data/processed"

@@ -1,8 +1,8 @@
 pipeline:
   name: coronial
   description: "Coronial Decisions NZ Ingestion Pipeline"
-  source_url: ""
-  base_url: ""
+  source_url: "https://coronialservices.justice.govt.nz/"
+  base_url: "https://coronialservices.justice.govt.nz/"
   paths:
     raw_dir: "data/raw/coronial"
     processed_dir: "data/processed"

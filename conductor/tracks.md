@@ -60,7 +60,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./conductor/tracks/law_commission_integration/](./conductor/tracks/law_commission_integration/)*
 *Status: ✅ COMPLETE — Config created, source registered in multi-source framework*
 
-## [ ] Track: Implement Multi-Git and Multi-Archive Mirroring Setup
+## [x] Track: Implement Multi-Git and Multi-Archive Mirroring Setup
 *Link: [./conductor/tracks/multi_git_archive_mirroring_20260614/](./conductor/tracks/multi_git_archive_mirroring_20260614/)*
 *Status: IN PROGRESS - local mirror workflow hardening, live trigger verification, public GitLab/Codeberg mirror publication, and strict mirror-set gating are complete; GitHub secrets remain gated.*
 
@@ -82,7 +82,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Archive Maturity Hardening
+## [x] Track: Archive Maturity Hardening
 *Link: [./conductor/tracks/archive_maturity_hardening_20260702/](./conductor/tracks/archive_maturity_hardening_20260702/)*
 *Status: ✅ COMPLETE - publication-evidence overlay, strict maturity gate, workflow attachment, source observability, anomaly detection, claims generation, privacy scoring, and federation compatibility are complete.*
 
@@ -90,7 +90,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## [x] Track: Source Collection And Parser Completion
 *Link: [./conductor/tracks/source_collection_parser_completion_20260701/](./conductor/tracks/source_collection_parser_completion_20260701/)*
-*Status: ✅ COMPLETE - five core sources now produce validated non-zero local corpus records with deterministic exports, reconciliation ledgers, quality gates, review evidence, and GitHub issue/project evidence.*
+*Status: ✅ COMPLETE - thirteen fixture-backed sources now produce validated non-zero local corpus records with deterministic exports, reconciliation ledgers, quality gates, review evidence, and GitHub issue/project evidence.*
 
 ---
 

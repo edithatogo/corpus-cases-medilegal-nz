@@ -1,8 +1,8 @@
 pipeline:
   name: moj_courts
   description: "Ministry of Justice (MoJ) Court Cases NZ Ingestion Pipeline"
-  source_url: ""
-  base_url: ""
+  source_url: "https://www.justice.govt.nz/courts/decisions/jdo/"
+  base_url: "https://www.justice.govt.nz/"
   paths:
     raw_dir: "data/raw/moj_courts"
     processed_dir: "data/processed"

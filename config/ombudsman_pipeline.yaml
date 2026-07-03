@@ -1,8 +1,8 @@
 pipeline:
   name: ombudsman
   description: "Ombudsman Reports NZ Ingestion Pipeline"
-  source_url: ""
-  base_url: ""
+  source_url: "https://www.ombudsman.parliament.nz/resources"
+  base_url: "https://www.ombudsman.parliament.nz/"
   paths:
     raw_dir: "data/raw/ombudsman"
     processed_dir: "data/processed"

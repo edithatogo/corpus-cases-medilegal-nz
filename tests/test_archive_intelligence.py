@@ -30,6 +30,21 @@ from corpus_cases_medilegal_nz.archive_intelligence import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+ALL_SOURCES = (
+    "hdc",
+    "hpdt",
+    "moj_tribunals",
+    "era",
+    "teachers",
+    "privacy",
+    "human_rights",
+    "ombudsman",
+    "ipca",
+    "law_commission",
+    "royal_commissions",
+    "coronial",
+    "moj_courts",
+)
 
 
 def _complete_evidence(tmp_path: Path) -> dict:
@@ -47,7 +62,7 @@ def _complete_evidence(tmp_path: Path) -> dict:
                 "rights_review_status": "reviewed",
             },
         }
-        for source in ("hdc", "hpdt", "moj_tribunals", "era", "teachers")
+        for source in ALL_SOURCES
     ]
     evidence = {
         "release": {
@@ -416,7 +431,7 @@ def test_public_claims_and_privacy_scoring_are_generated_from_ledgers(tmp_path: 
 
     assert privacy["status"] == "leading"
     assert privacy["score"] == 100
-    assert "validated records across 5 active sources" in claims["markdown"]["README.md"]
+    assert "validated records across 13 active sources" in claims["markdown"]["README.md"]
     assert (
         "Privacy/rights status is summarized as leading." in claims["markdown"]["dataset-card.md"]
     )
@@ -481,7 +496,7 @@ def test_write_archive_intelligence_bundle_writes_claim_and_compatibility_artifa
     assert output_dir.joinpath("dataset-card.claims.md").is_file()
     assert output_dir.joinpath("release-notes.claims.md").is_file()
     assert output_dir.joinpath("github-project-summary.claims.md").is_file()
-    assert bundle["public_claims"]["facts"]["record_count"] == 5
+    assert bundle["public_claims"]["facts"]["record_count"] == 13
 
 
 def test_archive_intelligence_loads_sibling_metadata_manifest(tmp_path: Path) -> None:

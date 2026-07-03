@@ -4,17 +4,17 @@ from pathlib import Path
 
 from corpus_cases_medilegal_nz.archive import load_jsonl_records
 from corpus_cases_medilegal_nz.collection_proof import (
-    CORE_SOURCE_URLS,
+    ALL_SOURCE_URLS,
     build_fixture_collection_records,
     write_collection_proof,
 )
 
 
-def test_build_fixture_collection_records_covers_all_core_sources() -> None:
+def test_build_fixture_collection_records_covers_all_fixture_sources() -> None:
     records = build_fixture_collection_records()
 
-    assert len(records) == len(CORE_SOURCE_URLS)
-    assert {record["source"] for record in records} == set(CORE_SOURCE_URLS)
+    assert len(records) == len(ALL_SOURCE_URLS)
+    assert {record["source"] for record in records} == set(ALL_SOURCE_URLS)
     assert all(record["metadata"]["raw_sha256"] for record in records)
 
 
@@ -24,12 +24,12 @@ def test_write_collection_proof_exports_archive_compatible_records(tmp_path: Pat
     evidence = write_collection_proof(output_dir=output_dir)
     records = load_jsonl_records(output_dir / "jsonl" / "records.jsonl")
 
-    assert evidence["record_count"] == 5
-    assert len(records) == 5
-    assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == 5
+    assert evidence["record_count"] == 13
+    assert len(records) == 13
+    assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == 13
     assert evidence["collection_quality_gates"]["status"] == "pass"
-    assert evidence["dataset_diff"]["counts"]["added"] == 5
-    assert evidence["dataset_diff"]["counts"]["current"] == 5
+    assert evidence["dataset_diff"]["counts"]["added"] == 13
+    assert evidence["dataset_diff"]["counts"]["current"] == 13
     assert (output_dir / "manifests" / "dataset_diff.json").is_file()
     assert (output_dir / "manifests" / "collection_quality_gates.json").is_file()
     assert (output_dir / "jsonl" / "cases.jsonl").is_file()

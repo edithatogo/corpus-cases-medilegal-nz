@@ -14,14 +14,14 @@ Add 13 new data source integrations to the corpus-cases-medilegal-nz repository,
 | moj_tribunals | Ministry of Justice Tribunals | https://www.justice.govt.nz/tribunals/ |
 | era | Employment Relations Authority | https://www.era.govt.nz/ |
 | teachers | Teachers Disciplinary Tribunal | https://www.teachersdisciplinarytribunal.nz/ |
-| royal_commissions | Royal Commissions & Waitangi Tribunal | — |
-| coronial | Coronial Decisions | — |
-| privacy | Privacy Commissioner | — |
-| human_rights | Human Rights Commission/Tribunal | — |
-| ombudsman | Ombudsman Reports | — |
-| moj_courts | Ministry of Justice Court Cases | — |
-| ipca | Independent Police Conduct Authority | — |
-| law_commission | Law Commission Reports | — |
+| royal_commissions | Royal Commissions & Waitangi Tribunal | https://www.waitangitribunal.govt.nz/en/publications/tribunal-reports |
+| coronial | Coronial Decisions | https://coronialservices.justice.govt.nz/ |
+| privacy | Privacy Commissioner | https://www.privacy.org.nz/resources-and-learning/case-notes-and-court-decisions/ |
+| human_rights | Human Rights Commission/Tribunal | https://www.justice.govt.nz/tribunals/human-rights/hrrt-decisions/ |
+| ombudsman | Ombudsman Reports | https://www.ombudsman.parliament.nz/resources |
+| moj_courts | Ministry of Justice Court Cases | https://www.justice.govt.nz/courts/decisions/jdo/ |
+| ipca | Independent Police Conduct Authority | https://www.ipca.govt.nz/Site/publications-and-media/Accountability/Archive.aspx |
+| law_commission | Law Commission Reports | https://www.lawcom.govt.nz/our-work |
 
 ## Dependency Graph
 ```

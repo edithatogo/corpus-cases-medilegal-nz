@@ -1,8 +1,8 @@
 pipeline:
   name: royal_commissions
   description: "Royal Commissions & Waitangi Tribunal NZ Decisions Ingestion Pipeline"
-  source_url: ""
-  base_url: ""
+  source_url: "https://www.waitangitribunal.govt.nz/en/publications/tribunal-reports"
+  base_url: "https://www.waitangitribunal.govt.nz/"
   paths:
     raw_dir: "data/raw/royal_commissions"
     processed_dir: "data/processed"

@@ -22,6 +22,14 @@ SOURCE_NAMES = {
     "moj_tribunals": "Ministry of Justice Tribunals",
     "era": "Employment Relations Authority",
     "teachers": "Teachers Disciplinary Tribunal",
+    "privacy": "Privacy Commissioner",
+    "human_rights": "Human Rights Commission/Tribunal",
+    "ombudsman": "Ombudsman Reports",
+    "ipca": "Independent Police Conduct Authority",
+    "law_commission": "Law Commission Reports",
+    "royal_commissions": "Royal Commissions & Waitangi Tribunal",
+    "coronial": "Coronial Decisions",
+    "moj_courts": "Ministry of Justice Court Cases",
 }
 
 SOURCE_DEFAULT_TITLE = {
@@ -30,6 +38,14 @@ SOURCE_DEFAULT_TITLE = {
     "moj_tribunals": "Ministry of Justice tribunal decision",
     "era": "Employment Relations Authority determination",
     "teachers": "Teachers Disciplinary Tribunal decision",
+    "privacy": "Privacy Commissioner decision",
+    "human_rights": "Human Rights Commission/Tribunal decision",
+    "ombudsman": "Ombudsman report",
+    "ipca": "Independent Police Conduct Authority report",
+    "law_commission": "Law Commission report",
+    "royal_commissions": "Royal Commission or Tribunal report",
+    "coronial": "Coronial finding",
+    "moj_courts": "Court decision",
 }
 
 JsonObject = dict[str, Any]

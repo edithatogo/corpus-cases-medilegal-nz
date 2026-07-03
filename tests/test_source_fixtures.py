@@ -10,13 +10,32 @@ from corpus_cases_medilegal_nz.parser_contract import validate_parser_input, val
 
 FIXTURES_ROOT = Path(__file__).parent / "fixtures" / "sources"
 CORE_SOURCE_IDS = {"hdc", "hpdt", "moj_tribunals", "era", "teachers"}
+EXTENDED_SOURCE_IDS = {
+    "privacy",
+    "human_rights",
+    "ombudsman",
+    "ipca",
+    "law_commission",
+    "royal_commissions",
+    "coronial",
+    "moj_courts",
+}
 
 
-def test_core_source_fixtures_manifest_covers_html_and_pdf() -> None:
+def test_source_fixtures_manifest_covers_html_and_pdf() -> None:
     manifest = json.loads((FIXTURES_ROOT / "fixture_manifest.json").read_text(encoding="utf-8"))
 
     assert set(manifest["core_sources"]) == CORE_SOURCE_IDS
+    assert set(manifest["extended_sources"]) == EXTENDED_SOURCE_IDS
     for source_id, fixture_paths in manifest["core_sources"].items():
+        html_path = FIXTURES_ROOT / fixture_paths["html"]
+        pdf_path = FIXTURES_ROOT / fixture_paths["pdf"]
+
+        assert html_path.is_file(), source_id
+        assert pdf_path.is_file(), source_id
+        assert "<!doctype html>" in html_path.read_text(encoding="utf-8").lower()
+        assert pdf_path.read_bytes().startswith(b"%PDF-")
+    for source_id, fixture_paths in manifest["extended_sources"].items():
         html_path = FIXTURES_ROOT / fixture_paths["html"]
         pdf_path = FIXTURES_ROOT / fixture_paths["pdf"]
 
@@ -65,10 +84,12 @@ def test_hdc_fixture_record_shape_matches_expected_parser_output() -> None:
     assert validate_parser_records([record], source_id="hdc") == [record]
 
 
-@pytest.mark.parametrize("source_id", sorted(CORE_SOURCE_IDS))
-def test_core_source_fixtures_encode_parser_metadata_expectations(source_id: str) -> None:
+@pytest.mark.parametrize("source_id", sorted(CORE_SOURCE_IDS | EXTENDED_SOURCE_IDS))
+def test_all_source_fixtures_encode_parser_metadata_expectations(source_id: str) -> None:
     manifest = json.loads((FIXTURES_ROOT / "fixture_manifest.json").read_text(encoding="utf-8"))
-    source_fixture = manifest["core_sources"][source_id]
+    source_fixture = manifest.get("core_sources", {}).get(source_id) or manifest["extended_sources"][
+        source_id
+    ]
     html = (FIXTURES_ROOT / source_fixture["html"]).read_text(encoding="utf-8")
 
     for expected_value in source_fixture["expected"].values():

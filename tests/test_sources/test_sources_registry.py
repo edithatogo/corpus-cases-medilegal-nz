@@ -27,7 +27,20 @@ class TestSourceRegistry:
 
     def test_all_key_sources_present(self) -> None:
         """All core medical-legal sources must be present."""
-        for sid in ["hpdt", "moj_tribunals", "era", "teachers"]:
+        for sid in [
+            "hpdt",
+            "moj_tribunals",
+            "era",
+            "teachers",
+            "privacy",
+            "human_rights",
+            "ombudsman",
+            "ipca",
+            "law_commission",
+            "royal_commissions",
+            "coronial",
+            "moj_courts",
+        ]:
             assert sid in SOURCE_REGISTRY, f"Missing source: {sid}"
 
     def test_each_source_has_name(self) -> None:

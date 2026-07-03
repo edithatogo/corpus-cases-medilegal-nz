@@ -1,8 +1,8 @@
 pipeline:
   name: ipca
   description: "Independent Police Conduct Authority (IPCA) NZ Ingestion Pipeline"
-  source_url: ""
-  base_url: ""
+  source_url: "https://www.ipca.govt.nz/Site/publications-and-media/Accountability/Archive.aspx"
+  base_url: "https://www.ipca.govt.nz/"
   paths:
     raw_dir: "data/raw/ipca"
     processed_dir: "data/processed"

@@ -14,13 +14,21 @@ LISTING_URLS = {
     "moj_tribunals": "https://www.justice.govt.nz/tribunals/",
     "era": "https://www.era.govt.nz/",
     "teachers": "https://www.teachersdisciplinarytribunal.nz/",
+    "privacy": "https://www.privacy.org.nz/resources-and-learning/case-notes-and-court-decisions/",
+    "human_rights": "https://www.justice.govt.nz/tribunals/human-rights/hrrt-decisions/",
+    "ombudsman": "https://www.ombudsman.parliament.nz/resources",
+    "ipca": "https://www.ipca.govt.nz/Site/publications-and-media/Accountability/Archive.aspx",
+    "law_commission": "https://www.lawcom.govt.nz/our-work",
+    "royal_commissions": "https://www.waitangitribunal.govt.nz/en/publications/tribunal-reports",
+    "coronial": "https://coronialservices.justice.govt.nz/",
+    "moj_courts": "https://www.justice.govt.nz/courts/decisions/jdo/",
 }
 
 
 @pytest.mark.parametrize("source_id", sorted(LISTING_URLS))
 def test_parse_source_listing_html_emits_contract_valid_records(source_id: str) -> None:
     manifest = json.loads((FIXTURES_ROOT / "fixture_manifest.json").read_text(encoding="utf-8"))
-    fixture = manifest["core_sources"][source_id]
+    fixture = manifest.get("core_sources", {}).get(source_id) or manifest["extended_sources"][source_id]
     html = (FIXTURES_ROOT / fixture["html"]).read_text(encoding="utf-8")
 
     records = parse_source_listing_html(

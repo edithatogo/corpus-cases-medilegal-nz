@@ -1,8 +1,8 @@
 pipeline:
   name: law_commission
   description: "Law Commission Reports NZ Ingestion Pipeline"
-  source_url: ""
-  base_url: ""
+  source_url: "https://www.lawcom.govt.nz/our-work"
+  base_url: "https://www.lawcom.govt.nz/"
   paths:
     raw_dir: "data/raw/law_commission"
     processed_dir: "data/processed"

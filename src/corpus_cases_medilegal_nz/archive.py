@@ -285,7 +285,7 @@ def _source_completion_stage(
 ) -> tuple[str, str]:
     if record_count > 0:
         return "validated_records", "published-ready local records exist for this source."
-    if adapter_exists and source_id in CORE_SOURCE_IDS and has_url and config_exists:
+    if adapter_exists and has_url and config_exists:
         return "fetch_scaffold_parser_stub", (
             "source has configuration and fetch scaffolding, but no parsed local records."
         )

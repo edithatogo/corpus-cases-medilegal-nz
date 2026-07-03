@@ -57,5 +57,95 @@
         "title": "Disciplinary Decisions"
       }
     }
+  },
+  "extended_sources": {
+    "privacy": {
+      "html": "privacy/listing.html",
+      "pdf": "privacy/decision.pdf",
+      "expected": {
+        "body_text": "Privacy commissioner synthetic fixture.",
+        "date": "2026-06-18",
+        "decision_link": "/resources-and-learning/case-notes-and-court-decisions/2026/privacy-2026-001/",
+        "identifier": "PRIV-2026-001",
+        "title": "Privacy Commissioner case note"
+      }
+    },
+    "human_rights": {
+      "html": "human_rights/listing.html",
+      "pdf": "human_rights/decision.pdf",
+      "expected": {
+        "body_text": "Human rights tribunal synthetic fixture.",
+        "date": "2026-06-20",
+        "decision_link": "/tribunals/human-rights/hrrt-decisions/2026/hrc-2026-001/",
+        "identifier": "HRC-2026-001",
+        "title": "Human Rights Tribunal decision"
+      }
+    },
+    "ombudsman": {
+      "html": "ombudsman/listing.html",
+      "pdf": "ombudsman/decision.pdf",
+      "expected": {
+        "body_text": "Ombudsman report synthetic fixture.",
+        "date": "2026-06-22",
+        "decision_link": "/resources/2026/omb-2026-001/",
+        "identifier": "OMB-2026-001",
+        "title": "Ombudsman report"
+      }
+    },
+    "ipca": {
+      "html": "ipca/listing.html",
+      "pdf": "ipca/decision.pdf",
+      "expected": {
+        "body_text": "IPCA report synthetic fixture.",
+        "date": "2026-06-24",
+        "decision_link": "/Site/publications-and-media/Accountability/Archive.aspx?report=ipca-2026-001",
+        "identifier": "IPCA-2026-001",
+        "title": "IPCA report"
+      }
+    },
+    "law_commission": {
+      "html": "law_commission/listing.html",
+      "pdf": "law_commission/decision.pdf",
+      "expected": {
+        "body_text": "Law Commission report synthetic fixture.",
+        "date": "2026-06-26",
+        "decision_link": "/our-work/2026/lc-2026-001/",
+        "identifier": "LC-2026-001",
+        "title": "Law Commission report"
+      }
+    },
+    "royal_commissions": {
+      "html": "royal_commissions/listing.html",
+      "pdf": "royal_commissions/decision.pdf",
+      "expected": {
+        "body_text": "Royal commissions synthetic fixture.",
+        "date": "2026-06-28",
+        "decision_link": "/en/publications/tribunal-reports/wai-1040/",
+        "identifier": "RC-2026-001",
+        "title": "Royal Commission report"
+      }
+    },
+    "coronial": {
+      "html": "coronial/listing.html",
+      "pdf": "coronial/decision.pdf",
+      "expected": {
+        "body_text": "Coronial finding synthetic fixture.",
+        "date": "2026-06-29",
+        "decision_link": "/findings-and-recommendations/2026/cor-2026-001/",
+        "identifier": "COR-2026-001",
+        "title": "Coronial finding"
+      }
+    },
+    "moj_courts": {
+      "html": "moj_courts/listing.html",
+      "pdf": "moj_courts/decision.pdf",
+      "expected": {
+        "body_text": "Court decision synthetic fixture.",
+        "date": "2026-06-30",
+        "decision_link": "/courts/decisions/jdo/2026/moj-courts-2026-001/",
+        "identifier": "MOJ-COURTS-2026-001",
+        "title": "Court decision"
+      }
+    }
   }
 }

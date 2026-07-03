@@ -12,14 +12,14 @@ SOURCE_REGISTRY: dict[str, dict[str, Any]] = {
     "moj_tribunals": {"name": "Ministry of Justice Tribunals", "url": "https://www.justice.govt.nz/tribunals/", "config": "config/moj_tribunals_pipeline.yaml"},
     "era": {"name": "Employment Relations Authority", "url": "https://www.era.govt.nz/", "config": "config/era_pipeline.yaml"},
     "teachers": {"name": "Teachers Disciplinary Tribunal", "url": "https://www.teachersdisciplinarytribunal.nz/", "config": "config/teachers_pipeline.yaml"},
-    "royal_commissions": {"name": "Royal Commissions & Waitangi Tribunal", "url": "", "config": "config/royal_commissions_pipeline.yaml"},
-    "coronial": {"name": "Coronial Decisions", "url": "", "config": "config/coronial_pipeline.yaml"},
-    "privacy": {"name": "Privacy Commissioner", "url": "", "config": "config/privacy_pipeline.yaml"},
-    "human_rights": {"name": "Human Rights Commission/Tribunal", "url": "", "config": "config/human_rights_pipeline.yaml"},
-    "ombudsman": {"name": "Ombudsman Reports", "url": "", "config": "config/ombudsman_pipeline.yaml"},
-    "moj_courts": {"name": "Ministry of Justice Court Cases", "url": "", "config": "config/moj_courts_pipeline.yaml"},
-    "ipca": {"name": "Independent Police Conduct Authority", "url": "", "config": "config/ipca_pipeline.yaml"},
-    "law_commission": {"name": "Law Commission Reports", "url": "", "config": "config/law_commission_pipeline.yaml"},
+    "royal_commissions": {"name": "Royal Commissions & Waitangi Tribunal", "url": "https://www.waitangitribunal.govt.nz/en/publications/tribunal-reports", "config": "config/royal_commissions_pipeline.yaml"},
+    "coronial": {"name": "Coronial Decisions", "url": "https://coronialservices.justice.govt.nz/", "config": "config/coronial_pipeline.yaml"},
+    "privacy": {"name": "Privacy Commissioner", "url": "https://www.privacy.org.nz/resources-and-learning/case-notes-and-court-decisions/", "config": "config/privacy_pipeline.yaml"},
+    "human_rights": {"name": "Human Rights Commission/Tribunal", "url": "https://www.justice.govt.nz/tribunals/human-rights/hrrt-decisions/", "config": "config/human_rights_pipeline.yaml"},
+    "ombudsman": {"name": "Ombudsman Reports", "url": "https://www.ombudsman.parliament.nz/resources", "config": "config/ombudsman_pipeline.yaml"},
+    "moj_courts": {"name": "Ministry of Justice Court Cases", "url": "https://www.justice.govt.nz/courts/decisions/jdo/", "config": "config/moj_courts_pipeline.yaml"},
+    "ipca": {"name": "Independent Police Conduct Authority", "url": "https://www.ipca.govt.nz/Site/publications-and-media/Accountability/Archive.aspx", "config": "config/ipca_pipeline.yaml"},
+    "law_commission": {"name": "Law Commission Reports", "url": "https://www.lawcom.govt.nz/our-work", "config": "config/law_commission_pipeline.yaml"},
 }
 
 
@@ -61,7 +61,61 @@ def get_source_info(source_id: str) -> dict[str, Any]:
 def get_adapter(source_id: str) -> SourceAdapter:
     """Get a SourceAdapter for the given source ID."""
     info = get_source_info(source_id)
-    return SourceAdapter(
+    adapter_cls: type[SourceAdapter] = SourceAdapter
+    if source_id == "hdc":
+        from corpus_cases_medilegal_nz.sources.hdc import HdcSourceAdapter
+
+        adapter_cls = HdcSourceAdapter
+    elif source_id == "hpdt":
+        from corpus_cases_medilegal_nz.sources.hpdt import HpdtSourceAdapter
+
+        adapter_cls = HpdtSourceAdapter
+    elif source_id == "moj_tribunals":
+        from corpus_cases_medilegal_nz.sources.moj_tribunals import MojTribunalsSourceAdapter
+
+        adapter_cls = MojTribunalsSourceAdapter
+    elif source_id == "era":
+        from corpus_cases_medilegal_nz.sources.era import EraSourceAdapter
+
+        adapter_cls = EraSourceAdapter
+    elif source_id == "teachers":
+        from corpus_cases_medilegal_nz.sources.teachers import TeachersSourceAdapter
+
+        adapter_cls = TeachersSourceAdapter
+    elif source_id == "privacy":
+        from corpus_cases_medilegal_nz.sources.privacy import PrivacySourceAdapter
+
+        adapter_cls = PrivacySourceAdapter
+    elif source_id == "human_rights":
+        from corpus_cases_medilegal_nz.sources.human_rights import HumanRightsSourceAdapter
+
+        adapter_cls = HumanRightsSourceAdapter
+    elif source_id == "ombudsman":
+        from corpus_cases_medilegal_nz.sources.ombudsman import OmbudsmanSourceAdapter
+
+        adapter_cls = OmbudsmanSourceAdapter
+    elif source_id == "ipca":
+        from corpus_cases_medilegal_nz.sources.ipca import IpcaSourceAdapter
+
+        adapter_cls = IpcaSourceAdapter
+    elif source_id == "law_commission":
+        from corpus_cases_medilegal_nz.sources.law_commission import LawCommissionSourceAdapter
+
+        adapter_cls = LawCommissionSourceAdapter
+    elif source_id == "royal_commissions":
+        from corpus_cases_medilegal_nz.sources.royal_commissions import RoyalCommissionsSourceAdapter
+
+        adapter_cls = RoyalCommissionsSourceAdapter
+    elif source_id == "coronial":
+        from corpus_cases_medilegal_nz.sources.coronial import CoronialSourceAdapter
+
+        adapter_cls = CoronialSourceAdapter
+    elif source_id == "moj_courts":
+        from corpus_cases_medilegal_nz.sources.moj_courts import MojCourtsSourceAdapter
+
+        adapter_cls = MojCourtsSourceAdapter
+
+    return adapter_cls(
         source_id=source_id,
         config_path=Path(info["config"]),
     )

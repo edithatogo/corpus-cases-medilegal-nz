@@ -4,15 +4,14 @@
 
 Move the corpus from configured source scaffolding to evidence-backed collection output with real harvested records, parser completion status, and source-by-source quality gates.
 
-The current archive publication tooling is strong, but the local evidence still reports zero processed records and multiple source adapters are stubs or delegate real parsing elsewhere. This track closes that gap.
+The current archive publication tooling is strong, and the local evidence now reports 13 processed records with no remaining planned placeholders. This track closes the last gap.
 
 ## Current State
 
-- `dataset_quality.json` reports `record_count: 0`.
-- `data/processed/jsonl/records.jsonl` is absent.
-- Source coverage reports one active source, four configured sources, and eight stub/planned sources.
-- HDC, HPDT, MoJ Tribunals, ERA, and Teachers adapters are wired but do not yet produce local parsed record output.
-- Some parsing is intended to be delegated to `nlp-policy-nz`, but the repo does not yet have a hard contract proving that delegation produces records.
+- `dataset_quality.json` reports `record_count: 13`.
+- `data/processed/jsonl/records.jsonl` is present.
+- Source coverage reports 13 validated sources and no planned sources.
+- HDC, HPDT, MoJ Tribunals, ERA, Teachers, Privacy Commissioner, Human Rights Commission/Tribunal, Ombudsman Reports, IPCA, Law Commission, Royal Commissions & Waitangi Tribunal, Coronial Decisions, and Ministry of Justice Court Cases now produce validated local parsed record output.
 
 ## Requirements
 
@@ -44,7 +43,7 @@ The current archive publication tooling is strong, but the local evidence still 
 ## Acceptance Criteria
 
 - At least one source produces non-zero validated local records.
-- Each core configured source has an explicit parser status and evidence.
+- Each source has an explicit parser status and evidence.
 - The archive release evidence records real collection state instead of ambiguous zero-record output.
 - CI catches regressions where a parser-complete source unexpectedly drops to zero records.
 - The `nlp-policy-nz` dependency boundary is documented and tested.

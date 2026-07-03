@@ -26,6 +26,19 @@ CORE_SOURCE_URLS = {
     "teachers": "https://www.teachersdisciplinarytribunal.nz/",
 }
 
+EXTENDED_SOURCE_URLS = {
+    "privacy": "https://www.privacy.org.nz/resources-and-learning/case-notes-and-court-decisions/",
+    "human_rights": "https://www.justice.govt.nz/tribunals/human-rights/hrrt-decisions/",
+    "ombudsman": "https://www.ombudsman.parliament.nz/resources",
+    "ipca": "https://www.ipca.govt.nz/Site/publications-and-media/Accountability/Archive.aspx",
+    "law_commission": "https://www.lawcom.govt.nz/our-work",
+    "royal_commissions": "https://www.waitangitribunal.govt.nz/en/publications/tribunal-reports",
+    "coronial": "https://coronialservices.justice.govt.nz/",
+    "moj_courts": "https://www.justice.govt.nz/courts/decisions/jdo/",
+}
+
+ALL_SOURCE_URLS = {**CORE_SOURCE_URLS, **EXTENDED_SOURCE_URLS}
+
 JsonObject = dict[str, Any]
 
 
@@ -34,17 +47,18 @@ def build_fixture_collection_records(
     *,
     retrieved_at: str = "2026-07-01T00:00:00Z",
 ) -> list[JsonObject]:
-    """Build deterministic parser output records from core source fixtures."""
+    """Build deterministic parser output records from all fixture-backed source fixtures."""
     manifest_path = fixture_root / "fixture_manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    fixture_groups = {**manifest["core_sources"], **manifest.get("extended_sources", {})}
     records: list[JsonObject] = []
-    for source_id in sorted(CORE_SOURCE_URLS):
-        fixture = manifest["core_sources"][source_id]
+    for source_id in sorted(ALL_SOURCE_URLS):
+        fixture = fixture_groups[source_id]
         html = (fixture_root / fixture["html"]).read_text(encoding="utf-8")
         records.extend(
             parse_source_listing_html(
                 source_id=source_id,
-                url=CORE_SOURCE_URLS[source_id],
+                url=ALL_SOURCE_URLS[source_id],
                 html=html,
                 retrieved_at=retrieved_at,
             )
@@ -79,7 +93,7 @@ def write_collection_proof(
         "record_count": len(records),
         "source_counts": {
             source_id: sum(1 for record in records if record["source"] == source_id)
-            for source_id in sorted(CORE_SOURCE_URLS)
+            for source_id in sorted(ALL_SOURCE_URLS)
         },
         "artifacts": {key: str(value) for key, value in paths.items()},
         "dataset_diff": dataset_diff,

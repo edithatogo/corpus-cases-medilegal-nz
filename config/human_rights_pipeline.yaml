@@ -1,8 +1,8 @@
 pipeline:
   name: human_rights
   description: "Human Rights Commission/Tribunal NZ Decisions Ingestion Pipeline"
-  source_url: ""
-  base_url: ""
+  source_url: "https://www.justice.govt.nz/tribunals/human-rights/hrrt-decisions/"
+  base_url: "https://www.justice.govt.nz/"
   paths:
     raw_dir: "data/raw/human_rights"
     processed_dir: "data/processed"

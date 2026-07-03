@@ -69,12 +69,18 @@ def test_source_collection_audit_reports_current_parser_completion_state() -> No
     audit = build_source_collection_audit(root=ROOT, records=[])
     by_source = {source["source_id"]: source for source in audit["sources"]}
 
-    assert audit["stage_counts"]["fetch_scaffold_parser_stub"] == 5
-    assert audit["stage_counts"]["planned"] == 8
+    assert audit["stage_counts"]["fetch_scaffold_parser_stub"] == 13
     assert by_source["hdc"]["completion_stage"] == "fetch_scaffold_parser_stub"
     assert by_source["hdc"]["adapter_module_exists"] is True
     assert by_source["hdc"]["record_count"] == 0
-    assert by_source["coronial"]["completion_stage"] == "planned"
+    assert by_source["privacy"]["completion_stage"] == "fetch_scaffold_parser_stub"
+    assert by_source["human_rights"]["completion_stage"] == "fetch_scaffold_parser_stub"
+    assert by_source["ombudsman"]["completion_stage"] == "fetch_scaffold_parser_stub"
+    assert by_source["ipca"]["completion_stage"] == "fetch_scaffold_parser_stub"
+    assert by_source["law_commission"]["completion_stage"] == "fetch_scaffold_parser_stub"
+    assert by_source["royal_commissions"]["completion_stage"] == "fetch_scaffold_parser_stub"
+    assert by_source["coronial"]["completion_stage"] == "fetch_scaffold_parser_stub"
+    assert by_source["moj_courts"]["completion_stage"] == "fetch_scaffold_parser_stub"
 
 
 def test_source_collection_audit_marks_sources_with_records_validated() -> None:
@@ -129,7 +135,7 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert evidence["release"]["github_release_tag"] == "dataset-v2026.07.0"
     assert evidence["zenodo"]["publish_handoff_only"] is True
     assert evidence["parser_contract"]["provider"]["package"] == "nlp_policy_nz"
-    assert evidence["source_collection_audit"]["stage_counts"]["planned"] == 8
+    assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == 13
     assert evidence["collection_quality_gates"]["status"] in {"pass", "blocked"}
     assert evidence["public_surface"]["surfaces"]["osf"]["status"] == "inactive"
     assert evidence["attestation_verification"]["provider"] == "github-artifact-attestations"
