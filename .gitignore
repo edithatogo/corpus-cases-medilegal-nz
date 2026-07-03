@@ -19,6 +19,7 @@ archive/
 !conductor/archive/**
 generated/
 .tmp/
+.local-secrets/
 .hf_cache/
 .pytest-tmp/
 test-tmp/

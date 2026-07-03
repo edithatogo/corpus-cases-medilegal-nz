@@ -62,7 +62,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## [ ] Track: Implement Multi-Git and Multi-Archive Mirroring Setup
 *Link: [./conductor/tracks/multi_git_archive_mirroring_20260614/](./conductor/tracks/multi_git_archive_mirroring_20260614/)*
-*Status: BLOCKED - local mirror workflow hardening and guarded live trigger verification are complete, but GitHub does not currently have the required `GIT_MIRROR_*` secrets, so strict mirror publication cannot be proven.*
+*Status: BLOCKED - GitHub `GIT_MIRROR_*` secrets and writable deploy keys are configured, and Codeberg mirrors `master` at `5a85e9311562da17146a65308200134192b73671`; GitLab direct git mirroring is blocked because the existing GitLab mirror repository is SHA-256-format and rejects this SHA-1 GitHub history.*
 
 ## [x] Track: Monthly Dynamic Archive Publication
 *Link: [./conductor/tracks/monthly_dynamic_archive_publication_20260701/](./conductor/tracks/monthly_dynamic_archive_publication_20260701/)*

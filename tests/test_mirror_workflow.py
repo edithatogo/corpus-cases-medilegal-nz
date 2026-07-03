@@ -9,15 +9,20 @@ def test_mirror_workflow_skips_when_any_required_secret_is_missing() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
     assert 'for MIRROR_URL in "$GIT_MIRROR_URL" "$GIT_MIRROR_URL_GITLAB" "$GIT_MIRROR_URL_CODEBERG"; do' in workflow
+    assert "SEEN_MIRROR_URLS[$MIRROR_URL]=1" in workflow
     assert "No mirror URLs are set, skipping mirror." in workflow
     assert 'if [ -z "$GIT_MIRROR_SSH_PRIVATE_KEY" ]; then' in workflow
     assert "GIT_MIRROR_SSH_PRIVATE_KEY is not set, skipping mirror." in workflow
 
 
-def test_mirror_workflow_quotes_dynamic_shell_values() -> None:
+def test_mirror_workflow_quotes_dynamic_shell_values_and_reports_each_target() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
-    assert 'echo "$GIT_MIRROR_URL"' in workflow
+    assert 'git push --force --prune mirror HEAD:${{ github.ref }}' in workflow
+    assert 'git ls-remote mirror HEAD' in workflow
+    assert 'echo "Mirrored $GIT_MIRROR_URL at $MIRROR_HEAD"' in workflow
+    assert 'echo "::error::Mirror push failed for $GIT_MIRROR_URL"' in workflow
+    assert 'echo "::error::$FAILURES mirror target(s) failed"' in workflow
     assert 'ssh-keyscan -t ed25519 "$HOST"' in workflow
     assert "git remote remove mirror" in workflow
 

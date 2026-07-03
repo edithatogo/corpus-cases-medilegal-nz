@@ -4,10 +4,13 @@
 - [x] Task: Write `.github/workflows/mirror_sync.yml` to support automated SSH mirroring to secondary Git remotes (GitLab/Codeberg).
 - [x] Task: Locally harden `mirror_sync.yml` credential bypass behavior for missing mirror URL or missing SSH private key.
 - [x] Task: Document public GitLab and Codeberg mirror URLs in env templates and mirror docs.
-- [ ] Task: Configure repository secrets `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, and `GIT_MIRROR_SSH_PRIVATE_KEY` on GitHub.
-  - Blocked: `gh secret list --repo edithatogo/corpus-cases-medilegal-nz` currently shows `HF_TOKEN`, `OSF_TOKEN`, `ZENODO_SANDBOX_TOKEN`, and `ZENODO_TOKEN`, but no `GIT_MIRROR_*` secrets.
-  - Evidence: latest Mirror Sync run `28653804452` succeeded as a guarded skip and logged empty `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, and `GIT_MIRROR_SSH_PRIVATE_KEY` values before printing `No mirror URLs are set, skipping mirror.`
+- [x] Task: Configure repository secrets `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, and `GIT_MIRROR_SSH_PRIVATE_KEY` on GitHub.
+  - Evidence: `gh secret list --repo edithatogo/corpus-cases-medilegal-nz` shows all four `GIT_MIRROR_*` secrets updated on 2026-07-03.
+  - Evidence: `uv run --frozen --python 3.12 --extra dev python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict` returned `status: ready` with no blockers when the same values were loaded locally.
+  - Evidence: GitLab and Codeberg both have the v2 deploy key fingerprint `SHA256:8pVwLtOI8exwo3MLOJIQmEtwOrjwCof9eMRV94MBELE` attached with write access.
 - [x] Task: Verify successful manual and push triggers for mirror sync.
+  - Partial live result: Codeberg mirror push succeeded and public readback returns `5a85e9311562da17146a65308200134192b73671` for `HEAD` and `refs/heads/master`.
+  - Blocked live result: GitLab mirror push authenticates but fails with `fatal: the receiving end does not support this repository's hash algorithm` because the existing GitLab project HEAD is a 64-character SHA-256 object (`e3dcc84171382b1178636b36a160335af5d35be0fbc8274624bad048299fb50e`). The GitLab mirror project must be recreated or converted as a SHA-1-compatible repository before direct git push mirroring can complete.
 
 ## Phase 2: Zenodo & OSF Mirroring Integration
 - [x] Task: Document Zenodo archival publication schema and script requirements. (See zenodo_archival_plan.md)
@@ -35,3 +38,8 @@
 - 2026-07-02: `mirror-readiness --strict` returns `status: ready` when `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, and `GIT_MIRROR_SSH_PRIVATE_KEY` are all configured.
 - 2026-07-03: `uv run --frozen --python 3.12 --extra dev python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict` returned `status: blocked` with blockers `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, `GIT_MIRROR_SSH_PRIVATE_KEY`, and `mirror_target_set`.
 - 2026-07-03: `git ls-remote https://gitlab.com/edithatogo/corpus-cases-medilegal-nz.git HEAD` returned public HEAD `e3dcc84171382b1178636b36a160335af5d35be0fbc8274624bad048299fb50e`; local Codeberg HTTPS readback failed with a Windows Schannel TLS handshake error, so Codeberg should be rechecked from GitHub Actions or a non-Schannel client after mirror secrets are configured.
+- 2026-07-03: Used Chrome-authenticated GitLab and Codeberg sessions to attach v2 writable deploy key `SHA256:8pVwLtOI8exwo3MLOJIQmEtwOrjwCof9eMRV94MBELE`; updated GitHub Actions `GIT_MIRROR_*` secrets without printing secret values.
+- 2026-07-03: Mirror Sync run `28659283834` failed on GitLab with `Permission denied (publickey)` because the first generated key was passphrase-protected accidentally; v2 key generation corrected this.
+- 2026-07-03: Mirror Sync run `28659792499` authenticated to GitLab but failed with `fatal: the receiving end does not support this repository's hash algorithm`, confirming a GitLab remote object-format blocker rather than a credentials blocker.
+- 2026-07-03: Direct Codeberg SSH push with the v2 key succeeded: `HEAD -> master`; public readback now returns `5a85e9311562da17146a65308200134192b73671` for both `HEAD` and `refs/heads/master`.
+- 2026-07-03: Focused validation passed after workflow hardening: `uv run --frozen --python 3.12 --extra dev pytest -q tests/test_mirror_workflow.py` -> 6 passed.

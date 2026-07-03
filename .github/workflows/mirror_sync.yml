@@ -19,9 +19,11 @@ jobs:
           GIT_MIRROR_URL_CODEBERG: ${{ secrets.GIT_MIRROR_URL_CODEBERG }}
           GIT_MIRROR_SSH_PRIVATE_KEY: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY }}
         run: |
+          declare -A SEEN_MIRROR_URLS=()
           MIRROR_URLS=()
           for MIRROR_URL in "$GIT_MIRROR_URL" "$GIT_MIRROR_URL_GITLAB" "$GIT_MIRROR_URL_CODEBERG"; do
-            if [ -n "$MIRROR_URL" ]; then
+            if [ -n "$MIRROR_URL" ] && [ -z "${SEEN_MIRROR_URLS[$MIRROR_URL]:-}" ]; then
+              SEEN_MIRROR_URLS[$MIRROR_URL]=1
               MIRROR_URLS+=("$MIRROR_URL")
             fi
           done
@@ -40,12 +42,24 @@ jobs:
           echo "$GIT_MIRROR_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
+          FAILURES=0
           for GIT_MIRROR_URL in "${MIRROR_URLS[@]}"; do
             # Extract host from git@host:user/repo.git
             HOST=$(echo "$GIT_MIRROR_URL" | cut -d'@' -f2 | cut -d':' -f1)
             ssh-keyscan -t ed25519 "$HOST" >> ~/.ssh/known_hosts
 
             git remote add mirror "$GIT_MIRROR_URL"
-            git push --force --prune mirror HEAD:${{ github.ref }}
+            if git push --force --prune mirror HEAD:${{ github.ref }}; then
+              MIRROR_HEAD=$(git ls-remote mirror HEAD | cut -f1)
+              echo "Mirrored $GIT_MIRROR_URL at $MIRROR_HEAD"
+            else
+              echo "::error::Mirror push failed for $GIT_MIRROR_URL"
+              FAILURES=$((FAILURES + 1))
+            fi
             git remote remove mirror
           done
+
+          if [ "$FAILURES" -gt 0 ]; then
+            echo "::error::$FAILURES mirror target(s) failed"
+            exit 1
+          fi

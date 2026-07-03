@@ -20,6 +20,11 @@ targets. The single `GIT_MIRROR_URL` secret remains as a backward-compatible
 fallback, but the preferred configuration is to set the GitLab and Codeberg
 URLs explicitly.
 
+The workflow deduplicates repeated mirror URLs, attempts every configured
+unique target, logs the remote HEAD for successful pushes, and fails at the end
+if any configured mirror target failed. This keeps successful mirrors observable
+even when one provider is temporarily incompatible.
+
 ## Readiness Checks
 
 Use the local readiness command to confirm the workflow shape and secret
@@ -55,5 +60,20 @@ git ls-remote https://codeberg.org/edithatogo/corpus-cases-medilegal-nz.git HEAD
 Expected outcome:
 
 - The workflow dispatch is accepted by GitHub.
-- The run completes successfully.
+- The run completes successfully when all configured mirror targets accept the
+  push.
 - When the mirror secrets are absent, the job logs a guarded skip.
+- If one configured mirror fails, the job still attempts later targets and logs
+  per-target success or failure before exiting non-zero.
+
+## Current Provider Notes
+
+- Codeberg is the verified public git mirror for `master`; public readback on
+  2026-07-03 returned `5a85e9311562da17146a65308200134192b73671` for `HEAD`
+  and `refs/heads/master`.
+- GitLab has writable deploy-key authentication configured, but the existing
+  GitLab project was initialized with a SHA-256 object format and rejects this
+  SHA-1 GitHub repository with `the receiving end does not support this
+  repository's hash algorithm`. Recreate or reconfigure the GitLab mirror as a
+  SHA-1-compatible repository before expecting direct git push mirroring to
+  pass there.
