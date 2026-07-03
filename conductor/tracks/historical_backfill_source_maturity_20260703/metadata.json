@@ -1,0 +1,8 @@
+{
+  "track_id": "historical_backfill_source_maturity_20260703",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-07-03T09:49:13Z",
+  "updated_at": "2026-07-03T09:49:13Z",
+  "description": "Implement live historical backfill maturity, source completeness evidence, public-claims gating, source discovery governance, rights review, and post-expansion publication proof."
+}
