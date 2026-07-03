@@ -4,7 +4,9 @@
 - [x] Task: Write `.github/workflows/mirror_sync.yml` to support automated SSH mirroring to secondary Git remotes (GitLab/Codeberg).
 - [x] Task: Locally harden `mirror_sync.yml` credential bypass behavior for missing mirror URL or missing SSH private key.
 - [x] Task: Document public GitLab and Codeberg mirror URLs in env templates and mirror docs.
-- [ ] Task: Configure repository secrets `GIT_MIRROR_URL` and `GIT_MIRROR_SSH_PRIVATE_KEY` on GitHub.
+- [ ] Task: Configure repository secrets `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, and `GIT_MIRROR_SSH_PRIVATE_KEY` on GitHub.
+  - Blocked: `gh secret list --repo edithatogo/corpus-cases-medilegal-nz` currently shows `HF_TOKEN`, `OSF_TOKEN`, `ZENODO_SANDBOX_TOKEN`, and `ZENODO_TOKEN`, but no `GIT_MIRROR_*` secrets.
+  - Evidence: latest Mirror Sync run `28653804452` succeeded as a guarded skip and logged empty `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, and `GIT_MIRROR_SSH_PRIVATE_KEY` values before printing `No mirror URLs are set, skipping mirror.`
 - [x] Task: Verify successful manual and push triggers for mirror sync.
 
 ## Phase 2: Zenodo & OSF Mirroring Integration
@@ -31,3 +33,5 @@
 - 2026-07-03: Public GitLab and Codeberg mirror endpoints were verified as reachable; env templates now store mirror URLs and tokens in ignored local env files.
 - 2026-07-03: Strict mirror readiness now fails closed unless the full mirror target set is configured, so the track can distinguish partial from complete mirror coverage.
 - 2026-07-02: `mirror-readiness --strict` returns `status: ready` when `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, and `GIT_MIRROR_SSH_PRIVATE_KEY` are all configured.
+- 2026-07-03: `uv run --frozen --python 3.12 --extra dev python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict` returned `status: blocked` with blockers `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, `GIT_MIRROR_SSH_PRIVATE_KEY`, and `mirror_target_set`.
+- 2026-07-03: `git ls-remote https://gitlab.com/edithatogo/corpus-cases-medilegal-nz.git HEAD` returned public HEAD `e3dcc84171382b1178636b36a160335af5d35be0fbc8274624bad048299fb50e`; local Codeberg HTTPS readback failed with a Windows Schannel TLS handshake error, so Codeberg should be rechecked from GitHub Actions or a non-Schannel client after mirror secrets are configured.
