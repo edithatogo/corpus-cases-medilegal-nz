@@ -68,6 +68,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Check mirror workflow readiness and secret gating.",
     )
     mirror.add_argument("--strict", action="store_true", help="Exit non-zero on blockers.")
+    mirror.add_argument(
+        "--probe-remotes",
+        action="store_true",
+        help="Probe configured mirror HEADs and flag incompatible remote object formats.",
+    )
     intelligence = sub.add_parser(
         "archive-intelligence",
         help="Build archive maturity intelligence from monthly release evidence.",
@@ -132,7 +137,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         if ns.strict and result["status"] != "ready":
             exit_code = 1
     elif ns.command == "mirror-readiness":
-        result = mirror_sync_readiness(require_complete_mirror_set=ns.strict)
+        result = mirror_sync_readiness(
+            require_complete_mirror_set=ns.strict,
+            probe_remotes=ns.probe_remotes,
+        )
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
         if ns.strict and result["status"] != "ready":
             exit_code = 1

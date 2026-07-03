@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from corpus_cases_medilegal_nz.mirror import mirror_sync_readiness
+from corpus_cases_medilegal_nz.mirror import classify_remote_head, mirror_sync_readiness
 
 WORKFLOW_PATH = Path(".github/workflows/mirror_sync.yml")
 
@@ -96,3 +96,45 @@ def test_mirror_readiness_strict_blocks_when_any_target_is_missing() -> None:
     assert report["status"] == "blocked"
     assert checks["mirror_target_set"]["status"] == "gated"
     assert "mirror_target_set" in report["blockers"]
+
+
+def test_remote_head_classification_flags_sha256_as_incompatible() -> None:
+    assert classify_remote_head("b70b00f6642634d31299afba8976486328134a2a") == {
+        "status": "ok",
+        "object_format": "sha1",
+        "compatible": True,
+    }
+
+    sha256 = "e3dcc84171382b1178636b36a160335af5d35be0fbc8274624bad048299fb50e"
+    classification = classify_remote_head(sha256)
+
+    assert classification["status"] == "incompatible"
+    assert classification["object_format"] == "sha256"
+    assert classification["compatible"] is False
+
+
+def test_mirror_readiness_probe_blocks_sha256_gitlab_remote() -> None:
+    gitlab_url = "git@gitlab.com:edithatogo/corpus-cases-medilegal-nz.git"
+    codeberg_url = "git@codeberg.org:edithatogo/corpus-cases-medilegal-nz.git"
+    report = mirror_sync_readiness(
+        environment={
+            "GIT_MIRROR_URL": gitlab_url,
+            "GIT_MIRROR_URL_GITLAB": gitlab_url,
+            "GIT_MIRROR_URL_CODEBERG": codeberg_url,
+            "GIT_MIRROR_SSH_PRIVATE_KEY": "key",
+        },
+        root=Path(),
+        require_complete_mirror_set=True,
+        remote_heads={
+            gitlab_url: "e3dcc84171382b1178636b36a160335af5d35be0fbc8274624bad048299fb50e",
+            codeberg_url: "b70b00f6642634d31299afba8976486328134a2a",
+        },
+    )
+
+    checks = {check["id"]: check for check in report["checks"]}
+
+    assert report["status"] == "blocked"
+    assert checks["remote_object_format"]["status"] == "blocked"
+    assert checks["remote_object_format"]["incompatible_count"] == 1
+    assert "remote_object_format" in report["blockers"]
+    assert report["remote_probe_results"][0]["object_format"] == "sha256"

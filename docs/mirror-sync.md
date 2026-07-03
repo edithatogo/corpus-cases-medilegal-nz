@@ -33,6 +33,7 @@ gating:
 ```bash
 python -m corpus_cases_medilegal_nz.cli mirror-readiness
 python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict
+python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict --probe-remotes
 ```
 
 `--strict` requires the full mirror target set to be configured:
@@ -41,6 +42,12 @@ python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict
 - `GIT_MIRROR_URL_GITLAB`
 - `GIT_MIRROR_URL_CODEBERG`
 - `GIT_MIRROR_SSH_PRIVATE_KEY`
+
+`--probe-remotes` additionally runs public `git ls-remote` readback against
+configured mirror URLs and classifies remote HEAD object IDs. A 40-character
+HEAD is treated as SHA-1-compatible. A 64-character HEAD is treated as a
+SHA-256-format remote and blocks direct GitHub-to-provider mirroring because
+GitHub repository history is SHA-1.
 
 Or use the wrapper script:
 
@@ -68,8 +75,8 @@ Expected outcome:
 
 ## Current Provider Notes
 
-- Codeberg is the verified public git mirror for `master`; public readback on
-  2026-07-03 returned `5a85e9311562da17146a65308200134192b73671` for `HEAD`
+- Codeberg is the verified public git mirror for `master`; SSH readback on
+  2026-07-03 returned `b70b00f6642634d31299afba8976486328134a2a` for `HEAD`
   and `refs/heads/master`.
 - GitLab has writable deploy-key authentication configured, but the existing
   GitLab project was initialized with a SHA-256 object format and rejects this
@@ -77,3 +84,20 @@ Expected outcome:
   repository's hash algorithm`. Recreate or reconfigure the GitLab mirror as a
   SHA-1-compatible repository before expecting direct git push mirroring to
   pass there.
+
+## GitLab SHA-1 Repair Checklist
+
+Use this only when `mirror-readiness --strict --probe-remotes` reports a
+64-character SHA-256 GitLab HEAD.
+
+1. Preserve the existing SHA-256 GitLab project by renaming its path to a dated
+   archive suffix such as `corpus-cases-medilegal-nz-sha256-archive-20260703`.
+2. Create a new public blank GitLab project at
+   `edithatogo/corpus-cases-medilegal-nz`.
+3. Leave GitLab's `project[use_sha256_repository]` option unchecked when
+   creating the replacement project.
+4. Add the existing writable mirror deploy key to the replacement project.
+5. Run `mirror-readiness --strict --probe-remotes`; the GitLab HEAD should be
+   absent for an empty project or 40 characters after first push.
+6. Dispatch Mirror Sync and verify both GitLab and Codeberg read back the
+   canonical GitHub commit.
