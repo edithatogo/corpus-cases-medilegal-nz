@@ -94,8 +94,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Historical Backfill And Source Maturity
+## [x] Track: Historical Backfill And Source Maturity
 *Link: [./conductor/tracks/historical_backfill_source_maturity_20260703/](./conductor/tracks/historical_backfill_source_maturity_20260703/)*
-*Status: NEW - live historical backfill maturity, source completeness evidence, public-claims gating, source discovery governance, rights review, and post-expansion publication proof.*
+*Status: ✅ COMPLETE - source maturity ladder, completeness evidence, conservative public-claims gating, discovery queue, rights review, parser-risk prioritisation, backfill provenance, dedupe, freshness, and governance ledgers are implemented.*
 
 ---
