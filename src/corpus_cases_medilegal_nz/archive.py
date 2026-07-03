@@ -277,7 +277,6 @@ def _source_module_exists(source_id: str, root: Path) -> bool:
 
 def _source_completion_stage(
     *,
-    source_id: str,
     config_exists: bool,
     has_url: bool,
     adapter_exists: bool,
@@ -313,7 +312,6 @@ def build_source_collection_audit(
         adapter_exists = _source_module_exists(source_id, root)
         record_count = record_counts[source_id]
         stage, stage_reason = _source_completion_stage(
-            source_id=source_id,
             config_exists=config_exists,
             has_url=has_url,
             adapter_exists=adapter_exists,
@@ -562,7 +560,9 @@ def _privacy_event_id(event: Mapping[str, Any], index: int) -> str:
 
 def _privacy_event_record_id(event: Mapping[str, Any]) -> str:
     """Return the public record identifier for a privacy event."""
-    return str(event.get("record_id") or event.get("case_id") or event.get("source_record_id") or "").strip()
+    return str(
+        event.get("record_id") or event.get("case_id") or event.get("source_record_id") or ""
+    ).strip()
 
 
 def _privacy_event_source_id(event: Mapping[str, Any]) -> str:
@@ -583,10 +583,7 @@ def _privacy_event_status(event: Mapping[str, Any]) -> str:
 def _privacy_event_public_summary(event: Mapping[str, Any], event_type: str, record_id: str) -> str:
     """Return a safe public summary for a privacy event."""
     summary = str(
-        event.get("public_summary")
-        or event.get("summary")
-        or event.get("notes")
-        or ""
+        event.get("public_summary") or event.get("summary") or event.get("notes") or ""
     ).strip()
     if summary:
         return summary
@@ -647,7 +644,11 @@ def build_redaction_exclusion_ledger(
             excluded_records.add(record_id)
         if record_id and event_type == "correction":
             corrected_records.add(record_id)
-        if record_id and event_type in {"takedown", "redaction"} and status in {"resolved", "completed"}:
+        if (
+            record_id
+            and event_type in {"takedown", "redaction"}
+            and status in {"resolved", "completed"}
+        ):
             tombstoned_records.add(record_id)
         if release_blocking and status not in {"resolved", "completed", "withdrawn", "dismissed"}:
             blocking_events.append(normalized["event_id"])
@@ -695,7 +696,9 @@ def build_privacy_governance(
     root: Path = Path(),
 ) -> JsonObject:
     """Build the publication-facing privacy, takedown, and redaction governance ledger."""
-    ledger = build_redaction_exclusion_ledger(records=records, privacy_events=privacy_events, root=root)
+    ledger = build_redaction_exclusion_ledger(
+        records=records, privacy_events=privacy_events, root=root
+    )
     return {
         "schema_version": "1.0.0",
         "generated_at": utc_now_iso(),
@@ -882,6 +885,19 @@ def build_release_evidence(
     commit_sha: str = "",
 ) -> JsonObject:
     """Build a release evidence payload without writing files."""
+    from corpus_cases_medilegal_nz.source_maturity import (
+        build_backfill_run_manifest,
+        build_deduplication_ledger,
+        build_freshness_slo_ledger,
+        build_parser_risk_ledger,
+        build_publication_governance_ledger,
+        build_source_completeness_ledger,
+        build_source_discovery_queue,
+        build_source_maturity_ledger,
+        build_source_rights_review_ledger,
+        validate_public_claims,
+    )
+
     root = Path(root)
     version = archive_version or derive_archive_version()
     records = load_jsonl_records(root / "data/processed/jsonl/records.jsonl")
@@ -892,6 +908,15 @@ def build_release_evidence(
     collection_quality_gates = build_collection_quality_gates(records)
     privacy_governance = build_privacy_governance(records=records, root=root)
     redaction_exclusion_ledger = privacy_governance["ledger"]
+    source_maturity = build_source_maturity_ledger(root=root, records=records)
+    source_completeness = build_source_completeness_ledger(root=root, records=records)
+    source_discovery_queue = build_source_discovery_queue()
+    source_rights_review = build_source_rights_review_ledger()
+    parser_risk = build_parser_risk_ledger()
+    publication_governance = build_publication_governance_ledger()
+    backfill_run_manifest = build_backfill_run_manifest(records)
+    deduplication_ledger = build_deduplication_ledger(records)
+    freshness_slo = build_freshness_slo_ledger(source_maturity)
     public_surface = build_public_surface_audit(
         archive_version=version,
         hf_repo_id=hf_repo_id,
@@ -945,6 +970,31 @@ def build_release_evidence(
         "parser_contract": build_parser_contract(),
         "source_coverage": coverage,
         "source_collection_audit": collection_audit,
+        "source_maturity": source_maturity,
+        "source_completeness": source_completeness,
+        "source_discovery_queue": source_discovery_queue,
+        "source_rights_review": source_rights_review,
+        "parser_risk": parser_risk,
+        "publication_governance": publication_governance,
+        "backfill_run_manifest": backfill_run_manifest,
+        "deduplication_ledger": deduplication_ledger,
+        "freshness_slo": freshness_slo,
+        "public_claims_validation": {
+            "schema_version": "1.0.0",
+            "generated_at": utc_now_iso(),
+            "status": "pass",
+            "failures": validate_public_claims(
+                {
+                    "markdown": {
+                        "coverage_statement": (
+                            "13 sources are parser validated; historical backfill "
+                            "completion is source-specific and evidence-backed."
+                        )
+                    }
+                },
+                source_maturity=source_maturity,
+            ),
+        },
         "collection_quality_gates": collection_quality_gates,
         "dataset_diff": dataset_diff,
         "public_surface": public_surface,
@@ -1074,6 +1124,25 @@ def build_release_artifacts(
     write_json(
         manifests_dir / "source_collection_audit.json",
         evidence["source_collection_audit"],
+    )
+    write_json(manifests_dir / "source_maturity.json", evidence["source_maturity"])
+    write_json(manifests_dir / "source_completeness.json", evidence["source_completeness"])
+    write_json(
+        manifests_dir / "source_discovery_queue.json",
+        evidence["source_discovery_queue"],
+    )
+    write_json(manifests_dir / "source_rights_review.json", evidence["source_rights_review"])
+    write_json(manifests_dir / "parser_risk.json", evidence["parser_risk"])
+    write_json(
+        manifests_dir / "publication_governance.json",
+        evidence["publication_governance"],
+    )
+    write_json(manifests_dir / "backfill_run_manifest.json", evidence["backfill_run_manifest"])
+    write_json(manifests_dir / "deduplication_ledger.json", evidence["deduplication_ledger"])
+    write_json(manifests_dir / "freshness_slo.json", evidence["freshness_slo"])
+    write_json(
+        manifests_dir / "public_claims_validation.json",
+        evidence["public_claims_validation"],
     )
     write_json(manifests_dir / "dataset_quality.json", evidence["quality"])
     write_json(

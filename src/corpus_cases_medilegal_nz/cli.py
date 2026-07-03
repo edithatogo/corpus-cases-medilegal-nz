@@ -22,6 +22,14 @@ from corpus_cases_medilegal_nz.collection_proof import write_collection_proof
 from corpus_cases_medilegal_nz.hf_sync import main as hf_sync_main
 from corpus_cases_medilegal_nz.mirror import mirror_sync_readiness
 from corpus_cases_medilegal_nz.parser_contract import build_parser_contract
+from corpus_cases_medilegal_nz.source_maturity import (
+    build_parser_risk_ledger,
+    build_publication_governance_ledger,
+    build_source_completeness_ledger,
+    build_source_discovery_queue,
+    build_source_maturity_ledger,
+    build_source_rights_review_ledger,
+)
 from corpus_cases_medilegal_nz.sources import get_source_ids
 
 
@@ -31,6 +39,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("sources", help="List configured source identifiers.")
     sub.add_parser("source-audit", help="Report source collection and parser completion state.")
+    sub.add_parser(
+        "source-maturity",
+        help="Report source maturity beyond parser validation.",
+    )
+    sub.add_parser(
+        "source-completeness",
+        help="Report historical backfill completeness reconciliation.",
+    )
+    sub.add_parser("source-discovery", help="Report review-gated candidate source queue.")
+    sub.add_parser("source-rights", help="Report source-level rights review ledger.")
+    sub.add_parser("parser-risk", help="Report parser replacement and live-smoke priorities.")
+    sub.add_parser("publication-governance", help="Report remaining publication governance gates.")
     proof = sub.add_parser("collection-proof", help="Build deterministic local collection proof.")
     proof.add_argument("--output-dir", default="data/processed")
     proof.add_argument("--fixture-root", default="tests/fixtures/sources")
@@ -71,6 +91,26 @@ def main(argv: Sequence[str] | None = None) -> int:
     elif ns.command == "source-audit":
         records = load_jsonl_records(Path("data/processed/jsonl/records.jsonl"))
         result = build_source_collection_audit(records=records)
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "source-maturity":
+        records = load_jsonl_records(Path("data/processed/jsonl/records.jsonl"))
+        result = build_source_maturity_ledger(records=records)
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "source-completeness":
+        records = load_jsonl_records(Path("data/processed/jsonl/records.jsonl"))
+        result = build_source_completeness_ledger(records=records)
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "source-discovery":
+        result = build_source_discovery_queue()
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "source-rights":
+        result = build_source_rights_review_ledger()
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "parser-risk":
+        result = build_parser_risk_ledger()
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "publication-governance":
+        result = build_publication_governance_ledger()
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
     elif ns.command == "collection-proof":
         result = write_collection_proof(

@@ -17,6 +17,17 @@ from corpus_cases_medilegal_nz.archive import (
     write_json,
 )
 from corpus_cases_medilegal_nz.medilegal_parser import parse_source_listing_html
+from corpus_cases_medilegal_nz.source_maturity import (
+    build_backfill_run_manifest,
+    build_deduplication_ledger,
+    build_freshness_slo_ledger,
+    build_parser_risk_ledger,
+    build_publication_governance_ledger,
+    build_source_completeness_ledger,
+    build_source_discovery_queue,
+    build_source_maturity_ledger,
+    build_source_rights_review_ledger,
+)
 
 CORE_SOURCE_URLS = {
     "hdc": "https://www.hdc.org.nz/decisions/search-decisions/",
@@ -88,6 +99,44 @@ def write_collection_proof(
         collection_quality_gates,
     )
     audit = build_source_collection_audit(records=records)
+    source_maturity = build_source_maturity_ledger(
+        records=records, previous_records=previous_records
+    )
+    source_completeness = build_source_completeness_ledger(
+        records=records,
+        previous_records=previous_records,
+    )
+    source_discovery_queue = build_source_discovery_queue()
+    source_rights_review = build_source_rights_review_ledger()
+    parser_risk = build_parser_risk_ledger()
+    publication_governance = build_publication_governance_ledger()
+    backfill_run_manifest = build_backfill_run_manifest(records)
+    deduplication_ledger = build_deduplication_ledger(records)
+    freshness_slo = build_freshness_slo_ledger(source_maturity)
+    source_maturity_path = write_json(manifests_dir / "source_maturity.json", source_maturity)
+    source_completeness_path = write_json(
+        manifests_dir / "source_completeness.json",
+        source_completeness,
+    )
+    source_discovery_path = write_json(
+        manifests_dir / "source_discovery_queue.json",
+        source_discovery_queue,
+    )
+    source_rights_path = write_json(
+        manifests_dir / "source_rights_review.json",
+        source_rights_review,
+    )
+    parser_risk_path = write_json(manifests_dir / "parser_risk.json", parser_risk)
+    publication_governance_path = write_json(
+        manifests_dir / "publication_governance.json",
+        publication_governance,
+    )
+    backfill_manifest_path = write_json(
+        manifests_dir / "backfill_run_manifest.json",
+        backfill_run_manifest,
+    )
+    dedupe_path = write_json(manifests_dir / "deduplication_ledger.json", deduplication_ledger)
+    freshness_path = write_json(manifests_dir / "freshness_slo.json", freshness_slo)
     evidence = {
         "schema_version": "1.0.0",
         "record_count": len(records),
@@ -99,12 +148,30 @@ def write_collection_proof(
         "dataset_diff": dataset_diff,
         "collection_quality_gates": collection_quality_gates,
         "source_collection_audit": audit,
+        "source_maturity": source_maturity,
+        "source_completeness": source_completeness,
+        "source_discovery_queue": source_discovery_queue,
+        "source_rights_review": source_rights_review,
+        "parser_risk": parser_risk,
+        "publication_governance": publication_governance,
+        "backfill_run_manifest": backfill_run_manifest,
+        "deduplication_ledger": deduplication_ledger,
+        "freshness_slo": freshness_slo,
     }
     evidence_path = output_dir / "collection_proof.json"
     write_json(evidence_path, evidence)
     evidence["artifacts"]["collection_proof"] = str(evidence_path)
     evidence["artifacts"]["dataset_diff"] = str(dataset_diff_path)
     evidence["artifacts"]["collection_quality_gates"] = str(quality_gates_path)
+    evidence["artifacts"]["source_maturity"] = str(source_maturity_path)
+    evidence["artifacts"]["source_completeness"] = str(source_completeness_path)
+    evidence["artifacts"]["source_discovery_queue"] = str(source_discovery_path)
+    evidence["artifacts"]["source_rights_review"] = str(source_rights_path)
+    evidence["artifacts"]["parser_risk"] = str(parser_risk_path)
+    evidence["artifacts"]["publication_governance"] = str(publication_governance_path)
+    evidence["artifacts"]["backfill_run_manifest"] = str(backfill_manifest_path)
+    evidence["artifacts"]["deduplication_ledger"] = str(dedupe_path)
+    evidence["artifacts"]["freshness_slo"] = str(freshness_path)
     return evidence
 
 

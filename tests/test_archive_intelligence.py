@@ -28,6 +28,7 @@ from corpus_cases_medilegal_nz.archive_intelligence import (
     write_archive_intelligence_bundle,
     write_archive_intelligence_report,
 )
+from corpus_cases_medilegal_nz.source_maturity import build_source_maturity_ledger
 
 ROOT = Path(__file__).resolve().parents[1]
 ALL_SOURCES = (
@@ -84,6 +85,7 @@ def _complete_evidence(tmp_path: Path) -> dict:
         "quality": build_quality_report(records),
         "source_coverage": build_source_coverage(root=ROOT, records=records),
         "source_collection_audit": build_source_collection_audit(root=ROOT, records=records),
+        "source_maturity": build_source_maturity_ledger(root=ROOT, records=records),
         "collection_quality_gates": build_collection_quality_gates(records),
         "public_surface": build_public_surface_audit(
             archive_version="2026.07.0",
@@ -432,9 +434,11 @@ def test_public_claims_and_privacy_scoring_are_generated_from_ledgers(tmp_path: 
     assert privacy["status"] == "leading"
     assert privacy["score"] == 100
     assert "validated records across 13 active sources" in claims["markdown"]["README.md"]
+    assert "Historical backfill is not yet complete" in claims["markdown"]["README.md"]
     assert (
         "Privacy/rights status is summarized as leading." in claims["markdown"]["dataset-card.md"]
     )
+    assert claims["validation"]["status"] == "pass"
     assert (
         "evidence-backed claims are generated from ledgers"
         in claims["markdown"]["release-notes.md"]

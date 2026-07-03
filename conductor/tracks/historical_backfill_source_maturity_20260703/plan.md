@@ -2,8 +2,8 @@
 
 ## Phase 1: Source Maturity Contract And Claim Gates
 
-- [ ] Task: Add a source maturity ladder beyond parser validation.
-    - [ ] Define states for `validated_records`, `live_collection_ready`, `historical_backfill_in_progress`, `historical_backfill_complete`, `publication_evidence_current`, and `blocked`.
+- [~] Task: Add a source maturity ladder beyond parser validation.
+    - [~] Define states for `validated_records`, `live_collection_ready`, `historical_backfill_in_progress`, `historical_backfill_complete`, `publication_evidence_current`, and `blocked`.
     - [ ] Update source audit and release evidence schemas to include both parser stage and historical completeness stage.
     - [ ] Add tests proving fixture-backed parser validation does not imply historical completion.
 - [ ] Task: Add public-claims strict mode.

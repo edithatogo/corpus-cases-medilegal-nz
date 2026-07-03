@@ -136,6 +136,14 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert evidence["zenodo"]["publish_handoff_only"] is True
     assert evidence["parser_contract"]["provider"]["package"] == "nlp_policy_nz"
     assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == 13
+    assert evidence["source_maturity"]["summary"]["stage_counts"] == {
+        "historical_backfill_in_progress": 13
+    }
+    assert evidence["source_completeness"]["status"] == "warn"
+    assert evidence["source_discovery_queue"]["status"] == "review_required"
+    assert evidence["source_rights_review"]["status"] == "review_required"
+    assert evidence["parser_risk"]["high_risk_source_count"] == 7
+    assert evidence["publication_governance"]["status"] == "gated"
     assert evidence["collection_quality_gates"]["status"] in {"pass", "blocked"}
     assert evidence["public_surface"]["surfaces"]["osf"]["status"] == "inactive"
     assert evidence["attestation_verification"]["provider"] == "github-artifact-attestations"
@@ -145,6 +153,12 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert (output_dir / "SHA256SUMS").is_file()
     assert (output_dir / "manifests/parser_contract.json").is_file()
     assert (output_dir / "manifests/source_collection_audit.json").is_file()
+    assert (output_dir / "manifests/source_maturity.json").is_file()
+    assert (output_dir / "manifests/source_completeness.json").is_file()
+    assert (output_dir / "manifests/source_discovery_queue.json").is_file()
+    assert (output_dir / "manifests/source_rights_review.json").is_file()
+    assert (output_dir / "manifests/parser_risk.json").is_file()
+    assert (output_dir / "manifests/publication_governance.json").is_file()
     assert (output_dir / "manifests/collection_quality_gates.json").is_file()
     assert (output_dir / "manifests/attestation_verification.json").is_file()
     assert (output_dir / "metadata/croissant.jsonld").is_file()

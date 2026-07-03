@@ -838,6 +838,8 @@ def build_public_claims(
     evidence: Mapping[str, Any], *, maturity_report: Mapping[str, Any] | None = None
 ) -> JsonObject:
     """Generate public claims from archive ledgers."""
+    from corpus_cases_medilegal_nz.source_maturity import validate_public_claims
+
     release = evidence.get("release", {}) if isinstance(evidence.get("release"), Mapping) else {}
     quality = evidence.get("quality", {}) if isinstance(evidence.get("quality"), Mapping) else {}
     coverage = (
@@ -853,6 +855,11 @@ def build_public_claims(
     observability = (
         evidence.get("source_observability", {})
         if isinstance(evidence.get("source_observability"), Mapping)
+        else {}
+    )
+    source_maturity = (
+        evidence.get("source_maturity", {})
+        if isinstance(evidence.get("source_maturity"), Mapping)
         else {}
     )
     privacy = (
@@ -875,14 +882,32 @@ def build_public_claims(
     zenodo = evidence.get("zenodo", {}) if isinstance(evidence.get("zenodo"), Mapping) else {}
     zenodo_claim = str(zenodo.get("record_url") or zenodo.get("draft_id") or "pending publication")
     maturity_score = maturity_report.get("score") if isinstance(maturity_report, Mapping) else None
+    maturity_summary = (
+        source_maturity.get("summary", {}) if isinstance(source_maturity, Mapping) else {}
+    )
+    historically_complete_count = int(
+        maturity_summary.get("historically_complete_source_count", 0) or 0
+    )
+    all_historically_complete = bool(
+        maturity_summary.get("all_sources_historically_complete", False)
+    )
+    historical_phrase = (
+        "Historical backfill is complete for all registered sources."
+        if all_historically_complete
+        else (
+            f"Historical backfill is not yet complete; {historically_complete_count} "
+            "registered source(s) have historical completion evidence."
+        )
+    )
     readme = (
         f"This archive currently records {quality.get('record_count', 0)} validated records "
-        f"across {len(active_sources)} active sources. "
+        f"across {len(active_sources)} active sources. {historical_phrase} "
         f"Publication proof is published via GitHub release {public_url}, Hugging Face revision "
         f"{hf_revision}, and Zenodo evidence {zenodo_claim}."
     )
     dataset_card = (
-        f"Coverage is sourced from {len(validated_sources)} parser-complete sources. "
+        f"Coverage is sourced from {len(validated_sources)} parser-validated sources. "
+        f"Historical completeness remains source-specific and ledger-backed. "
         f"Quality gates report {quality.get('blocking_issue_count', 0)} blocking issue(s). "
         f"Privacy/rights status is summarized as {privacy.get('status', 'unknown')}."
     )
@@ -895,13 +920,15 @@ def build_public_claims(
         f"Project sync should reference the same release evidence used for the archive: "
         f"{release.get('github_release_tag', 'dataset release')}."
     )
-    return {
+    result = {
         "schema_version": ARCHIVE_INTELLIGENCE_SCHEMA_VERSION,
         "generated_at": utc_now_iso(),
         "facts": {
             "record_count": quality.get("record_count", 0),
             "active_source_count": len(active_sources),
             "validated_source_count": len(validated_sources),
+            "historically_complete_source_count": historically_complete_count,
+            "all_sources_historically_complete": all_historically_complete,
             "maturity_score": maturity_score,
             "privacy_status": privacy.get("status", "unknown"),
         },
@@ -912,6 +939,12 @@ def build_public_claims(
             "github-project-summary.md": project_summary,
         },
     }
+    failures = validate_public_claims(result, source_maturity=source_maturity)
+    result["validation"] = {
+        "status": "pass" if not failures else "fail",
+        "failures": failures,
+    }
+    return result
 
 
 def build_federation_compatibility_report(
