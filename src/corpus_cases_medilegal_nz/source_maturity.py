@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from collections import Counter, defaultdict
 from collections.abc import Iterable, Mapping
 from pathlib import Path
@@ -19,6 +20,7 @@ from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY
 JsonObject = dict[str, Any]
 
 SOURCE_MATURITY_SCHEMA_VERSION = "1.0.0"
+DEFAULT_SOURCE_TARGETS_PATH = Path("config/source_historical_targets.json")
 SOURCE_MATURITY_LADDER = [
     "validated_records",
     "live_collection_ready",
@@ -87,6 +89,15 @@ def _target_for_source(
     return default
 
 
+def _load_target_metadata(root: Path) -> JsonObject:
+    """Load default source target metadata when present."""
+    path = root / DEFAULT_SOURCE_TARGETS_PATH
+    if not path.is_file():
+        return {}
+    loaded = json.loads(path.read_text(encoding="utf-8"))
+    return loaded if isinstance(loaded, dict) else {}
+
+
 def _stage_for_source(
     *,
     parser_stage: str,
@@ -138,6 +149,8 @@ def build_source_maturity_ledger(
 ) -> JsonObject:
     """Build source maturity evidence beyond parser validation."""
     root = Path(root)
+    if target_metadata is None:
+        target_metadata = _load_target_metadata(root)
     current_records = [dict(record) for record in records]
     previous = [dict(record) for record in previous_records or []]
     audit = build_source_collection_audit(root=root, records=current_records)
@@ -169,6 +182,10 @@ def build_source_maturity_ledger(
         )
         stage_counts[maturity_stage] += 1
         dataset_diff = build_dataset_diff(source_records, previous_source_records)
+        expected_count = target.get("expected_count")
+        remaining_to_target = (
+            max(int(expected_count) - record_count, 0) if isinstance(expected_count, int) else None
+        )
         metadata_items = [_metadata(record) for record in source_records]
         source_urls = sorted(
             {
@@ -195,6 +212,16 @@ def build_source_maturity_ledger(
                 "record_count": record_count,
                 "previous_record_count": len(previous_source_records),
                 "target": target,
+                "target_progress": {
+                    "expected_count": expected_count,
+                    "record_count": record_count,
+                    "remaining_to_target": remaining_to_target,
+                    "progress_ratio": (
+                        round(record_count / int(expected_count), 4)
+                        if isinstance(expected_count, int) and expected_count > 0
+                        else None
+                    ),
+                },
                 "counts": {
                     "fetched": len(raw_hashes) or record_count,
                     "parsed": record_count,
@@ -222,6 +249,17 @@ def build_source_maturity_ledger(
         if source["historical_maturity_stage"]
         in {"historical_backfill_complete", "publication_evidence_current"}
     ]
+    sources_with_known_targets = [
+        source
+        for source in sources
+        if isinstance(source.get("target", {}).get("expected_count"), int)
+    ]
+    total_expected = sum(
+        int(source["target"]["expected_count"]) for source in sources_with_known_targets
+    )
+    total_records_against_known_targets = sum(
+        int(source["record_count"]) for source in sources_with_known_targets
+    )
     return {
         "schema_version": SOURCE_MATURITY_SCHEMA_VERSION,
         "generated_at": utc_now_iso(),
@@ -230,6 +268,13 @@ def build_source_maturity_ledger(
             "source_count": len(sources),
             "historically_complete_source_count": len(complete_sources),
             "all_sources_historically_complete": len(complete_sources) == len(sources),
+            "sources_with_known_targets": len(sources_with_known_targets),
+            "total_expected_records_for_known_targets": total_expected,
+            "total_records_against_known_targets": total_records_against_known_targets,
+            "total_remaining_to_known_targets": max(
+                total_expected - total_records_against_known_targets,
+                0,
+            ),
             "stage_counts": dict(sorted(stage_counts.items())),
         },
         "sources": sources,

@@ -29,11 +29,21 @@ def test_fixture_validated_records_do_not_claim_historical_completion() -> None:
     assert ledger["summary"]["source_count"] == 13
     assert ledger["summary"]["historically_complete_source_count"] == 0
     assert ledger["summary"]["all_sources_historically_complete"] is False
+    assert ledger["summary"]["sources_with_known_targets"] == 13
+    assert ledger["summary"]["total_expected_records_for_known_targets"] == 26
+    assert ledger["summary"]["total_records_against_known_targets"] == 13
+    assert ledger["summary"]["total_remaining_to_known_targets"] == 13
     assert ledger["summary"]["stage_counts"] == {"historical_backfill_in_progress": 13}
     hdc = next(source for source in ledger["sources"] if source["source_id"] == "hdc")
     assert hdc["parser_stage"] == "validated_records"
     assert hdc["historical_maturity_stage"] == "historical_backfill_in_progress"
-    assert hdc["target"]["expected_count_confidence"] == "unknown"
+    assert hdc["target"]["expected_count_confidence"] == "baseline_minimum"
+    assert hdc["target_progress"] == {
+        "expected_count": 2,
+        "record_count": 1,
+        "remaining_to_target": 1,
+        "progress_ratio": 0.5,
+    }
 
 
 def test_known_target_can_promote_source_to_historical_completion() -> None:

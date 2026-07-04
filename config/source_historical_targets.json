@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-07-05T00:00:00+10:00",
+  "policy": "Conservative baseline targets are minimum backfill targets used to prevent unknown-target maturity claims. They are not assertions of full source population size.",
+  "sources": {
+    "hdc": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "hpdt": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "moj_tribunals": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "era": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "teachers": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "royal_commissions": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "coronial": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "privacy": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "human_rights": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "ombudsman": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "moj_courts": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "ipca": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "law_commission": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    }
+  }
+}
