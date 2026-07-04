@@ -141,6 +141,8 @@ jobs:
           GIT_MIRROR_URL_GITLAB: ${{ secrets.GIT_MIRROR_URL_GITLAB }}
           GIT_MIRROR_URL_CODEBERG: ${{ secrets.GIT_MIRROR_URL_CODEBERG }}
           GIT_MIRROR_SSH_PRIVATE_KEY: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY }}
+          GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB }}
+          GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG }}
         run: |
           set +e
           mkdir -p generated/mirror-probe
