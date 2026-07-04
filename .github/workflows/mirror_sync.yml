@@ -18,6 +18,8 @@ jobs:
           GIT_MIRROR_URL_GITLAB: ${{ secrets.GIT_MIRROR_URL_GITLAB }}
           GIT_MIRROR_URL_CODEBERG: ${{ secrets.GIT_MIRROR_URL_CODEBERG }}
           GIT_MIRROR_SSH_PRIVATE_KEY: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY }}
+          GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB }}
+          GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG }}
         run: |
           declare -A SEEN_MIRROR_URLS=()
           MIRROR_URLS=()
@@ -33,17 +35,31 @@ jobs:
             exit 0
           fi
 
-          if [ -z "$GIT_MIRROR_SSH_PRIVATE_KEY" ]; then
-            echo "GIT_MIRROR_SSH_PRIVATE_KEY is not set, skipping mirror."
+          if [ -z "$GIT_MIRROR_SSH_PRIVATE_KEY" ] && [ -z "$GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB" ] && [ -z "$GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG" ]; then
+            echo "No mirror SSH private key secrets are set, skipping mirror."
             exit 0
           fi
 
           mkdir -p ~/.ssh
-          echo "$GIT_MIRROR_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
 
           FAILURES=0
           for GIT_MIRROR_URL in "${MIRROR_URLS[@]}"; do
+            SELECTED_SSH_PRIVATE_KEY="$GIT_MIRROR_SSH_PRIVATE_KEY"
+            if [[ "$GIT_MIRROR_URL" == *"gitlab.com"* ]] && [ -n "$GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB" ]; then
+              SELECTED_SSH_PRIVATE_KEY="$GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB"
+            elif [[ "$GIT_MIRROR_URL" == *"codeberg.org"* ]] && [ -n "$GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG" ]; then
+              SELECTED_SSH_PRIVATE_KEY="$GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG"
+            fi
+
+            if [ -z "$SELECTED_SSH_PRIVATE_KEY" ]; then
+              echo "::error::No mirror SSH private key configured for $GIT_MIRROR_URL"
+              FAILURES=$((FAILURES + 1))
+              continue
+            fi
+
+            echo "$SELECTED_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+            chmod 600 ~/.ssh/id_ed25519
+
             # Extract host from git@host:user/repo.git
             HOST=$(echo "$GIT_MIRROR_URL" | cut -d'@' -f2 | cut -d':' -f1)
             ssh-keyscan -t ed25519 "$HOST" >> ~/.ssh/known_hosts

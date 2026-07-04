@@ -10,15 +10,24 @@ It runs on pushes to `main` and `master`, and it is also manually dispatchable.
 - `GIT_MIRROR_URL_GITLAB`
 - `GIT_MIRROR_URL_CODEBERG`
 - `GIT_MIRROR_SSH_PRIVATE_KEY`
+- `GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB`
+- `GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG`
 
 If no mirror URL is set, the workflow exits cleanly after logging that the
-mirror step is skipped. If the SSH private key is missing, the workflow also
-exits cleanly.
+mirror step is skipped. If no SSH private key secret is set, the workflow also
+exits cleanly. If at least one key exists but a configured target has no
+provider-specific key and no fallback key, that target fails explicitly.
 
 The repository currently uses GitLab and Codeberg as the public mirror
 targets. The single `GIT_MIRROR_URL` secret remains as a backward-compatible
 fallback, but the preferred configuration is to set the GitLab and Codeberg
 URLs explicitly.
+
+Provider-specific SSH key secrets are preferred. The generic
+`GIT_MIRROR_SSH_PRIVATE_KEY` remains a fallback for unknown providers and older
+single-key deployments. This lets GitLab and Codeberg use separate deploy keys
+when one provider needs a key rotation but the other already has a working
+deploy key.
 
 The workflow deduplicates repeated mirror URLs, attempts every configured
 unique target, logs the remote HEAD for successful pushes, and fails at the end
@@ -41,7 +50,9 @@ python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict --probe-remote
 - `GIT_MIRROR_URL`
 - `GIT_MIRROR_URL_GITLAB`
 - `GIT_MIRROR_URL_CODEBERG`
-- `GIT_MIRROR_SSH_PRIVATE_KEY`
+- mirror SSH key coverage through either `GIT_MIRROR_SSH_PRIVATE_KEY` or the
+  provider-specific `GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB` and
+  `GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG` secrets.
 
 `--probe-remotes` additionally runs public `git ls-remote` readback against
 configured mirror URLs and classifies remote HEAD object IDs. A 40-character
@@ -122,13 +133,12 @@ Expected outcome:
 
 - Codeberg is the verified public git mirror for `master`; SSH readback on
   2026-07-03 returned `b70b00f6642634d31299afba8976486328134a2a` for `HEAD`
-  and `refs/heads/master`.
-- GitLab has writable deploy-key authentication configured, but the existing
-  GitLab project was initialized with a SHA-256 object format and rejects this
-  SHA-1 GitHub repository with `the receiving end does not support this
-  repository's hash algorithm`. Recreate or reconfigure the GitLab mirror as a
-  SHA-1-compatible repository before expecting direct git push mirroring to
-  pass there.
+  and `refs/heads/master`. It uses the v2 deploy key fingerprint
+  `SHA256:8pVwLtOI8exwo3MLOJIQmEtwOrjwCof9eMRV94MBELE`.
+- GitLab was recreated on 2026-07-04 as a blank public SHA-1-compatible project
+  after the prior SHA-256 project was preserved under a dated archive path. It
+  uses the v3 deploy key fingerprint
+  `SHA256:HACEq+yiW+PnlES8HFBFnMK0ppUW4tXt1R4i/mIwIos`.
 
 ## GitLab SHA-1 Repair Checklist
 
@@ -141,7 +151,10 @@ Use this only when `mirror-readiness --strict --probe-remotes` reports a
    `edithatogo/corpus-cases-medilegal-nz`.
 3. Leave GitLab's `project[use_sha256_repository]` option unchecked when
    creating the replacement project.
-4. Add the existing writable mirror deploy key to the replacement project.
+4. Add a writable mirror deploy key to the replacement project. If the old key
+   remains attached to the archived GitLab project or another mirror provider,
+   generate a provider-specific replacement key and store it in
+   `GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB`.
 5. Run `mirror-readiness --strict --probe-remotes`; the GitLab HEAD should be
    absent for an empty project or 40 characters after first push.
 6. Dispatch Mirror Sync and verify both GitLab and Codeberg read back the

@@ -25,8 +25,16 @@ def test_mirror_workflow_skips_when_any_required_secret_is_missing() -> None:
     )
     assert "SEEN_MIRROR_URLS[$MIRROR_URL]=1" in workflow
     assert "No mirror URLs are set, skipping mirror." in workflow
-    assert 'if [ -z "$GIT_MIRROR_SSH_PRIVATE_KEY" ]; then' in workflow
-    assert "GIT_MIRROR_SSH_PRIVATE_KEY is not set, skipping mirror." in workflow
+    assert (
+        "GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB }}"
+        in workflow
+    )
+    assert (
+        "GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG }}"
+        in workflow
+    )
+    assert "No mirror SSH private key secrets are set, skipping mirror." in workflow
+    assert 'echo "::error::No mirror SSH private key configured for $GIT_MIRROR_URL"' in workflow
 
 
 def test_mirror_workflow_quotes_dynamic_shell_values_and_reports_each_target() -> None:
@@ -37,6 +45,8 @@ def test_mirror_workflow_quotes_dynamic_shell_values_and_reports_each_target() -
     assert 'echo "Mirrored $GIT_MIRROR_URL at $MIRROR_HEAD"' in workflow
     assert 'echo "::error::Mirror push failed for $GIT_MIRROR_URL"' in workflow
     assert 'echo "::error::$FAILURES mirror target(s) failed"' in workflow
+    assert '[[ "$GIT_MIRROR_URL" == *"gitlab.com"* ]]' in workflow
+    assert '[[ "$GIT_MIRROR_URL" == *"codeberg.org"* ]]' in workflow
     assert 'ssh-keyscan -t ed25519 "$HOST"' in workflow
     assert "git remote remove mirror" in workflow
 
@@ -66,10 +76,14 @@ def test_mirror_readiness_reports_workflow_and_secret_gating() -> None:
     assert checks["GIT_MIRROR_URL_GITLAB"]["status"] == "gated"
     assert checks["GIT_MIRROR_URL_CODEBERG"]["status"] == "gated"
     assert checks["GIT_MIRROR_SSH_PRIVATE_KEY"]["status"] == "gated"
+    assert checks["GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB"]["status"] == "gated"
+    assert checks["GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG"]["status"] == "gated"
     assert "GIT_MIRROR_URL" in report["blockers"]
     assert "GIT_MIRROR_URL_GITLAB" in report["blockers"]
     assert "GIT_MIRROR_URL_CODEBERG" in report["blockers"]
     assert "GIT_MIRROR_SSH_PRIVATE_KEY" in report["blockers"]
+    assert "GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB" in report["blockers"]
+    assert "GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG" in report["blockers"]
     assert report["mirror_target_summary"] == {
         "configured_count": 0,
         "healthy_count": 0,
@@ -97,6 +111,39 @@ def test_mirror_readiness_strict_requires_all_mirror_targets() -> None:
     assert report["status"] == "ready"
     assert report["strict_mode"] is True
     assert checks["mirror_target_set"]["status"] == "configured"
+    assert checks["mirror_ssh_key_set"]["status"] == "configured"
+
+
+def test_mirror_readiness_strict_accepts_provider_specific_keys() -> None:
+    report = mirror_sync_readiness(
+        environment={
+            "GIT_MIRROR_URL": "git@gitlab.com:edithatogo/corpus-cases-medilegal-nz.git",
+            "GIT_MIRROR_URL_GITLAB": "git@gitlab.com:edithatogo/corpus-cases-medilegal-nz.git",
+            "GIT_MIRROR_URL_CODEBERG": "git@codeberg.org:edithatogo/corpus-cases-medilegal-nz.git",
+            "GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB": "gitlab-key",
+            "GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG": "codeberg-key",
+        },
+        root=Path(),
+        require_complete_mirror_set=True,
+    )
+
+    checks = {check["id"]: check for check in report["checks"]}
+    targets = {target["provider"]: target for target in report["mirror_targets"]}
+
+    assert report["status"] == "ready"
+    assert checks["mirror_ssh_key_set"]["status"] == "configured"
+    assert checks["mirror_ssh_key_set"]["configured_names"] == [
+        "GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG",
+        "GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB",
+    ]
+    assert targets["gitlab"]["ssh_key_secret_names"] == [
+        "GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB",
+        "GIT_MIRROR_SSH_PRIVATE_KEY",
+    ]
+    assert targets["codeberg"]["ssh_key_secret_names"] == [
+        "GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG",
+        "GIT_MIRROR_SSH_PRIVATE_KEY",
+    ]
 
 
 def test_mirror_readiness_strict_blocks_when_any_target_is_missing() -> None:

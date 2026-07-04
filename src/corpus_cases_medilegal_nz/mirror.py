@@ -68,6 +68,15 @@ def _target_provider(mirror_url: str) -> str:
     return "unknown"
 
 
+def _provider_key_env_names(provider: str) -> tuple[str, ...]:
+    """Return accepted SSH key environment names for a mirror provider."""
+    if provider == "gitlab":
+        return ("GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB", "GIT_MIRROR_SSH_PRIVATE_KEY")
+    if provider == "codeberg":
+        return ("GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG", "GIT_MIRROR_SSH_PRIVATE_KEY")
+    return ("GIT_MIRROR_SSH_PRIVATE_KEY",)
+
+
 def probe_remote_head(mirror_url: str, *, timeout_seconds: int = 20) -> JsonObject:
     """Probe a remote mirror HEAD using public readback where possible."""
     readback_url = _https_readback_url(mirror_url)
@@ -151,6 +160,14 @@ def mirror_sync_readiness(
         ("GIT_MIRROR_URL_GITLAB", ("GIT_MIRROR_URL_GITLAB",)),
         ("GIT_MIRROR_URL_CODEBERG", ("GIT_MIRROR_URL_CODEBERG",)),
         ("GIT_MIRROR_SSH_PRIVATE_KEY", ("GIT_MIRROR_SSH_PRIVATE_KEY",)),
+        (
+            "GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB",
+            ("GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB",),
+        ),
+        (
+            "GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG",
+            ("GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG",),
+        ),
     )
     for name, aliases in credential_checks:
         configured_aliases = [alias for alias in aliases if env.get(alias)]
@@ -200,6 +217,29 @@ def mirror_sync_readiness(
                 "mirror_url": mirror_url,
                 "readback_url": _https_readback_url(mirror_url),
                 "provider": _target_provider(mirror_url),
+            }
+        )
+    if require_complete_mirror_set:
+        missing_key_providers = []
+        configured_key_names = []
+        for target in configured_mirror_targets:
+            accepted_names = _provider_key_env_names(str(target["provider"]))
+            configured_names = [name for name in accepted_names if env.get(name)]
+            configured_key_names.extend(configured_names)
+            if not configured_names:
+                missing_key_providers.append(target["provider"])
+        checks.append(
+            {
+                "id": "mirror_ssh_key_set",
+                "status": "configured" if not missing_key_providers else "gated",
+                "secret": True,
+                "accepted_names": [
+                    "GIT_MIRROR_SSH_PRIVATE_KEY",
+                    "GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB",
+                    "GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG",
+                ],
+                "configured_names": sorted(set(configured_key_names)),
+                "missing_providers": sorted(set(missing_key_providers)),
             }
         )
     remote_probe_results: list[JsonObject] = []
@@ -256,6 +296,7 @@ def mirror_sync_readiness(
         mirror_targets.append(
             {
                 **target,
+                "ssh_key_secret_names": list(_provider_key_env_names(str(target["provider"]))),
                 "status": status,
                 "reason": reason,
                 "head": probe.get("head") if probe else None,
@@ -269,13 +310,38 @@ def mirror_sync_readiness(
                 "mirror_url": None,
                 "readback_url": None,
                 "provider": None,
+                "ssh_key_secret_names": [],
                 "status": "gated",
                 "reason": "no mirror target URL secrets are configured",
                 "head": None,
                 "object_format": "unknown",
             }
         )
-    blockers = [check["id"] for check in checks if check["status"] in {"missing", "gated"}]
+    aggregate_key_check = next(
+        (check for check in checks if check["id"] == "mirror_ssh_key_set"),
+        None,
+    )
+    optional_key_check_ids = {
+        "GIT_MIRROR_SSH_PRIVATE_KEY",
+        "GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB",
+        "GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG",
+    }
+    suppress_optional_key_blockers = (
+        aggregate_key_check is not None and aggregate_key_check["status"] == "configured"
+    )
+    gated_checks = [
+        check
+        for check in checks
+        if check["status"] == "gated"
+        and not (suppress_optional_key_blockers and check["id"] in optional_key_check_ids)
+    ]
+    blockers = [
+        check["id"]
+        for check in checks
+        if check["status"] == "missing"
+        and not (suppress_optional_key_blockers and check["id"] in optional_key_check_ids)
+    ]
+    blockers.extend(check["id"] for check in gated_checks)
     blockers.extend(check["id"] for check in checks if check["status"] == "blocked")
     blocked_targets = [target for target in mirror_targets if target["status"] == "blocked"]
     healthy_targets = [target for target in mirror_targets if target["status"] == "healthy"]
@@ -293,7 +359,7 @@ def mirror_sync_readiness(
         )
     if not configured_mirror_targets:
         next_actions.append(
-            "Configure GIT_MIRROR_URL_GITLAB, GIT_MIRROR_URL_CODEBERG, and GIT_MIRROR_SSH_PRIVATE_KEY before expecting live mirroring."
+            "Configure GIT_MIRROR_URL_GITLAB, GIT_MIRROR_URL_CODEBERG, and mirror SSH key secrets before expecting live mirroring."
         )
     return {
         "schema_version": "1.0.0",
@@ -316,7 +382,7 @@ def mirror_sync_readiness(
         },
         "remote_probe_results": remote_probe_results,
         "blockers": blockers,
-        "gated_external_writes": [check["id"] for check in checks if check["status"] == "gated"],
+        "gated_external_writes": [check["id"] for check in gated_checks],
         "next_actions": next_actions,
         "manual_verification": [
             'gh workflow run "Mirror Sync" --repo edithatogo/corpus-cases-medilegal-nz --ref master',

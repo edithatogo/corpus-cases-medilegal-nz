@@ -4,10 +4,12 @@
 - [x] Task: Write `.github/workflows/mirror_sync.yml` to support automated SSH mirroring to secondary Git remotes (GitLab/Codeberg).
 - [x] Task: Locally harden `mirror_sync.yml` credential bypass behavior for missing mirror URL or missing SSH private key.
 - [x] Task: Document public GitLab and Codeberg mirror URLs in env templates and mirror docs.
-- [x] Task: Configure repository secrets `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, and `GIT_MIRROR_SSH_PRIVATE_KEY` on GitHub.
+- [x] Task: Configure repository secrets `GIT_MIRROR_URL`, `GIT_MIRROR_URL_GITLAB`, `GIT_MIRROR_URL_CODEBERG`, and mirror SSH key secrets on GitHub.
   - Evidence: `gh secret list --repo edithatogo/corpus-cases-medilegal-nz` shows all four `GIT_MIRROR_*` secrets updated on 2026-07-03.
   - Evidence: `uv run --frozen --python 3.12 --extra dev python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict` returned `status: ready` with no blockers when the same values were loaded locally.
   - Evidence: GitLab and Codeberg both have the v2 deploy key fingerprint `SHA256:8pVwLtOI8exwo3MLOJIQmEtwOrjwCof9eMRV94MBELE` attached with write access.
+  - Evidence: GitLab was recreated as a public SHA-1-compatible project on 2026-07-04 and now uses provider-specific v3 deploy key fingerprint `SHA256:HACEq+yiW+PnlES8HFBFnMK0ppUW4tXt1R4i/mIwIos`; Codeberg keeps the working v2 deploy key fingerprint `SHA256:8pVwLtOI8exwo3MLOJIQmEtwOrjwCof9eMRV94MBELE`.
+  - Evidence: `mirror_sync.yml` supports `GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB` and `GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG` with the generic `GIT_MIRROR_SSH_PRIVATE_KEY` as fallback.
 - [x] Task: Verify successful manual and push triggers for mirror sync.
   - Partial live result: Codeberg mirror push succeeded and public readback returns `5a85e9311562da17146a65308200134192b73671` for `HEAD` and `refs/heads/master`.
   - Blocked live result: GitLab mirror push authenticates but fails with `fatal: the receiving end does not support this repository's hash algorithm` because the existing GitLab project HEAD is a 64-character SHA-256 object (`e3dcc84171382b1178636b36a160335af5d35be0fbc8274624bad048299fb50e`). The GitLab mirror project must be recreated or converted as a SHA-1-compatible repository before direct git push mirroring can complete.
@@ -51,3 +53,5 @@
 - 2026-07-04: Created dedicated GitHub issue for the manual GitLab SHA-1 recreation proof and acceptance criteria: https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/9.
 - 2026-07-04: Added scheduled `Mirror Probe Report` workflow to run strict remote readiness probes daily and on manual dispatch, upload `readiness.json` and `report.md`, write the report to the GitHub Actions summary, and post one idempotent marker comment to issue #9 when GitLab becomes SHA-1-compatible and strict readiness turns `ready`.
 - 2026-07-04: Added release-readiness mirror gating. Monthly publication now writes `generated/mirror-probe/readiness.json` before strict `publication-readiness`; readiness treats healthy Codeberg SHA-1 coverage plus GitLab's known SHA-256 mismatch as `known_external_blocker` rather than a release blocker, and fails only when no healthy Codeberg mirror is present.
+- 2026-07-04: Repaired the GitLab mirror by renaming the SHA-256 project to `corpus-cases-medilegal-nz-sha256-archive-20260703`, creating a replacement public project at `edithatogo/corpus-cases-medilegal-nz`, adding v3 writable deploy key `SHA256:HACEq+yiW+PnlES8HFBFnMK0ppUW4tXt1R4i/mIwIos`, and locally pushing/readback-verifying `30169f71adb73306f9245cee8112c85390effa5c`.
+- 2026-07-04: Identified that GitLab and Codeberg require separate deploy keys because the GitHub fallback secret was rotated to GitLab v3 while Codeberg still trusts v2; provider-specific workflow secrets are now the canonical fix.
