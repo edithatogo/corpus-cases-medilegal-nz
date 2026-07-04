@@ -78,3 +78,16 @@ def test_riopa_project_sync_workflow_is_guarded_and_evidence_backed() -> None:
     assert "scripts/sync_riopa_project.py" in workflow
     assert "riopa-project-sync-evidence" in workflow
     assert "generated/project-sync/riopa_project_sync_evidence.json" in workflow
+
+
+def test_multi_source_sync_workflow_uses_uv_not_stale_pixi() -> None:
+    workflow = (ROOT / ".github/workflows/multi_source_sync.yml").read_text(encoding="utf-8")
+
+    assert "pixi.toml" not in workflow
+    assert "prefix-dev/setup-pixi" not in workflow
+    assert "pixi run" not in workflow
+    assert "astral-sh/setup-uv@v7" in workflow
+    assert "uv sync --extra dev --frozen" in workflow
+    assert "uv run python -m corpus_cases_medilegal_nz.hf_sync" in workflow
+    assert "Checkout sibling nlp-policy-nz dependency" in workflow
+    assert "REQUESTED_SOURCES" in workflow

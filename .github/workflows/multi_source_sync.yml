@@ -13,28 +13,67 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env:
+      REQUESTED_SOURCES: ${{ inputs.sources || '' }}
     strategy:
       matrix:
         source: [hdc, hpdt, moj_tribunals, era, teachers]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
-      - name: Remove local-only sibling dependency in CI
-        run: |
-          python -c "from pathlib import Path; p = Path('pixi.toml'); text = p.read_text(); p.write_text(text.replace('nlp-policy-nz = { path = \"../nlp-policy-nz\", editable = true }\n', ''))"
-      - uses: prefix-dev/setup-pixi@v0
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
-          pixi-version: latest
-          cache: false
+          persist-credentials: false
+
+      - name: Checkout sibling nlp-policy-nz dependency
+        run: git clone --depth 1 https://github.com/edithatogo/nlp-policy-nz.git ../nlp-policy-nz
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --extra dev --frozen
+
+      - name: Select source
+        id: selected
+        env:
+          SOURCE: ${{ matrix.source }}
+        run: |
+          set -euo pipefail
+          if [ -z "$REQUESTED_SOURCES" ]; then
+            echo "selected=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if python - <<'PY'
+          import os
+
+          selected = {item.strip() for item in os.environ["REQUESTED_SOURCES"].split(",") if item.strip()}
+          raise SystemExit(0 if os.environ["SOURCE"] in selected else 1)
+          PY
+          then
+            echo "selected=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "selected=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Sync ${{ matrix.source }}
+        if: steps.selected.outputs.selected == 'true'
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_REPO_ID: ${{ vars.HF_REPO_ID || 'edithatogo/corpus-cases-medilegal-nz' }}
         run: |
           echo "Syncing source: ${{ matrix.source }}"
-          pixi run python -c "import sys; sys.path.insert(0, 'src'); from corpus_cases_medilegal_nz.sources import get_adapter, SOURCE_REGISTRY; adapter = get_adapter('${{ matrix.source }}'); info = SOURCE_REGISTRY['${{ matrix.source }}']; print('Syncing {} from {}'.format(info['name'], adapter.config_path))"
+          uv run python -c "import sys; sys.path.insert(0, 'src'); from corpus_cases_medilegal_nz.sources import get_adapter, SOURCE_REGISTRY; adapter = get_adapter('${{ matrix.source }}'); info = SOURCE_REGISTRY['${{ matrix.source }}']; print('Syncing {} from {}'.format(info['name'], adapter.config_path))"
+
       - name: Upload ${{ matrix.source }} data
+        if: steps.selected.outputs.selected == 'true'
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           PYTHONPATH: src
-        run: pixi run python -m corpus_cases_medilegal_nz.hf_sync ${{ matrix.source }}
+          HF_REPO_ID: ${{ vars.HF_REPO_ID || 'edithatogo/corpus-cases-medilegal-nz' }}
+        run: uv run python -m corpus_cases_medilegal_nz.hf_sync ${{ matrix.source }}
