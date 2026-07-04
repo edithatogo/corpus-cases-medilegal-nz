@@ -1,0 +1,92 @@
+name: Mirror Probe Report
+
+on:
+  schedule:
+    - cron: "17 19 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  probe:
+    name: Scheduled Mirror Readiness Probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Checkout sibling nlp-policy-nz dependency
+        run: git clone --depth 1 https://github.com/edithatogo/nlp-policy-nz.git ../nlp-policy-nz
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --extra dev --frozen
+
+      - name: Run strict mirror probe
+        id: readiness
+        env:
+          GIT_MIRROR_URL: ${{ secrets.GIT_MIRROR_URL }}
+          GIT_MIRROR_URL_GITLAB: ${{ secrets.GIT_MIRROR_URL_GITLAB }}
+          GIT_MIRROR_URL_CODEBERG: ${{ secrets.GIT_MIRROR_URL_CODEBERG }}
+          GIT_MIRROR_SSH_PRIVATE_KEY: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY }}
+        run: |
+          set +e
+          mkdir -p generated/mirror-probe
+          uv run python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict --probe-remotes \
+            > generated/mirror-probe/readiness.json
+          READINESS_EXIT_CODE="$?"
+          set -e
+          STATUS="$(uv run python -c "import json; print(json.load(open('generated/mirror-probe/readiness.json', encoding='utf-8'))['status'])")"
+          echo "exit_code=$READINESS_EXIT_CODE" >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Build probe report
+        run: |
+          uv run python scripts/build_mirror_probe_report.py \
+            --input generated/mirror-probe/readiness.json \
+            --output generated/mirror-probe/report.md
+          cat generated/mirror-probe/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload probe evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: mirror-probe-report
+          path: generated/mirror-probe/
+          if-no-files-found: error
+
+      - name: Notify GitLab repair issue when ready
+        if: steps.readiness.outputs.status == 'ready'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ISSUE_NUMBER="9"
+          MARKER="<!-- mirror-probe-ready -->"
+          EXISTING="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" \
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" | head -n 1)"
+          if [ -n "$EXISTING" ]; then
+            echo "Mirror readiness issue already has a ready marker comment."
+            exit 0
+          fi
+          {
+            echo "$MARKER"
+            echo "Scheduled mirror probe is now ready."
+            echo
+            cat generated/mirror-probe/report.md
+          } > generated/mirror-probe/issue-ready-comment.md
+          gh issue comment "$ISSUE_NUMBER" \
+            --repo "$GITHUB_REPOSITORY" \
+            --body-file generated/mirror-probe/issue-ready-comment.md

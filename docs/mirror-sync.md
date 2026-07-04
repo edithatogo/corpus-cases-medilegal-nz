@@ -49,17 +49,59 @@ HEAD is treated as SHA-1-compatible. A 64-character HEAD is treated as a
 SHA-256-format remote and blocks direct GitHub-to-provider mirroring because
 GitHub repository history is SHA-1.
 
+The readiness report includes:
+
+- `mirror_targets`: one normalized row per unique configured target, including
+  provider, HTTPS readback URL, probe status, object format, current HEAD when
+  available, and the reason for the target state.
+- `mirror_target_summary`: aggregate configured, healthy, blocked, and
+  probe-failed counts for dashboards and issue/project evidence.
+- `next_actions`: operator remediation steps generated from the observed
+  blockers.
+
 Or use the wrapper script:
 
 ```bash
 python scripts/mirror_readiness.py
+python scripts/mirror_readiness.py --strict --probe-remotes
 ```
+
+## Scheduled Probe Reporting
+
+[`Mirror Probe Report`](../.github/workflows/mirror_probe_report.yml) runs daily
+and can also be manually dispatched. It does not push to any mirror. It only
+runs strict readiness with remote probes, writes a GitHub Actions job summary,
+and uploads `readiness.json` plus `report.md` as the `mirror-probe-report`
+artifact.
+
+The scheduled probe is intentionally non-spamming while GitLab remains blocked.
+When the report first changes to `status: ready`, the workflow posts one
+idempotent marker comment to issue
+[#9](https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/9), making
+the GitLab SHA-1 recreation visible without requiring operators to inspect
+every scheduled run.
+
+## Release Readiness Gate
+
+Monthly publication builds mirror probe evidence before running strict
+`publication-readiness`. Release readiness treats mirror coverage as acceptable
+when Codeberg is healthy with a SHA-1 HEAD. If GitLab is the known SHA-256
+remote-format mismatch, readiness records it in `known_external_blockers` with
+issue #9 and keeps the release gate open because the repo still has a verified
+public git mirror.
+
+The gate fails only when mirror evidence exists but no healthy Codeberg mirror
+is present. This prevents a repaired-or-broken mirror state from being hidden as
+generic external-write debt while avoiding unnecessary release blockage for the
+already-tracked GitLab recreation task.
 
 ## Manual Verification
 
 ```bash
 gh workflow run "Mirror Sync" --repo edithatogo/corpus-cases-medilegal-nz --ref master
+gh workflow run "Mirror Probe Report" --repo edithatogo/corpus-cases-medilegal-nz --ref master
 gh run list --repo edithatogo/corpus-cases-medilegal-nz --workflow "Mirror Sync"
+gh run list --repo edithatogo/corpus-cases-medilegal-nz --workflow "Mirror Probe Report"
 git ls-remote https://gitlab.com/edithatogo/corpus-cases-medilegal-nz.git HEAD
 git ls-remote https://codeberg.org/edithatogo/corpus-cases-medilegal-nz.git HEAD
 ```
@@ -72,6 +114,9 @@ Expected outcome:
 - When the mirror secrets are absent, the job logs a guarded skip.
 - If one configured mirror fails, the job still attempts later targets and logs
   per-target success or failure before exiting non-zero.
+- `mirror-readiness --strict --probe-remotes` shows Codeberg as healthy when it
+  has a 40-character SHA-1 HEAD, and shows GitLab as blocked when it has the
+  known 64-character SHA-256 HEAD.
 
 ## Current Provider Notes
 

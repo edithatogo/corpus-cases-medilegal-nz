@@ -279,6 +279,73 @@ def test_publication_readiness_detects_configured_protected_environment() -> Non
     assert checks["github_environment_protection:zenodo-production"]["status"] == "configured"
 
 
+def test_publication_readiness_treats_gitlab_sha256_as_known_external_blocker() -> None:
+    readiness = publication_readiness(
+        environment={},
+        root=ROOT,
+        privacy_report={"schema_version": "1.0.0", "status": "pass", "blockers": []},
+        mirror_report={
+            "schema_version": "1.0.0",
+            "status": "blocked",
+            "blockers": ["remote_object_format"],
+            "mirror_targets": [
+                {
+                    "provider": "gitlab",
+                    "status": "blocked",
+                    "object_format": "sha256",
+                    "head": "e3dcc84171382b1178636b36a160335af5d35be0fbc8274624bad048299fb50e",
+                },
+                {
+                    "provider": "codeberg",
+                    "status": "healthy",
+                    "object_format": "sha1",
+                    "head": "1895a0b7822dc0027393e83cb4c8cfc4a023c63e",
+                },
+            ],
+        },
+    )
+    checks = {check["id"]: check for check in readiness["checks"]}
+
+    assert readiness["status"] == "ready"
+    assert "mirror_readiness" not in readiness["blockers"]
+    assert checks["mirror_readiness"]["status"] == "known_external_blocker"
+    assert readiness["known_external_blockers"] == [
+        {
+            "id": "gitlab_sha1_recreation",
+            "provider": "gitlab",
+            "status": "tracked_external_blocker",
+            "issue_url": "https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/9",
+            "reason": "GitLab mirror is SHA-256-backed and must be recreated as SHA-1-compatible; Codeberg remains healthy mirror coverage.",
+        }
+    ]
+
+
+def test_publication_readiness_blocks_when_no_healthy_git_mirror_exists() -> None:
+    readiness = publication_readiness(
+        environment={},
+        root=ROOT,
+        privacy_report={"schema_version": "1.0.0", "status": "pass", "blockers": []},
+        mirror_report={
+            "schema_version": "1.0.0",
+            "status": "blocked",
+            "blockers": ["remote_object_format"],
+            "mirror_targets": [
+                {
+                    "provider": "gitlab",
+                    "status": "blocked",
+                    "object_format": "sha256",
+                    "head": "e3dcc84171382b1178636b36a160335af5d35be0fbc8274624bad048299fb50e",
+                }
+            ],
+        },
+    )
+    checks = {check["id"]: check for check in readiness["checks"]}
+
+    assert readiness["status"] == "blocked"
+    assert checks["mirror_readiness"]["status"] == "blocked"
+    assert "mirror_readiness" in readiness["blockers"]
+
+
 def test_privacy_governance_normalizes_requests_without_requester_identity(tmp_path: Path) -> None:
     privacy_dir = tmp_path / "data/privacy"
     privacy_dir.mkdir(parents=True)

@@ -59,6 +59,15 @@ def _https_readback_url(mirror_url: str) -> str:
     return mirror_url
 
 
+def _target_provider(mirror_url: str) -> str:
+    """Return the mirror provider name for reporting."""
+    if "gitlab.com" in mirror_url:
+        return "gitlab"
+    if "codeberg.org" in mirror_url:
+        return "codeberg"
+    return "unknown"
+
+
 def probe_remote_head(mirror_url: str, *, timeout_seconds: int = 20) -> JsonObject:
     """Probe a remote mirror HEAD using public readback where possible."""
     readback_url = _https_readback_url(mirror_url)
@@ -176,22 +185,34 @@ def mirror_sync_readiness(
                 "configured_names": configured_targets,
             }
         )
+    configured_mirror_targets: list[JsonObject] = []
+    seen_target_urls: set[str] = set()
+    for name in ("GIT_MIRROR_URL", "GIT_MIRROR_URL_GITLAB", "GIT_MIRROR_URL_CODEBERG"):
+        mirror_url = env.get(name, "").strip()
+        if not mirror_url:
+            continue
+        if mirror_url in seen_target_urls:
+            continue
+        seen_target_urls.add(mirror_url)
+        configured_mirror_targets.append(
+            {
+                "secret_name": name,
+                "mirror_url": mirror_url,
+                "readback_url": _https_readback_url(mirror_url),
+                "provider": _target_provider(mirror_url),
+            }
+        )
     remote_probe_results: list[JsonObject] = []
     remote_head_map = remote_heads or {}
     if probe_remotes or remote_head_map:
-        mirror_urls = []
-        seen_urls: set[str] = set()
-        for name in ("GIT_MIRROR_URL", "GIT_MIRROR_URL_GITLAB", "GIT_MIRROR_URL_CODEBERG"):
-            mirror_url = env.get(name, "").strip()
-            if mirror_url and mirror_url not in seen_urls:
-                seen_urls.add(mirror_url)
-                mirror_urls.append(mirror_url)
-        for mirror_url in mirror_urls:
+        for target in configured_mirror_targets:
+            mirror_url = target["mirror_url"]
             if mirror_url in remote_head_map:
                 classification = classify_remote_head(remote_head_map[mirror_url])
                 remote_probe_results.append(
                     {
                         "mirror_url": mirror_url,
+                        "readback_url": target["readback_url"],
                         "head": remote_head_map[mirror_url],
                         **classification,
                     }
@@ -213,16 +234,90 @@ def mirror_sync_readiness(
                 "incompatible_count": len(incompatible),
             }
         )
+    probe_by_url = {result["mirror_url"]: result for result in remote_probe_results}
+    mirror_targets: list[JsonObject] = []
+    for target in configured_mirror_targets:
+        probe = probe_by_url.get(target["mirror_url"])
+        status = "configured"
+        reason = "target configured; remote probe not enabled"
+        if probe:
+            if probe.get("status") == "incompatible" or probe.get("compatible") is False:
+                status = "blocked"
+                reason = str(probe.get("reason", "remote object format is incompatible"))
+            elif probe.get("status") == "probe_failed":
+                status = "probe_failed"
+                reason = str(probe.get("reason", "remote probe failed"))
+            elif probe.get("status") in {"ok", "empty"}:
+                status = "healthy"
+                reason = "remote HEAD is compatible with GitHub SHA-1 mirroring"
+            else:
+                status = str(probe.get("status", "unknown"))
+                reason = str(probe.get("reason", "remote probe returned an unknown status"))
+        mirror_targets.append(
+            {
+                **target,
+                "status": status,
+                "reason": reason,
+                "head": probe.get("head") if probe else None,
+                "object_format": probe.get("object_format", "unknown") if probe else "unknown",
+            }
+        )
+    if not configured_mirror_targets:
+        mirror_targets.append(
+            {
+                "secret_name": None,
+                "mirror_url": None,
+                "readback_url": None,
+                "provider": None,
+                "status": "gated",
+                "reason": "no mirror target URL secrets are configured",
+                "head": None,
+                "object_format": "unknown",
+            }
+        )
     blockers = [check["id"] for check in checks if check["status"] in {"missing", "gated"}]
     blockers.extend(check["id"] for check in checks if check["status"] == "blocked")
+    blocked_targets = [target for target in mirror_targets if target["status"] == "blocked"]
+    healthy_targets = [target for target in mirror_targets if target["status"] == "healthy"]
+    probe_failed_targets = [
+        target for target in mirror_targets if target["status"] == "probe_failed"
+    ]
+    next_actions = []
+    if any(target["provider"] == "gitlab" for target in blocked_targets):
+        next_actions.append(
+            "Recreate the GitLab mirror as a blank public SHA-1 repository, then rerun mirror-readiness --strict --probe-remotes."
+        )
+    if probe_failed_targets:
+        next_actions.append(
+            "Rerun remote probes from a network that can reach the provider HTTPS readback endpoint; probe failures are reported but non-blocking."
+        )
+    if not configured_mirror_targets:
+        next_actions.append(
+            "Configure GIT_MIRROR_URL_GITLAB, GIT_MIRROR_URL_CODEBERG, and GIT_MIRROR_SSH_PRIVATE_KEY before expecting live mirroring."
+        )
     return {
         "schema_version": "1.0.0",
         "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "status": "ready" if not blockers else "blocked",
         "checks": checks,
+        "mirror_targets": mirror_targets,
+        "mirror_target_summary": {
+            "configured_count": len(configured_mirror_targets),
+            "healthy_count": len(healthy_targets),
+            "blocked_count": len(blocked_targets),
+            "probe_failed_count": len(probe_failed_targets),
+            "providers": sorted(
+                {
+                    str(target["provider"])
+                    for target in configured_mirror_targets
+                    if target["provider"] != "unknown"
+                }
+            ),
+        },
         "remote_probe_results": remote_probe_results,
         "blockers": blockers,
         "gated_external_writes": [check["id"] for check in checks if check["status"] == "gated"],
+        "next_actions": next_actions,
         "manual_verification": [
             'gh workflow run "Mirror Sync" --repo edithatogo/corpus-cases-medilegal-nz --ref master',
             'gh run list --repo edithatogo/corpus-cases-medilegal-nz --workflow "Mirror Sync"',

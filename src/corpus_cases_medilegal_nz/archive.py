@@ -1323,6 +1323,7 @@ def publication_readiness(
     environment: Mapping[str, str] | None = None,
     root: Path = Path(),
     privacy_report: Mapping[str, Any] | None = None,
+    mirror_report: Mapping[str, Any] | None = None,
 ) -> JsonObject:
     """Check local and credential readiness for publication workflows."""
     env = environment or os.environ
@@ -1339,6 +1340,7 @@ def publication_readiness(
         "scripts/check_release_evidence.py",
         "scripts/publish_huggingface_release.py",
         "scripts/publish_zenodo_draft.py",
+        ".github/workflows/mirror_probe_report.yml",
         "uv.lock",
     ]
     checks: list[JsonObject] = []
@@ -1430,9 +1432,68 @@ def publication_readiness(
                 "source": privacy_report_path.as_posix(),
             }
         )
+    known_external_blockers: list[JsonObject] = []
+    mirror_report_path = root / "generated/mirror-probe/readiness.json"
+    mirror_status = "unknown"
+    mirror_targets: list[Mapping[str, Any]] = []
+    if mirror_report is None and mirror_report_path.is_file():
+        loaded = json.loads(mirror_report_path.read_text(encoding="utf-8"))
+        if isinstance(loaded, Mapping):
+            mirror_report = loaded
+    if isinstance(mirror_report, Mapping):
+        raw_targets = mirror_report.get("mirror_targets", [])
+        if isinstance(raw_targets, list):
+            mirror_targets = [target for target in raw_targets if isinstance(target, Mapping)]
+        codeberg_healthy = any(
+            target.get("provider") == "codeberg"
+            and target.get("status") == "healthy"
+            and target.get("object_format") == "sha1"
+            for target in mirror_targets
+        )
+        gitlab_known_sha256 = [
+            target
+            for target in mirror_targets
+            if target.get("provider") == "gitlab"
+            and target.get("status") == "blocked"
+            and target.get("object_format") == "sha256"
+        ]
+        if codeberg_healthy and gitlab_known_sha256:
+            mirror_status = "known_external_blocker"
+            known_external_blockers.append(
+                {
+                    "id": "gitlab_sha1_recreation",
+                    "provider": "gitlab",
+                    "status": "tracked_external_blocker",
+                    "issue_url": "https://github.com/edithatogo/corpus-cases-medilegal-nz/issues/9",
+                    "reason": "GitLab mirror is SHA-256-backed and must be recreated as SHA-1-compatible; Codeberg remains healthy mirror coverage.",
+                }
+            )
+        elif codeberg_healthy:
+            mirror_status = "configured"
+        else:
+            mirror_status = "blocked"
+        checks.append(
+            {
+                "id": "mirror_readiness",
+                "status": mirror_status,
+                "secret": False,
+                "source": mirror_report_path.as_posix(),
+            }
+        )
+    else:
+        checks.append(
+            {
+                "id": "mirror_readiness",
+                "status": "unknown",
+                "secret": False,
+                "source": mirror_report_path.as_posix(),
+            }
+        )
     blockers = [check["id"] for check in checks if check["status"] == "missing"]
     if privacy_report is not None and privacy_status == "blocked":
         blockers.append("privacy_governance")
+    if mirror_report is not None and mirror_status == "blocked":
+        blockers.append("mirror_readiness")
     return {
         "schema_version": "1.0.0",
         "generated_at": utc_now_iso(),
@@ -1443,6 +1504,8 @@ def publication_readiness(
         "protected_environment": protected_environment,
         "privacy_governance": privacy_report,
         "privacy_blockers": privacy_blockers,
+        "mirror_readiness": mirror_report,
+        "known_external_blockers": known_external_blockers,
     }
 
 

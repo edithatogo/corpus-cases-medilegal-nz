@@ -1,8 +1,19 @@
+import importlib.util
 from pathlib import Path
 
 from corpus_cases_medilegal_nz.mirror import classify_remote_head, mirror_sync_readiness
 
 WORKFLOW_PATH = Path(".github/workflows/mirror_sync.yml")
+REPORT_SCRIPT_PATH = Path("scripts/build_mirror_probe_report.py")
+
+
+def _build_markdown_report(report: dict[object, object]) -> str:
+    spec = importlib.util.spec_from_file_location("build_mirror_probe_report", REPORT_SCRIPT_PATH)
+    assert spec is not None
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module.build_markdown_report(report)
 
 
 def test_mirror_workflow_skips_when_any_required_secret_is_missing() -> None:
@@ -59,6 +70,14 @@ def test_mirror_readiness_reports_workflow_and_secret_gating() -> None:
     assert "GIT_MIRROR_URL_GITLAB" in report["blockers"]
     assert "GIT_MIRROR_URL_CODEBERG" in report["blockers"]
     assert "GIT_MIRROR_SSH_PRIVATE_KEY" in report["blockers"]
+    assert report["mirror_target_summary"] == {
+        "configured_count": 0,
+        "healthy_count": 0,
+        "blocked_count": 0,
+        "probe_failed_count": 0,
+        "providers": [],
+    }
+    assert report["mirror_targets"][0]["status"] == "gated"
 
 
 def test_mirror_readiness_strict_requires_all_mirror_targets() -> None:
@@ -138,3 +157,76 @@ def test_mirror_readiness_probe_blocks_sha256_gitlab_remote() -> None:
     assert checks["remote_object_format"]["incompatible_count"] == 1
     assert "remote_object_format" in report["blockers"]
     assert report["remote_probe_results"][0]["object_format"] == "sha256"
+    assert report["mirror_target_summary"]["configured_count"] == 2
+    assert report["mirror_target_summary"]["healthy_count"] == 1
+    assert report["mirror_target_summary"]["blocked_count"] == 1
+    assert report["mirror_target_summary"]["providers"] == ["codeberg", "gitlab"]
+    targets = {target["provider"]: target for target in report["mirror_targets"]}
+    assert targets["gitlab"]["status"] == "blocked"
+    assert targets["gitlab"]["object_format"] == "sha256"
+    assert targets["codeberg"]["status"] == "healthy"
+    assert targets["codeberg"]["object_format"] == "sha1"
+    assert report["next_actions"] == [
+        "Recreate the GitLab mirror as a blank public SHA-1 repository, then rerun mirror-readiness --strict --probe-remotes."
+    ]
+
+
+def test_mirror_readiness_probe_failure_is_reported_not_blocking() -> None:
+    codeberg_url = "git@codeberg.org:edithatogo/corpus-cases-medilegal-nz.git"
+    report = mirror_sync_readiness(
+        environment={
+            "GIT_MIRROR_URL_CODEBERG": codeberg_url,
+            "GIT_MIRROR_SSH_PRIVATE_KEY": "key",
+        },
+        root=Path(),
+        remote_heads={codeberg_url: "not-a-git-object"},
+    )
+
+    assert report["status"] == "blocked"
+    assert "remote_object_format" not in report["blockers"]
+    assert report["mirror_target_summary"]["configured_count"] == 1
+    assert report["mirror_target_summary"]["blocked_count"] == 0
+    assert report["mirror_targets"][0]["status"] == "unknown"
+    assert report["mirror_targets"][0]["object_format"] == "unknown"
+
+
+def test_mirror_probe_markdown_report_surfaces_target_health() -> None:
+    report = {
+        "generated_at": "2026-07-04T00:00:00Z",
+        "status": "blocked",
+        "blockers": ["remote_object_format"],
+        "mirror_target_summary": {
+            "configured_count": 2,
+            "healthy_count": 1,
+            "blocked_count": 1,
+            "probe_failed_count": 0,
+            "providers": ["codeberg", "gitlab"],
+        },
+        "mirror_targets": [
+            {
+                "provider": "gitlab",
+                "status": "blocked",
+                "object_format": "sha256",
+                "head": "e3dcc84171382b1178636b36a160335af5d35be0fbc8274624bad048299fb50e",
+                "reason": "remote HEAD appears to use SHA-256 object ids; GitHub mirrors are SHA-1.",
+            },
+            {
+                "provider": "codeberg",
+                "status": "healthy",
+                "object_format": "sha1",
+                "head": "1895a0b7822dc0027393e83cb4c8cfc4a023c63e",
+                "reason": "remote HEAD is compatible with GitHub SHA-1 mirroring",
+            },
+        ],
+        "next_actions": [
+            "Recreate the GitLab mirror as a blank public SHA-1 repository, then rerun mirror-readiness --strict --probe-remotes."
+        ],
+    }
+
+    markdown = _build_markdown_report(report)
+
+    assert "- Status: `blocked`" in markdown
+    assert "- Blockers: `remote_object_format`" in markdown
+    assert "| gitlab | blocked | sha256 |" in markdown
+    assert "| codeberg | healthy | sha1 |" in markdown
+    assert "Recreate the GitLab mirror" in markdown

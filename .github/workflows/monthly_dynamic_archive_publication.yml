@@ -135,6 +135,21 @@ jobs:
             --archive-version "$ARCHIVE_VERSION" \
             --hf-repo-id "$HF_REPO_ID"
 
+      - name: Build mirror readiness evidence
+        env:
+          GIT_MIRROR_URL: ${{ secrets.GIT_MIRROR_URL }}
+          GIT_MIRROR_URL_GITLAB: ${{ secrets.GIT_MIRROR_URL_GITLAB }}
+          GIT_MIRROR_URL_CODEBERG: ${{ secrets.GIT_MIRROR_URL_CODEBERG }}
+          GIT_MIRROR_SSH_PRIVATE_KEY: ${{ secrets.GIT_MIRROR_SSH_PRIVATE_KEY }}
+        run: |
+          set +e
+          mkdir -p generated/mirror-probe
+          uv run python -m corpus_cases_medilegal_nz.cli mirror-readiness --strict --probe-remotes \
+            > generated/mirror-probe/readiness.json
+          MIRROR_READINESS_EXIT_CODE="$?"
+          set -e
+          echo "Mirror readiness command exited with $MIRROR_READINESS_EXIT_CODE; publication-readiness will classify the evidence."
+
       - name: Validate local release evidence
         run: |
           set -euo pipefail
