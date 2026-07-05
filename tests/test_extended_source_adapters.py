@@ -12,8 +12,8 @@ from corpus_cases_medilegal_nz.sources.ipca import IpcaSourceAdapter
 from corpus_cases_medilegal_nz.sources.law_commission import LawCommissionSourceAdapter
 from corpus_cases_medilegal_nz.sources.moj_courts import MojCourtsSourceAdapter
 from corpus_cases_medilegal_nz.sources.ombudsman import OmbudsmanSourceAdapter
-from corpus_cases_medilegal_nz.sources.royal_commissions import RoyalCommissionsSourceAdapter
 from corpus_cases_medilegal_nz.sources.privacy import PrivacySourceAdapter
+from corpus_cases_medilegal_nz.sources.royal_commissions import RoyalCommissionsSourceAdapter
 
 EXTENDED_SOURCE_CASES = [
     (
@@ -167,6 +167,15 @@ def test_extended_source_adapters_fetch_and_validate(
     assert record["source"] == source_id
     assert record["title"] == title
     assert record["metadata"]["source_name"] == source_name
+    if source_id in {
+        "ombudsman",
+        "ipca",
+        "law_commission",
+        "royal_commissions",
+        "coronial",
+        "moj_courts",
+    }:
+        assert record["metadata"]["parser_profile_id"]
     assert adapter.validate(records) is True
 
 

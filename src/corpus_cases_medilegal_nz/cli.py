@@ -32,6 +32,7 @@ from corpus_cases_medilegal_nz.source_maturity import (
     build_source_rights_review_ledger,
 )
 from corpus_cases_medilegal_nz.source_verification import (
+    build_live_backfill_proof,
     build_source_verification_bundle,
     build_source_verification_feasibility,
     fetch_verification_inputs,
@@ -58,9 +59,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     sub.add_parser("source-rights", help="Report source-level rights review ledger.")
     sub.add_parser("parser-risk", help="Report parser replacement and live-smoke priorities.")
     sub.add_parser("publication-governance", help="Report remaining publication governance gates.")
-    sub.add_parser(
+    completion_readiness = sub.add_parser(
         "corpus-completion-readiness",
         help="Report whether complete-corpus claims are currently evidence-safe.",
+    )
+    completion_readiness.add_argument(
+        "--verification-mode",
+        choices=("fixture", "live"),
+        default="fixture",
+        help="Source verification mode used for the readiness gate.",
     )
     sub.add_parser(
         "source-verification-feasibility",
@@ -83,6 +90,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     verification.add_argument("--output-dir", default="generated/source-verification")
     verification.add_argument("--mode", choices=("fixture", "live"), default="fixture")
+    live_backfill = sub.add_parser(
+        "live-backfill-proof",
+        help="Build generated live backfill proof without replacing canonical data.",
+    )
+    live_backfill.add_argument("--output-dir", default="generated/live-backfill-proof")
     proof = sub.add_parser("collection-proof", help="Build deterministic local collection proof.")
     proof.add_argument("--output-dir", default="data/processed")
     proof.add_argument("--fixture-root", default="tests/fixtures/sources")
@@ -151,9 +163,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
     elif ns.command == "corpus-completion-readiness":
         records = load_jsonl_records(Path("data/processed/jsonl/records.jsonl"))
+        evidence_dir = (
+            Path("generated/source-verification-live")
+            if ns.verification_mode == "live"
+            else Path("generated/source-verification")
+        )
         verification = build_source_verification_bundle(
-            output_dir=Path("generated/source-verification"),
+            output_dir=evidence_dir,
             processed_records=records,
+            mode=ns.verification_mode,
         )
         result = build_corpus_completion_readiness(
             source_completeness=build_source_completeness_ledger(
@@ -189,6 +207,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
         if result["status"] == "blocked":
+            exit_code = 1
+    elif ns.command == "live-backfill-proof":
+        result = build_live_backfill_proof(output_dir=Path(ns.output_dir))
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+        if result["status"] != "pass":
             exit_code = 1
     elif ns.command == "collection-proof":
         result = write_collection_proof(

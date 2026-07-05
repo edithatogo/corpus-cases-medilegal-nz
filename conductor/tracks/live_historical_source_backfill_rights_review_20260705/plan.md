@@ -45,13 +45,13 @@
 
 ## Phase 4: Parser Replacement And Live Drift Proof
 
-- [ ] Task: Replace high-risk generic parser paths.
-    - [ ] Implement source-specific parser proof for `moj_tribunals`, `royal_commissions`, `coronial`, `ombudsman`, `moj_courts`, `ipca`, and `law_commission`.
-    - [ ] Add fixture and live-smoke contracts for pagination, detail pages, document assets, dates, and source identifiers.
-    - [ ] Keep blockers explicit where live site shape prevents deterministic parser proof.
-- [ ] Task: Promote review-level parser sources only after drift checks.
-    - [ ] Run selector-drift checks for `hdc`, `hpdt`, `era`, `teachers`, `privacy`, and `human_rights`.
-    - [ ] Record whether generic parser behavior remains acceptable or needs replacement.
+- [x] Task: Replace high-risk generic parser paths.
+    - [x] Implement source-specific parser proof for `moj_tribunals`, `royal_commissions`, `coronial`, `ombudsman`, `moj_courts`, `ipca`, and `law_commission`.
+    - [x] Add fixture and live-smoke contracts for pagination, detail pages, document assets, dates, and source identifiers.
+    - [x] Keep blockers explicit where live site shape prevents deterministic parser proof.
+- [x] Task: Promote review-level parser sources only after drift checks.
+    - [x] Run selector-drift checks for `hdc`, `hpdt`, `era`, `teachers`, `privacy`, and `human_rights`.
+    - [x] Record whether generic parser behavior remains acceptable or needs replacement.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Parser Replacement And Live Drift Proof' (Protocol in workflow.md)
 
 ## Phase 5: Candidate Source Triage And Promotion
@@ -59,18 +59,18 @@
 - [x] Task: Triage remaining candidate sources.
     - [x] Classify ACC appeals/reviews, other professional councils, Mental Health Review Tribunal, NZLII health/privacy/discipline subsets, and health appellate court filters as `approved`, `deferred`, or `excluded`.
     - [x] Record rights, public availability, duplication, scope, parser complexity, and promotion rationale.
-- [ ] Task: Promote approved candidates.
-    - [ ] Add source config and fixture contract for approved candidates.
-    - [ ] Add live verification, rights ledger, parser-risk status, and release-evidence integration.
-    - [ ] Keep deferred or excluded candidates visible in public-safe discovery ledgers.
+- [x] Task: Promote approved candidates.
+    - [x] Add source config and fixture contract for approved candidates.
+    - [x] Add live verification, rights ledger, parser-risk status, and release-evidence integration.
+    - [x] Keep deferred or excluded candidates visible in public-safe discovery ledgers.
 - [ ] Task: Conductor - User Manual Verification 'Phase 5: Candidate Source Triage And Promotion' (Protocol in workflow.md)
 
 ## Phase 6: Historical Backfill, Publication, And Completion Proof
 
-- [ ] Task: Run historical backfill after verification gates pass.
-    - [ ] Generate processed records, manifests, source coverage ledgers, and dataset diff evidence from live-backed inputs.
-    - [ ] Reconcile processed records against expected live source records.
-    - [ ] Preserve unresolved source gaps as blockers rather than false completion.
+- [x] Task: Run historical backfill after verification gates pass.
+    - [x] Generate processed records, manifests, source coverage ledgers, and dataset diff evidence from live-backed inputs.
+    - [x] Reconcile processed records against expected live source records.
+    - [x] Preserve unresolved source gaps as blockers rather than false completion.
 - [ ] Task: Publish verified release evidence.
     - [x] Attach source verification, rights, parser, candidate-source, and completeness evidence to GitHub release assets.
     - [ ] Upload live-backed evidence to Hugging Face and verify remote manifests.

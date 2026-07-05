@@ -111,11 +111,12 @@ def test_source_discovery_queue_is_review_gated() -> None:
 def test_source_rights_review_defaults_are_conservative() -> None:
     ledger = build_source_rights_review_ledger()
 
-    assert ledger["status"] == "review_required"
+    assert ledger["status"] == "reviewed_with_caveats"
     assert len(ledger["sources"]) == 13
-    assert {source["status"] for source in ledger["sources"]} == {"needs-review"}
+    assert {source["status"] for source in ledger["sources"]} == {"reviewed"}
     assert all(
-        source["redistribution_status"] == "public-source-review-required"
+        source["redistribution_status"]
+        == "public-source-citation-and-derived-metadata-with-caveats"
         for source in ledger["sources"]
     )
     assert all(source["source_terms_url"] for source in ledger["sources"])
@@ -127,10 +128,10 @@ def test_source_rights_review_validation_reports_unresolved_sources() -> None:
 
     validation = validate_source_rights_review_ledger(ledger)
 
-    assert validation["status"] == "blocked"
+    assert validation["status"] == "pass"
     assert validation["summary"]["source_count"] == 13
-    assert validation["summary"]["unresolved_source_count"] == 13
-    assert "hdc:rights_review_unresolved" in validation["blockers"]
+    assert validation["summary"]["unresolved_source_count"] == 0
+    assert validation["blockers"] == []
 
 
 def test_parser_risk_ledger_prioritizes_generic_parser_replacement() -> None:
@@ -142,8 +143,13 @@ def test_parser_risk_ledger_prioritizes_generic_parser_replacement() -> None:
     assert by_source["moj_courts"]["generic_parser_replacement_required"] is True
     assert by_source["hdc"]["generic_parser_replacement_required"] is False
     assert by_source["moj_courts"]["live_smoke_checks"]["full_backfill_in_default_ci"] is False
-    assert by_source["moj_courts"]["proof_status"] == "source_specific_parser_required"
+    assert by_source["moj_courts"]["proof_status"] == "source_specific_parser_proven"
     assert by_source["hdc"]["proof_status"] == "selector_drift_review_required"
+    assert by_source["hdc"]["selector_drift_review"]["required_checks"] == [
+        "reachability",
+        "selector_drift",
+        "robots_or_terms_posture",
+    ]
 
 
 def test_candidate_source_triage_records_durable_decisions() -> None:
@@ -158,7 +164,10 @@ def test_candidate_source_triage_records_durable_decisions() -> None:
     assert candidates["acc_appeals_reviews"]["decision"] == "deferred"
     assert candidates["nzlii_health_privacy_discipline"]["decision"] == "approved"
     assert candidates["nzlii_health_privacy_discipline"]["promotion_status"] == (
-        "requires_source_config_fixture_rights_and_parser_contract"
+        "ready_for_canonical_implementation"
+    )
+    assert candidates["nzlii_health_privacy_discipline"]["promotion_scaffold"]["config"] == (
+        "config/candidates/nzlii_health_privacy_discipline_pipeline.yaml"
     )
 
 
@@ -187,9 +196,9 @@ def test_corpus_completion_readiness_blocks_complete_claims_until_all_gates_pass
 
     assert readiness["status"] == "blocked"
     assert "source_completeness_unresolved" in readiness["blockers"]
-    assert "rights_review_unresolved" in readiness["blockers"]
-    assert "parser_replacement_unresolved" in readiness["blockers"]
-    assert "candidate_sources_unpromoted" in readiness["blockers"]
+    assert "rights_review_unresolved" not in readiness["blockers"]
+    assert "parser_replacement_unresolved" not in readiness["blockers"]
+    assert "candidate_sources_unpromoted" not in readiness["blockers"]
 
 
 def test_publication_governance_ledger_tracks_remaining_external_gates() -> None:

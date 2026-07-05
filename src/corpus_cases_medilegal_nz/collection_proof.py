@@ -29,6 +29,10 @@ from corpus_cases_medilegal_nz.source_maturity import (
     build_source_maturity_ledger,
     build_source_rights_review_ledger,
 )
+from corpus_cases_medilegal_nz.source_parser_profiles import (
+    SOURCE_SPECIFIC_PARSER_PROFILES,
+    parse_source_specific_listing_html,
+)
 from corpus_cases_medilegal_nz.source_verification import build_source_verification_bundle
 
 CORE_SOURCE_URLS = {
@@ -68,8 +72,13 @@ def build_fixture_collection_records(
     for source_id in sorted(ALL_SOURCE_URLS):
         fixture = fixture_groups[source_id]
         html = (fixture_root / fixture["html"]).read_text(encoding="utf-8")
+        parser = (
+            parse_source_specific_listing_html
+            if source_id in SOURCE_SPECIFIC_PARSER_PROFILES
+            else parse_source_listing_html
+        )
         records.extend(
-            parse_source_listing_html(
+            parser(
                 source_id=source_id,
                 url=ALL_SOURCE_URLS[source_id],
                 html=html,

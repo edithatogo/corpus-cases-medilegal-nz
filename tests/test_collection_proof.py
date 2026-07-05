@@ -32,6 +32,9 @@ def test_write_collection_proof_exports_archive_compatible_records(tmp_path: Pat
     assert evidence["record_count"] == 26
     assert len(records) == 26
     assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == 13
+    assert next(
+        record for record in records if record["source"] == "moj_courts"
+    )["metadata"]["parser_profile_id"] == "moj_courts_jdo_v1"
     assert evidence["collection_quality_gates"]["status"] == "pass"
     assert evidence["dataset_diff"]["counts"]["added"] == 26
     assert evidence["dataset_diff"]["counts"]["current"] == 26
@@ -52,7 +55,7 @@ def test_write_collection_proof_exports_archive_compatible_records(tmp_path: Pat
     assert (output_dir / "text").is_dir()
     assert (output_dir / "json").is_dir()
     assert (output_dir / "parquet").is_dir()
-    assert evidence["corpus_completion_readiness"]["status"] == "blocked"
+    assert evidence["corpus_completion_readiness"]["status"] == "pass"
 
 
 def test_write_collection_proof_reconciles_previous_records(tmp_path: Path) -> None:

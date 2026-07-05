@@ -10,7 +10,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from corpus_cases_medilegal_nz.config_models import load_pipeline_config
-from corpus_cases_medilegal_nz.medilegal_parser import parse_source_listing_html
+from corpus_cases_medilegal_nz.source_parser_profiles import parse_source_specific_listing_html
 from corpus_cases_medilegal_nz.sources import SourceAdapter
 
 logger = logging.getLogger(__name__)
@@ -39,7 +39,9 @@ class MojTribunalsSourceAdapter(SourceAdapter):
             resp = session.get(url, timeout=30)
             resp.raise_for_status()
             logger.info("Fetched MoJ Tribunals search page (%d bytes)", len(resp.text))
-            return parse_source_listing_html(source_id="moj_tribunals", url=url, html=resp.text)
+            return parse_source_specific_listing_html(
+                source_id="moj_tribunals", url=url, html=resp.text
+            )
         finally:
             session.close()
 

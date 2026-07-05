@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from corpus_cases_medilegal_nz.collection_proof import build_fixture_collection_records
 from corpus_cases_medilegal_nz.source_verification import (
+    build_live_backfill_proof,
     build_source_verification_bundle,
     build_source_verification_feasibility,
     build_verification_public_claims,
@@ -115,6 +116,35 @@ def test_reconcile_expected_records_classifies_missing_and_extra() -> None:
     assert reconciliation["status"] == "verified_incomplete"
 
 
+def test_reconcile_expected_records_can_report_ambiguity_without_failing_projection() -> None:
+    expected = [
+        {
+            "source": "ombudsman",
+            "case_id": "ombudsman-1",
+            "title": "Annual report",
+            "date": "",
+        },
+        {
+            "source": "ombudsman",
+            "case_id": "ombudsman-2",
+            "title": "Annual report",
+            "date": "",
+        },
+    ]
+
+    strict = reconcile_expected_records(expected_records=expected, processed_records=expected)
+    projected = reconcile_expected_records(
+        expected_records=expected,
+        processed_records=expected,
+        fail_on_ambiguous=False,
+    )
+
+    assert strict["summary"]["ambiguous_count"] == 2
+    assert strict["status"] == "verified_incomplete"
+    assert projected["summary"]["ambiguous_count"] == 2
+    assert projected["status"] == "verified_complete"
+
+
 def test_verification_target_metadata_promotes_official_source_index_counts(
     tmp_path: Path,
 ) -> None:
@@ -187,3 +217,23 @@ def test_live_fetch_success_replays_with_relative_paths(tmp_path: Path) -> None:
     assert manifest["inputs"][0]["relative_path"] == "raw/hdc/listing.html"
     assert replay["status"] == "pass"
     assert replay["inputs"][0]["status"] == "replayed"
+
+
+def test_live_backfill_proof_reconciles_generated_records(tmp_path: Path) -> None:
+    class OkResponse:
+        status_code = 200
+        headers: ClassVar[dict[str, str]] = {"content-type": "text/html"}
+        content = b"<html><body><article data-case-id='HDC-LIVE-1'><h2>Live HDC</h2><time datetime='2026-07-01'>1 July 2026</time><a href='https://example.test/live'>Decision</a><p>Live decision.</p></article></body></html>"
+
+    with patch("corpus_cases_medilegal_nz.source_verification.requests.get") as get:
+        get.return_value = OkResponse()
+        proof = build_live_backfill_proof(
+            output_dir=tmp_path / "live-backfill",
+            root=ROOT,
+            source_ids=["hdc"],
+        )
+
+    assert proof["status"] == "pass"
+    assert proof["record_count"] == 1
+    assert proof["reconciliation"]["status"] == "verified_complete"
+    assert (tmp_path / "live-backfill" / "jsonl" / "records.jsonl").is_file()

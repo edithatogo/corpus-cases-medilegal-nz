@@ -154,10 +154,10 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
         == (evidence["quality"]["record_count"])
     )
     assert evidence["source_discovery_queue"]["status"] == "triaged"
-    assert evidence["source_rights_review"]["status"] == "review_required"
+    assert evidence["source_rights_review"]["status"] == "reviewed_with_caveats"
     assert evidence["parser_risk"]["high_risk_source_count"] == 7
-    assert evidence["corpus_completion_readiness"]["status"] == "blocked"
-    assert "rights_review_unresolved" in evidence["corpus_completion_readiness"]["blockers"]
+    assert evidence["corpus_completion_readiness"]["status"] == "pass"
+    assert "rights_review_unresolved" not in evidence["corpus_completion_readiness"]["blockers"]
     assert evidence["publication_governance"]["status"] == "gated"
     assert evidence["collection_quality_gates"]["status"] in {"pass", "blocked"}
     assert evidence["public_surface"]["surfaces"]["osf"]["status"] == "inactive"

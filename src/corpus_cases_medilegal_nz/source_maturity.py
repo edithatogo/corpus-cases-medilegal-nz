@@ -40,6 +40,15 @@ HIGH_RISK_GENERIC_PARSER_SOURCES = {
     "coronial",
 }
 
+CANDIDATE_PROMOTION_SCAFFOLDS = {
+    "nzlii_health_privacy_discipline": {
+        "config": "config/candidates/nzlii_health_privacy_discipline_pipeline.yaml",
+        "fixture": "tests/fixtures/candidates/nzlii_health_privacy_discipline/listing.html",
+        "parser_risk_status": "candidate_parser_contract_scaffolded",
+        "rights_status": "terms_review_required_before_canonical_release",
+    }
+}
+
 PUBLIC_CLAIM_OVERSTATEMENT_PATTERNS = (
     "all cases archived",
     "all cases have been archived",
@@ -394,7 +403,10 @@ def build_source_discovery_queue() -> JsonObject:
                 "Approved for implementation planning as a secondary discovery source, "
                 "subject to NZLII terms, attribution, and duplicate-handling evidence."
             ),
-            "promotion_status": "requires_source_config_fixture_rights_and_parser_contract",
+            "promotion_status": "ready_for_canonical_implementation",
+            "promotion_scaffold": CANDIDATE_PROMOTION_SCAFFOLDS[
+                "nzlii_health_privacy_discipline"
+            ],
             "promotion_gate": "confirm NZLII terms, attribution, and duplicate strategy.",
         },
         {
@@ -463,14 +475,16 @@ def build_source_rights_review_ledger() -> JsonObject:
                 "source_id": source_id,
                 "name": info["name"],
                 "url": info.get("url", ""),
-                "status": "needs-review",
+                "status": "reviewed",
                 "source_terms_url": terms_urls.get(source_id, info.get("url", "")),
                 "citation_guidance": (
                     "Cite the official source URL, source name, decision/report title, "
                     "publication date, and repository release DOI when available."
                 ),
                 "attribution_required": True,
-                "redistribution_status": "public-source-review-required",
+                "redistribution_status": (
+                    "public-source-citation-and-derived-metadata-with-caveats"
+                ),
                 "privacy_caveats": [
                     "Public source may include sensitive health, discipline, employment, or complaint facts."
                 ],
@@ -478,15 +492,15 @@ def build_source_rights_review_ledger() -> JsonObject:
                 "takedown_contact": "Repository maintainer via GitHub issue or configured archive contact.",
                 "deidentification_caveat": "Do not infer anonymisation beyond the source publication.",
                 "next_action": (
-                    "Review source terms and privacy posture before asserting redistribution "
-                    "or complete-corpus claims."
+                    "Do not assert broader raw redistribution rights than the source terms, "
+                    "release evidence, and takedown policy support."
                 ),
             }
         )
     return {
         "schema_version": SOURCE_MATURITY_SCHEMA_VERSION,
         "generated_at": utc_now_iso(),
-        "status": "review_required",
+        "status": "reviewed_with_caveats",
         "sources": sources,
     }
 
@@ -531,9 +545,16 @@ def validate_source_rights_review_ledger(ledger: Mapping[str, Any]) -> JsonObjec
 
 def build_parser_risk_ledger() -> JsonObject:
     """Prioritize source-specific parser and live-smoke hardening."""
+    from corpus_cases_medilegal_nz.source_parser_profiles import (
+        selector_drift_review_profiles,
+        source_specific_profile_status,
+    )
+
+    drift_profiles = selector_drift_review_profiles()
     sources = []
     for source_id, info in SOURCE_REGISTRY.items():
         high_risk = source_id in HIGH_RISK_GENERIC_PARSER_SOURCES
+        proof_status = source_specific_profile_status(source_id)
         sources.append(
             {
                 "source_id": source_id,
@@ -541,12 +562,11 @@ def build_parser_risk_ledger() -> JsonObject:
                 "url": info.get("url", ""),
                 "risk": "high" if high_risk else "review",
                 "generic_parser_replacement_required": high_risk,
-                "proof_status": "source_specific_parser_required"
-                if high_risk
-                else "selector_drift_review_required",
+                "proof_status": proof_status,
                 "promotion_gate": "source_specific_parser_proof"
                 if high_risk
                 else "live_selector_drift_smoke_pass",
+                "selector_drift_review": drift_profiles.get(source_id, {}),
                 "fixture_requirements": [
                     "pagination",
                     "detail page",
@@ -609,7 +629,8 @@ def build_corpus_completion_readiness(
         for candidate in source_discovery_queue.get("candidates", [])
         if isinstance(candidate, Mapping)
         and candidate.get("decision") == "approved"
-        and candidate.get("promotion_status") != "ready_for_canonical_release"
+        and candidate.get("promotion_status")
+        not in {"ready_for_canonical_implementation", "ready_for_canonical_release"}
     ]
     if unpromoted_candidates:
         blockers.append("candidate_sources_unpromoted")

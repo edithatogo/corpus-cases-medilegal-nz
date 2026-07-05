@@ -1,0 +1,24 @@
+pipeline:
+  name: nzlii_health_privacy_discipline
+  description: "NZLII health, privacy, and discipline subset candidate discovery pipeline"
+  source_url: "https://www.nzlii.org/"
+  base_url: "https://www.nzlii.org/"
+  paths:
+    raw_dir: "data/raw/candidates/nzlii_health_privacy_discipline"
+    processed_dir: "data/processed/candidates"
+  scraping:
+    page_size: 25
+    max_pages: 5
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) NZ-Medicolegal-Corpus-Sync"
+    timeout: 30
+  validation:
+    required_metadata_fields:
+      - "case_id"
+      - "date"
+      - "title"
+      - "citation"
+      - "url"
+  promotion:
+    canonical_registry_status: "candidate_only"
+    duplicate_strategy: "link_to_official_source_when_duplicate"
+    rights_status: "terms_review_required_before_canonical_release"

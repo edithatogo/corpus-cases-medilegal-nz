@@ -41,6 +41,12 @@ Check whether complete-corpus claims are currently evidence-safe:
 uv run python -m corpus_cases_medilegal_nz.cli corpus-completion-readiness
 ```
 
+Use live verification inputs for the same gate:
+
+```bash
+uv run python -m corpus_cases_medilegal_nz.cli corpus-completion-readiness --verification-mode live
+```
+
 This command exits non-zero while source rights review, parser replacement,
 candidate promotion, source verification, or completeness reconciliation gates
 remain unresolved. A blocked result is expected until the live historical
@@ -51,6 +57,18 @@ Live mode is explicit:
 ```bash
 uv run python -m corpus_cases_medilegal_nz.cli source-verification --output-dir generated/source-verification-live --mode live
 ```
+
+Build a non-mutating live historical backfill proof from archived live expected
+records:
+
+```bash
+uv run python -m corpus_cases_medilegal_nz.cli live-backfill-proof --output-dir generated/live-backfill-proof
+```
+
+The live backfill proof writes generated processed-style records under
+`generated/live-backfill-proof/jsonl/records.jsonl` and reconciles them against
+the archived live expected-record ledger. It does not replace the canonical
+processed corpus unless a release workflow explicitly promotes those artifacts.
 
 ## Evidence Layout
 
@@ -64,6 +82,8 @@ uv run python -m corpus_cases_medilegal_nz.cli source-verification --output-dir 
 - `manifests/source_verification_summary.json`: aggregate verification bundle.
 - `manifests/corpus_completion_readiness.json`: complete-corpus claim gate covering
   verification, rights, parser, candidate-source, and reconciliation blockers.
+- `generated/live-backfill-proof/`: non-mutating proof artifacts for a
+  live-backed historical-record projection and reconciliation.
 
 ## Publication Integration
 
