@@ -17,7 +17,7 @@
 ## Phase 2: Zenodo & OSF Mirroring Integration
 - [x] Task: Document Zenodo archival publication schema and script requirements. (See zenodo_archival_plan.md)
 - [x] Task: Design OSF optional mirror convenience policy matching sister Hansard/Legislation corpora. (See osf_mirror_policy.md)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Zenodo & OSF Mirroring Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Zenodo & OSF Mirroring Integration' (Protocol in workflow.md)
 
 ## Chrome Operator Evidence - 2026-06-14
 
@@ -57,3 +57,4 @@
 - 2026-07-04: Identified that GitLab and Codeberg require separate deploy keys because the GitHub fallback secret was rotated to GitLab v3 while Codeberg still trusts v2; provider-specific workflow secrets are now the canonical fix.
 - 2026-07-04: Added and pushed provider-specific GitHub mirror key support in commit `9467106dc63469add0dc708b69dbbf4fcf7ed87d`. `GIT_MIRROR_SSH_PRIVATE_KEY_GITLAB` now uses GitLab v3, `GIT_MIRROR_SSH_PRIVATE_KEY_CODEBERG` uses Codeberg v2, and the generic fallback key was reset to Codeberg v2 for backward compatibility.
 - 2026-07-04: Live verification complete: push-triggered Mirror Sync run `28704295813` succeeded, manual Mirror Sync run `28704324611` succeeded, and manual Mirror Probe Report run `28704325099` succeeded with strict readiness `ready`, two configured targets, two healthy targets, zero blockers, and both GitLab and Codeberg reporting SHA-1 `HEAD` `9467106dc63469add0dc708b69dbbf4fcf7ed87d`.
+- 2026-07-05: Final mirror verification for completed source-verification implementation succeeded. GitHub Actions Mirror Sync run `28741297986` pushed `4bd519a207cea043874bd6caaaa736100452f3b3` to both GitLab and Codeberg, and readback reported `Mirrored ... at 4bd519a207cea043874bd6caaaa736100452f3b3` for both providers. Issue #9 is closed with GitLab SHA-1 recreation evidence and no remaining mirror blocker.
