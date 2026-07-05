@@ -323,6 +323,7 @@ jobs:
             "$ARTIFACT_DIR/manifests/privacy_governance.json" \
             "$ARTIFACT_DIR/manifests/redaction_exclusion_ledger.json" \
             "$ARTIFACT_DIR/manifests/legal_provenance.json" \
+            "$ARTIFACT_DIR/manifests/corpus_completion_readiness.json" \
             "$ARTIFACT_DIR/metadata/metadata_packages_manifest.json" \
             "$ARTIFACT_DIR/manifests/github_release_evidence.json" \
             "generated/archive-intelligence/archive_maturity.json" \

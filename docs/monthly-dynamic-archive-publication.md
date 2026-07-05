@@ -72,6 +72,7 @@ Each release build writes deterministic artifacts under
 - `manifests/legal_provenance.json`
 - `manifests/release_ladder.json`
 - `manifests/attestation_verification.json`
+- `manifests/corpus_completion_readiness.json`
 - `manifests/checksum_manifest.json`
 - `manifests/zenodo-metadata.json`
 - `metadata/metadata_packages_manifest.json`

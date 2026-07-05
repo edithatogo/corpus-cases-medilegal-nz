@@ -49,6 +49,7 @@ def test_monthly_workflow_has_publication_guards_and_surfaces() -> None:
     assert "archive_maturity.json" in workflow
     assert "source_observability.json" in workflow
     assert "privacy_rights_score.json" in workflow
+    assert "corpus_completion_readiness.json" in workflow
     assert "privacy_governance.json" in workflow
     assert "redaction_exclusion_ledger.json" in workflow
     assert "anomaly_report.json" in workflow

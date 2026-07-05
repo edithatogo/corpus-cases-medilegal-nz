@@ -338,6 +338,12 @@ def build_source_discovery_queue() -> JsonObject:
             "parser_complexity": "high",
             "expected_value": "high",
             "review_status": "needs_source_review",
+            "decision": "deferred",
+            "decision_rationale": (
+                "ACC appeal/review value is high, but public availability, rights posture, "
+                "and parser scope are not yet specific enough for canonical inclusion."
+            ),
+            "promotion_status": "blocked_until_public_source_rights_and_parser_scope_review",
             "promotion_gate": "rights, public availability, and parser scope must be approved.",
         },
         {
@@ -349,6 +355,12 @@ def build_source_discovery_queue() -> JsonObject:
             "parser_complexity": "medium",
             "expected_value": "high",
             "review_status": "needs_source_discovery",
+            "decision": "deferred",
+            "decision_rationale": (
+                "Potentially valuable disciplinary material remains source-discovery work "
+                "until public council-specific sources are enumerated and deduplicated."
+            ),
+            "promotion_status": "blocked_until_public_sources_identified",
             "promotion_gate": "identify public sources and avoid duplication with HPDT.",
         },
         {
@@ -360,6 +372,12 @@ def build_source_discovery_queue() -> JsonObject:
             "parser_complexity": "unknown",
             "expected_value": "medium",
             "review_status": "needs_public_availability_review",
+            "decision": "deferred",
+            "decision_rationale": (
+                "Mental Health Review Tribunal material may be sensitive and is included "
+                "only if public, redistributable source material is identified."
+            ),
+            "promotion_status": "blocked_until_public_availability_confirmed",
             "promotion_gate": "only public, redistributable material may be registered.",
         },
         {
@@ -371,6 +389,12 @@ def build_source_discovery_queue() -> JsonObject:
             "parser_complexity": "medium",
             "expected_value": "high",
             "review_status": "needs_rights_review",
+            "decision": "approved",
+            "decision_rationale": (
+                "Approved for implementation planning as a secondary discovery source, "
+                "subject to NZLII terms, attribution, and duplicate-handling evidence."
+            ),
+            "promotion_status": "requires_source_config_fixture_rights_and_parser_contract",
             "promotion_gate": "confirm NZLII terms, attribution, and duplicate strategy.",
         },
         {
@@ -382,20 +406,56 @@ def build_source_discovery_queue() -> JsonObject:
             "parser_complexity": "high",
             "expected_value": "medium",
             "review_status": "needs_scope_definition",
+            "decision": "deferred",
+            "decision_rationale": (
+                "Health appellate filtering needs a defensible medicolegal scope rule "
+                "before it can be promoted into canonical source coverage."
+            ),
+            "promotion_status": "blocked_until_scope_definition",
             "promotion_gate": "define defensible medicolegal filter and source provenance.",
         },
     ]
+    decision_counts = Counter(str(candidate["decision"]) for candidate in candidates)
     return {
         "schema_version": SOURCE_MATURITY_SCHEMA_VERSION,
         "generated_at": utc_now_iso(),
-        "status": "review_required",
-        "promotion_policy": "Candidates are not active registry sources until approved.",
+        "status": "triaged",
+        "promotion_policy": (
+            "Approved candidates are not active registry sources until source config, "
+            "fixture contract, rights review, live verification, and parser-risk evidence exist."
+        ),
+        "summary": {
+            "candidate_count": len(candidates),
+            "decision_counts": dict(sorted(decision_counts.items())),
+            "approved_candidate_count": decision_counts.get("approved", 0),
+            "unpromoted_candidate_count": sum(
+                1
+                for candidate in candidates
+                if candidate["promotion_status"]
+                != "ready_for_canonical_release"
+            ),
+        },
         "candidates": candidates,
     }
 
 
 def build_source_rights_review_ledger() -> JsonObject:
-    """Build conservative source-level rights review placeholders."""
+    """Build conservative source-level rights review evidence."""
+    terms_urls = {
+        "hdc": "https://www.hdc.org.nz/about-us/about-this-site/",
+        "hpdt": "https://www.hpdt.org.nz/",
+        "moj_tribunals": "https://www.justice.govt.nz/about/about-this-site/",
+        "era": "https://www.era.govt.nz/about-this-site/",
+        "teachers": "https://www.teachersdisciplinarytribunal.nz/",
+        "royal_commissions": "https://www.waitangitribunal.govt.nz/en/about/website-information",
+        "coronial": "https://coronialservices.justice.govt.nz/",
+        "privacy": "https://www.privacy.org.nz/about-us/about-this-website/",
+        "human_rights": "https://www.justice.govt.nz/about/about-this-site/",
+        "ombudsman": "https://www.ombudsman.parliament.nz/about/website-privacy-and-copyright",
+        "moj_courts": "https://www.justice.govt.nz/about/about-this-site/",
+        "ipca": "https://www.ipca.govt.nz/Site/other/copyright.aspx",
+        "law_commission": "https://www.lawcom.govt.nz/copyright/",
+    }
     sources = []
     for source_id, info in SOURCE_REGISTRY.items():
         sources.append(
@@ -404,8 +464,11 @@ def build_source_rights_review_ledger() -> JsonObject:
                 "name": info["name"],
                 "url": info.get("url", ""),
                 "status": "needs-review",
-                "source_terms_url": "",
-                "citation_guidance": "",
+                "source_terms_url": terms_urls.get(source_id, info.get("url", "")),
+                "citation_guidance": (
+                    "Cite the official source URL, source name, decision/report title, "
+                    "publication date, and repository release DOI when available."
+                ),
                 "attribution_required": True,
                 "redistribution_status": "public-source-review-required",
                 "privacy_caveats": [
@@ -414,6 +477,10 @@ def build_source_rights_review_ledger() -> JsonObject:
                 "known_exclusions": [],
                 "takedown_contact": "Repository maintainer via GitHub issue or configured archive contact.",
                 "deidentification_caveat": "Do not infer anonymisation beyond the source publication.",
+                "next_action": (
+                    "Review source terms and privacy posture before asserting redistribution "
+                    "or complete-corpus claims."
+                ),
             }
         )
     return {
@@ -421,6 +488,44 @@ def build_source_rights_review_ledger() -> JsonObject:
         "generated_at": utc_now_iso(),
         "status": "review_required",
         "sources": sources,
+    }
+
+
+def validate_source_rights_review_ledger(ledger: Mapping[str, Any]) -> JsonObject:
+    """Validate source rights ledger completeness and unresolved review blockers."""
+    sources = [source for source in ledger.get("sources", []) if isinstance(source, Mapping)]
+    blockers: list[str] = []
+    warnings: list[str] = []
+    for source in sources:
+        source_id = str(source.get("source_id", "unknown"))
+        if str(source.get("status", "")) != "reviewed":
+            blockers.append(f"{source_id}:rights_review_unresolved")
+        for field in (
+            "source_terms_url",
+            "citation_guidance",
+            "redistribution_status",
+            "takedown_contact",
+            "deidentification_caveat",
+            "next_action",
+        ):
+            if not str(source.get(field, "")).strip():
+                blockers.append(f"{source_id}:missing_{field}")
+        if not source.get("privacy_caveats"):
+            warnings.append(f"{source_id}:missing_privacy_caveats")
+    return {
+        "schema_version": SOURCE_MATURITY_SCHEMA_VERSION,
+        "generated_at": utc_now_iso(),
+        "status": "blocked" if blockers else ("warn" if warnings else "pass"),
+        "summary": {
+            "source_count": len(sources),
+            "unresolved_source_count": sum(
+                1 for source in sources if str(source.get("status", "")) != "reviewed"
+            ),
+            "blocker_count": len(blockers),
+            "warning_count": len(warnings),
+        },
+        "blockers": sorted(blockers),
+        "warnings": sorted(warnings),
     }
 
 
@@ -436,6 +541,12 @@ def build_parser_risk_ledger() -> JsonObject:
                 "url": info.get("url", ""),
                 "risk": "high" if high_risk else "review",
                 "generic_parser_replacement_required": high_risk,
+                "proof_status": "source_specific_parser_required"
+                if high_risk
+                else "selector_drift_review_required",
+                "promotion_gate": "source_specific_parser_proof"
+                if high_risk
+                else "live_selector_drift_smoke_pass",
                 "fixture_requirements": [
                     "pagination",
                     "detail page",
@@ -464,6 +575,67 @@ def build_parser_risk_ledger() -> JsonObject:
             1 for source in sources if source["generic_parser_replacement_required"]
         ),
         "sources": sources,
+    }
+
+
+def build_corpus_completion_readiness(
+    *,
+    source_completeness: Mapping[str, Any],
+    source_rights_review: Mapping[str, Any],
+    parser_risk: Mapping[str, Any],
+    source_discovery_queue: Mapping[str, Any],
+    source_verification: Mapping[str, Any],
+    strict: bool = False,
+) -> JsonObject:
+    """Build release-gating evidence for complete-corpus claims."""
+    blockers: list[str] = []
+    warnings: list[str] = []
+    if source_completeness.get("status") != "pass":
+        blockers.append("source_completeness_unresolved")
+    rights_validation = validate_source_rights_review_ledger(source_rights_review)
+    if rights_validation["status"] != "pass":
+        blockers.append("rights_review_unresolved")
+    high_risk_unresolved = [
+        str(source.get("source_id"))
+        for source in parser_risk.get("sources", [])
+        if isinstance(source, Mapping)
+        and source.get("generic_parser_replacement_required")
+        and source.get("proof_status") != "source_specific_parser_proven"
+    ]
+    if high_risk_unresolved:
+        blockers.append("parser_replacement_unresolved")
+    unpromoted_candidates = [
+        str(candidate.get("candidate_id"))
+        for candidate in source_discovery_queue.get("candidates", [])
+        if isinstance(candidate, Mapping)
+        and candidate.get("decision") == "approved"
+        and candidate.get("promotion_status") != "ready_for_canonical_release"
+    ]
+    if unpromoted_candidates:
+        blockers.append("candidate_sources_unpromoted")
+    reconciliation = source_verification.get("reconciliation", {})
+    summary = reconciliation.get("summary", {}) if isinstance(reconciliation, Mapping) else {}
+    unresolved_counts = {
+        "missing_count": int(summary.get("missing_count", 0) or 0),
+        "extra_count": int(summary.get("extra_count", 0) or 0),
+        "duplicate_count": int(summary.get("duplicate_count", 0) or 0),
+        "ambiguous_count": int(summary.get("ambiguous_count", 0) or 0),
+    }
+    if source_verification.get("status") == "blocked" or any(unresolved_counts.values()):
+        blockers.append("source_verification_unresolved")
+    if not strict and blockers:
+        warnings.extend(blockers)
+    return {
+        "schema_version": SOURCE_MATURITY_SCHEMA_VERSION,
+        "generated_at": utc_now_iso(),
+        "status": "blocked" if blockers and strict else ("warn" if blockers else "pass"),
+        "strict": strict,
+        "blockers": sorted(set(blockers)) if strict else [],
+        "warnings": sorted(set(warnings)),
+        "rights_validation": rights_validation,
+        "high_risk_parser_sources": sorted(high_risk_unresolved),
+        "unpromoted_candidate_sources": sorted(unpromoted_candidates),
+        "source_verification_unresolved_counts": unresolved_counts,
     }
 
 

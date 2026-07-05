@@ -153,9 +153,11 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
         evidence["source_verification"]["reconciliation"]["summary"]["matched_count"]
         == (evidence["quality"]["record_count"])
     )
-    assert evidence["source_discovery_queue"]["status"] == "review_required"
+    assert evidence["source_discovery_queue"]["status"] == "triaged"
     assert evidence["source_rights_review"]["status"] == "review_required"
     assert evidence["parser_risk"]["high_risk_source_count"] == 7
+    assert evidence["corpus_completion_readiness"]["status"] == "blocked"
+    assert "rights_review_unresolved" in evidence["corpus_completion_readiness"]["blockers"]
     assert evidence["publication_governance"]["status"] == "gated"
     assert evidence["collection_quality_gates"]["status"] in {"pass", "blocked"}
     assert evidence["public_surface"]["surfaces"]["osf"]["status"] == "inactive"
@@ -176,6 +178,7 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert (output_dir / "manifests/source_discovery_queue.json").is_file()
     assert (output_dir / "manifests/source_rights_review.json").is_file()
     assert (output_dir / "manifests/parser_risk.json").is_file()
+    assert (output_dir / "manifests/corpus_completion_readiness.json").is_file()
     assert (output_dir / "manifests/publication_governance.json").is_file()
     assert (output_dir / "manifests/collection_quality_gates.json").is_file()
     assert (output_dir / "manifests/attestation_verification.json").is_file()
@@ -199,6 +202,15 @@ def test_release_evidence_requires_attestation_verification() -> None:
     evidence.pop("attestation_verification")
 
     assert "Missing release evidence key: attestation_verification" in validate_release_evidence(
+        evidence
+    )
+
+
+def test_release_evidence_requires_corpus_completion_readiness() -> None:
+    evidence = build_release_evidence(root=ROOT, archive_version="2026.07.0")
+    evidence.pop("corpus_completion_readiness")
+
+    assert "Missing release evidence key: corpus_completion_readiness" in validate_release_evidence(
         evidence
     )
 

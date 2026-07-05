@@ -901,6 +901,7 @@ def build_release_evidence(
     """Build a release evidence payload without writing files."""
     from corpus_cases_medilegal_nz.source_maturity import (
         build_backfill_run_manifest,
+        build_corpus_completion_readiness,
         build_deduplication_ledger,
         build_freshness_slo_ledger,
         build_parser_risk_ledger,
@@ -942,6 +943,14 @@ def build_release_evidence(
     source_rights_review = build_source_rights_review_ledger()
     parser_risk = build_parser_risk_ledger()
     publication_governance = build_publication_governance_ledger()
+    corpus_completion_readiness = build_corpus_completion_readiness(
+        source_completeness=source_completeness,
+        source_rights_review=source_rights_review,
+        parser_risk=parser_risk,
+        source_discovery_queue=source_discovery_queue,
+        source_verification=source_verification,
+        strict=True,
+    )
     backfill_run_manifest = build_backfill_run_manifest(records)
     deduplication_ledger = build_deduplication_ledger(records)
     freshness_slo = build_freshness_slo_ledger(source_maturity)
@@ -1004,6 +1013,7 @@ def build_release_evidence(
         "source_rights_review": source_rights_review,
         "parser_risk": parser_risk,
         "publication_governance": publication_governance,
+        "corpus_completion_readiness": corpus_completion_readiness,
         "backfill_run_manifest": backfill_run_manifest,
         "deduplication_ledger": deduplication_ledger,
         "freshness_slo": freshness_slo,
@@ -1163,6 +1173,10 @@ def build_release_artifacts(
     write_json(manifests_dir / "source_rights_review.json", evidence["source_rights_review"])
     write_json(manifests_dir / "parser_risk.json", evidence["parser_risk"])
     write_json(
+        manifests_dir / "corpus_completion_readiness.json",
+        evidence["corpus_completion_readiness"],
+    )
+    write_json(
         manifests_dir / "publication_governance.json",
         evidence["publication_governance"],
     )
@@ -1279,6 +1293,7 @@ def validate_release_evidence(payload: Mapping[str, Any]) -> list[str]:
         "quality",
         "source_coverage",
         "source_verification",
+        "corpus_completion_readiness",
         "public_surface",
         "checksums",
         "privacy_governance",
@@ -1330,6 +1345,14 @@ def validate_release_evidence(payload: Mapping[str, Any]) -> list[str]:
             failures.append("source_verification.reconciliation must be an object")
     else:
         failures.append("source_verification must be an object")
+    corpus_completion = payload.get("corpus_completion_readiness", {})
+    if isinstance(corpus_completion, Mapping):
+        if corpus_completion.get("status") not in {"pass", "warn", "blocked"}:
+            failures.append("corpus_completion_readiness.status must be pass, warn, or blocked")
+        if not isinstance(corpus_completion.get("blockers", []), list):
+            failures.append("corpus_completion_readiness.blockers must be a list")
+    else:
+        failures.append("corpus_completion_readiness must be an object")
     privacy = payload.get("privacy_governance", {})
     if isinstance(privacy, Mapping):
         if privacy.get("status") not in {"pass", "blocked"}:

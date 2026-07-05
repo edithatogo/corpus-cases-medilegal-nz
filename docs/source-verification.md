@@ -35,6 +35,17 @@ Build the full verification bundle:
 uv run python -m corpus_cases_medilegal_nz.cli source-verification --output-dir generated/source-verification --mode fixture
 ```
 
+Check whether complete-corpus claims are currently evidence-safe:
+
+```bash
+uv run python -m corpus_cases_medilegal_nz.cli corpus-completion-readiness
+```
+
+This command exits non-zero while source rights review, parser replacement,
+candidate promotion, source verification, or completeness reconciliation gates
+remain unresolved. A blocked result is expected until the live historical
+backfill track has source-specific proof for every relevant source.
+
 Live mode is explicit:
 
 ```bash
@@ -51,6 +62,8 @@ uv run python -m corpus_cases_medilegal_nz.cli source-verification --output-dir 
 - `manifests/source_verification_reconciliation.json`: expected-versus-processed gap ledger.
 - `manifests/source_verification_public_claims.json`: public-safe generated claims.
 - `manifests/source_verification_summary.json`: aggregate verification bundle.
+- `manifests/corpus_completion_readiness.json`: complete-corpus claim gate covering
+  verification, rights, parser, candidate-source, and reconciliation blockers.
 
 ## Publication Integration
 
@@ -67,3 +80,5 @@ Blocked sources must remain explicit. Do not convert source access failures into
 - `manual_review_required` when terms, privacy, or redistribution status is unclear.
 
 Public claims must be generated from verification ledgers and must include caveats for blocked or partially verified sources.
+Complete-corpus claims must additionally pass `corpus_completion_readiness`;
+fixture-backed parser proof alone is not sufficient.

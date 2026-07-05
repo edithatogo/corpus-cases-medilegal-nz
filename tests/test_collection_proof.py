@@ -42,6 +42,7 @@ def test_write_collection_proof_exports_archive_compatible_records(tmp_path: Pat
     assert (output_dir / "manifests" / "source_discovery_queue.json").is_file()
     assert (output_dir / "manifests" / "source_rights_review.json").is_file()
     assert (output_dir / "manifests" / "parser_risk.json").is_file()
+    assert (output_dir / "manifests" / "corpus_completion_readiness.json").is_file()
     assert (output_dir / "manifests" / "publication_governance.json").is_file()
     assert (output_dir / "manifests" / "backfill_run_manifest.json").is_file()
     assert (output_dir / "manifests" / "deduplication_ledger.json").is_file()
@@ -51,6 +52,7 @@ def test_write_collection_proof_exports_archive_compatible_records(tmp_path: Pat
     assert (output_dir / "text").is_dir()
     assert (output_dir / "json").is_dir()
     assert (output_dir / "parquet").is_dir()
+    assert evidence["corpus_completion_readiness"]["status"] == "blocked"
 
 
 def test_write_collection_proof_reconciles_previous_records(tmp_path: Path) -> None:

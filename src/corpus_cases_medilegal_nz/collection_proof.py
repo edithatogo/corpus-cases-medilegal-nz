@@ -19,6 +19,7 @@ from corpus_cases_medilegal_nz.archive import (
 from corpus_cases_medilegal_nz.medilegal_parser import parse_source_listing_html
 from corpus_cases_medilegal_nz.source_maturity import (
     build_backfill_run_manifest,
+    build_corpus_completion_readiness,
     build_deduplication_ledger,
     build_freshness_slo_ledger,
     build_parser_risk_ledger,
@@ -119,6 +120,14 @@ def write_collection_proof(
     source_rights_review = build_source_rights_review_ledger()
     parser_risk = build_parser_risk_ledger()
     publication_governance = build_publication_governance_ledger()
+    corpus_completion_readiness = build_corpus_completion_readiness(
+        source_completeness=source_completeness,
+        source_rights_review=source_rights_review,
+        parser_risk=parser_risk,
+        source_discovery_queue=source_discovery_queue,
+        source_verification=source_verification,
+        strict=True,
+    )
     backfill_run_manifest = build_backfill_run_manifest(records)
     deduplication_ledger = build_deduplication_ledger(records)
     freshness_slo = build_freshness_slo_ledger(source_maturity)
@@ -136,6 +145,10 @@ def write_collection_proof(
         source_rights_review,
     )
     parser_risk_path = write_json(manifests_dir / "parser_risk.json", parser_risk)
+    corpus_completion_path = write_json(
+        manifests_dir / "corpus_completion_readiness.json",
+        corpus_completion_readiness,
+    )
     publication_governance_path = write_json(
         manifests_dir / "publication_governance.json",
         publication_governance,
@@ -166,6 +179,7 @@ def write_collection_proof(
         "source_discovery_queue": source_discovery_queue,
         "source_rights_review": source_rights_review,
         "parser_risk": parser_risk,
+        "corpus_completion_readiness": corpus_completion_readiness,
         "publication_governance": publication_governance,
         "backfill_run_manifest": backfill_run_manifest,
         "deduplication_ledger": deduplication_ledger,
@@ -182,6 +196,7 @@ def write_collection_proof(
     evidence["artifacts"]["source_discovery_queue"] = str(source_discovery_path)
     evidence["artifacts"]["source_rights_review"] = str(source_rights_path)
     evidence["artifacts"]["parser_risk"] = str(parser_risk_path)
+    evidence["artifacts"]["corpus_completion_readiness"] = str(corpus_completion_path)
     evidence["artifacts"]["publication_governance"] = str(publication_governance_path)
     evidence["artifacts"]["backfill_run_manifest"] = str(backfill_manifest_path)
     evidence["artifacts"]["deduplication_ledger"] = str(dedupe_path)

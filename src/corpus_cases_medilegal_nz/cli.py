@@ -23,6 +23,7 @@ from corpus_cases_medilegal_nz.hf_sync import main as hf_sync_main
 from corpus_cases_medilegal_nz.mirror import mirror_sync_readiness
 from corpus_cases_medilegal_nz.parser_contract import build_parser_contract
 from corpus_cases_medilegal_nz.source_maturity import (
+    build_corpus_completion_readiness,
     build_parser_risk_ledger,
     build_publication_governance_ledger,
     build_source_completeness_ledger,
@@ -57,6 +58,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     sub.add_parser("source-rights", help="Report source-level rights review ledger.")
     sub.add_parser("parser-risk", help="Report parser replacement and live-smoke priorities.")
     sub.add_parser("publication-governance", help="Report remaining publication governance gates.")
+    sub.add_parser(
+        "corpus-completion-readiness",
+        help="Report whether complete-corpus claims are currently evidence-safe.",
+    )
     sub.add_parser(
         "source-verification-feasibility",
         help="Report source verification input feasibility.",
@@ -144,6 +149,26 @@ def main(argv: Sequence[str] | None = None) -> int:
     elif ns.command == "publication-governance":
         result = build_publication_governance_ledger()
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "corpus-completion-readiness":
+        records = load_jsonl_records(Path("data/processed/jsonl/records.jsonl"))
+        verification = build_source_verification_bundle(
+            output_dir=Path("generated/source-verification"),
+            processed_records=records,
+        )
+        result = build_corpus_completion_readiness(
+            source_completeness=build_source_completeness_ledger(
+                records=records,
+                target_metadata=verification["target_metadata"],
+            ),
+            source_rights_review=build_source_rights_review_ledger(),
+            parser_risk=build_parser_risk_ledger(),
+            source_discovery_queue=build_source_discovery_queue(),
+            source_verification=verification,
+            strict=True,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+        if result["status"] == "blocked":
+            exit_code = 1
     elif ns.command == "source-verification-feasibility":
         result = build_source_verification_feasibility()
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201

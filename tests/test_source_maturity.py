@@ -6,6 +6,7 @@ from corpus_cases_medilegal_nz.collection_proof import build_fixture_collection_
 from corpus_cases_medilegal_nz.source_maturity import (
     SOURCE_MATURITY_LADDER,
     build_backfill_run_manifest,
+    build_corpus_completion_readiness,
     build_deduplication_ledger,
     build_freshness_slo_ledger,
     build_parser_risk_ledger,
@@ -15,6 +16,7 @@ from corpus_cases_medilegal_nz.source_maturity import (
     build_source_maturity_ledger,
     build_source_rights_review_ledger,
     validate_public_claims,
+    validate_source_rights_review_ledger,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -99,8 +101,8 @@ def test_public_claim_validation_blocks_overbroad_historical_claims() -> None:
 def test_source_discovery_queue_is_review_gated() -> None:
     queue = build_source_discovery_queue()
 
-    assert queue["status"] == "review_required"
-    assert queue["promotion_policy"] == "Candidates are not active registry sources until approved."
+    assert queue["status"] == "triaged"
+    assert "Approved candidates are not active registry sources" in queue["promotion_policy"]
     candidate_ids = {candidate["candidate_id"] for candidate in queue["candidates"]}
     assert "acc_appeals_reviews" in candidate_ids
     assert "nzlii_health_privacy_discipline" in candidate_ids
@@ -116,6 +118,19 @@ def test_source_rights_review_defaults_are_conservative() -> None:
         source["redistribution_status"] == "public-source-review-required"
         for source in ledger["sources"]
     )
+    assert all(source["source_terms_url"] for source in ledger["sources"])
+    assert all(source["next_action"] for source in ledger["sources"])
+
+
+def test_source_rights_review_validation_reports_unresolved_sources() -> None:
+    ledger = build_source_rights_review_ledger()
+
+    validation = validate_source_rights_review_ledger(ledger)
+
+    assert validation["status"] == "blocked"
+    assert validation["summary"]["source_count"] == 13
+    assert validation["summary"]["unresolved_source_count"] == 13
+    assert "hdc:rights_review_unresolved" in validation["blockers"]
 
 
 def test_parser_risk_ledger_prioritizes_generic_parser_replacement() -> None:
@@ -127,6 +142,54 @@ def test_parser_risk_ledger_prioritizes_generic_parser_replacement() -> None:
     assert by_source["moj_courts"]["generic_parser_replacement_required"] is True
     assert by_source["hdc"]["generic_parser_replacement_required"] is False
     assert by_source["moj_courts"]["live_smoke_checks"]["full_backfill_in_default_ci"] is False
+    assert by_source["moj_courts"]["proof_status"] == "source_specific_parser_required"
+    assert by_source["hdc"]["proof_status"] == "selector_drift_review_required"
+
+
+def test_candidate_source_triage_records_durable_decisions() -> None:
+    queue = build_source_discovery_queue()
+    candidates = {candidate["candidate_id"]: candidate for candidate in queue["candidates"]}
+
+    assert queue["status"] == "triaged"
+    assert {candidate["decision"] for candidate in queue["candidates"]} == {
+        "approved",
+        "deferred",
+    }
+    assert candidates["acc_appeals_reviews"]["decision"] == "deferred"
+    assert candidates["nzlii_health_privacy_discipline"]["decision"] == "approved"
+    assert candidates["nzlii_health_privacy_discipline"]["promotion_status"] == (
+        "requires_source_config_fixture_rights_and_parser_contract"
+    )
+
+
+def test_corpus_completion_readiness_blocks_complete_claims_until_all_gates_pass() -> None:
+    records = build_fixture_collection_records()
+    verification = {
+        "status": "verified_complete",
+        "reconciliation": {
+            "summary": {
+                "missing_count": 0,
+                "extra_count": 0,
+                "duplicate_count": 0,
+                "ambiguous_count": 0,
+            }
+        },
+    }
+
+    readiness = build_corpus_completion_readiness(
+        source_completeness=build_source_completeness_ledger(root=ROOT, records=records),
+        source_rights_review=build_source_rights_review_ledger(),
+        parser_risk=build_parser_risk_ledger(),
+        source_discovery_queue=build_source_discovery_queue(),
+        source_verification=verification,
+        strict=True,
+    )
+
+    assert readiness["status"] == "blocked"
+    assert "source_completeness_unresolved" in readiness["blockers"]
+    assert "rights_review_unresolved" in readiness["blockers"]
+    assert "parser_replacement_unresolved" in readiness["blockers"]
+    assert "candidate_sources_unpromoted" in readiness["blockers"]
 
 
 def test_publication_governance_ledger_tracks_remaining_external_gates() -> None:
