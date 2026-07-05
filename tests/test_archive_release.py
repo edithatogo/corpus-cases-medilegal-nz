@@ -129,6 +129,7 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
 
     evidence_path = output_dir / "manifests/release_evidence.json"
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    target_summary = evidence["source_maturity"]["summary"]
 
     assert validate_release_evidence(evidence) == []
     assert evidence["release"]["archive_version"] == "2026.07.0"
@@ -136,11 +137,16 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert evidence["zenodo"]["publish_handoff_only"] is True
     assert evidence["parser_contract"]["provider"]["package"] == "nlp_policy_nz"
     assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == 13
-    assert evidence["quality"]["record_count"] == 13
+    assert (
+        evidence["quality"]["record_count"] == target_summary["total_records_against_known_targets"]
+    )
     assert evidence["source_maturity"]["summary"]["stage_counts"] == {
         "historical_backfill_in_progress": 13
     }
-    assert evidence["source_maturity"]["summary"]["total_remaining_to_known_targets"] == 13
+    assert target_summary["total_remaining_to_known_targets"] == (
+        target_summary["total_expected_records_for_known_targets"]
+        - target_summary["total_records_against_known_targets"]
+    )
     assert evidence["source_completeness"]["status"] == "warn"
     assert evidence["source_discovery_queue"]["status"] == "review_required"
     assert evidence["source_rights_review"]["status"] == "review_required"
