@@ -12,9 +12,14 @@ from corpus_cases_medilegal_nz.collection_proof import (
 
 def test_build_fixture_collection_records_covers_all_fixture_sources() -> None:
     records = build_fixture_collection_records()
+    source_counts = {
+        source: sum(1 for record in records if record["source"] == source)
+        for source in ALL_SOURCE_URLS
+    }
 
-    assert len(records) == len(ALL_SOURCE_URLS)
+    assert len(records) == len(ALL_SOURCE_URLS) * 2
     assert {record["source"] for record in records} == set(ALL_SOURCE_URLS)
+    assert set(source_counts.values()) == {2}
     assert all(record["metadata"]["raw_sha256"] for record in records)
 
 
@@ -24,12 +29,12 @@ def test_write_collection_proof_exports_archive_compatible_records(tmp_path: Pat
     evidence = write_collection_proof(output_dir=output_dir)
     records = load_jsonl_records(output_dir / "jsonl" / "records.jsonl")
 
-    assert evidence["record_count"] == 13
-    assert len(records) == 13
+    assert evidence["record_count"] == 26
+    assert len(records) == 26
     assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == 13
     assert evidence["collection_quality_gates"]["status"] == "pass"
-    assert evidence["dataset_diff"]["counts"]["added"] == 13
-    assert evidence["dataset_diff"]["counts"]["current"] == 13
+    assert evidence["dataset_diff"]["counts"]["added"] == 26
+    assert evidence["dataset_diff"]["counts"]["current"] == 26
     assert (output_dir / "manifests" / "dataset_diff.json").is_file()
     assert (output_dir / "manifests" / "collection_quality_gates.json").is_file()
     assert (output_dir / "manifests" / "source_maturity.json").is_file()

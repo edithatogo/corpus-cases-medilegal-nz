@@ -116,7 +116,8 @@ def _stage_for_source(
         target_is_known = (
             isinstance(expected, int) and expected > 0 and confidence not in {"unknown", "blocked"}
         )
-        if target_is_known and record_count >= expected:
+        target_is_verified = confidence in {"verified", "source_index_count", "official_count"}
+        if target_is_known and target_is_verified and record_count >= expected:
             stage = (
                 "publication_evidence_current"
                 if publication_manifest_hash

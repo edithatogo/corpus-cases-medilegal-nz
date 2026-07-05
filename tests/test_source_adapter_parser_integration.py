@@ -6,18 +6,18 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from corpus_cases_medilegal_nz.sources.era import EraSourceAdapter
 from corpus_cases_medilegal_nz.sources.coronial import CoronialSourceAdapter
-from corpus_cases_medilegal_nz.sources.human_rights import HumanRightsSourceAdapter
+from corpus_cases_medilegal_nz.sources.era import EraSourceAdapter
 from corpus_cases_medilegal_nz.sources.hdc import HdcSourceAdapter
 from corpus_cases_medilegal_nz.sources.hpdt import HpdtSourceAdapter
+from corpus_cases_medilegal_nz.sources.human_rights import HumanRightsSourceAdapter
 from corpus_cases_medilegal_nz.sources.ipca import IpcaSourceAdapter
 from corpus_cases_medilegal_nz.sources.law_commission import LawCommissionSourceAdapter
 from corpus_cases_medilegal_nz.sources.moj_courts import MojCourtsSourceAdapter
 from corpus_cases_medilegal_nz.sources.moj_tribunals import MojTribunalsSourceAdapter
 from corpus_cases_medilegal_nz.sources.ombudsman import OmbudsmanSourceAdapter
-from corpus_cases_medilegal_nz.sources.royal_commissions import RoyalCommissionsSourceAdapter
 from corpus_cases_medilegal_nz.sources.privacy import PrivacySourceAdapter
+from corpus_cases_medilegal_nz.sources.royal_commissions import RoyalCommissionsSourceAdapter
 from corpus_cases_medilegal_nz.sources.teachers import TeachersSourceAdapter
 
 FIXTURES_ROOT = Path(__file__).parent / "fixtures" / "sources"
@@ -25,9 +25,9 @@ FIXTURES_ROOT = Path(__file__).parent / "fixtures" / "sources"
 
 def _fixture_html(source_id: str) -> str:
     manifest = json.loads((FIXTURES_ROOT / "fixture_manifest.json").read_text(encoding="utf-8"))
-    source_fixture = manifest.get("core_sources", {}).get(source_id) or manifest["extended_sources"][
-        source_id
-    ]
+    source_fixture = (
+        manifest.get("core_sources", {}).get(source_id) or manifest["extended_sources"][source_id]
+    )
     return (FIXTURES_ROOT / source_fixture["html"]).read_text(encoding="utf-8")
 
 
@@ -48,7 +48,7 @@ def test_hdc_adapter_fetch_parses_fixture_record() -> None:
 
         records = adapter.fetch()
 
-    assert len(records) == 1
+    assert len(records) == 2
     assert records[0]["case_id"] == "HDC26HDC001"
     assert adapter.validate(records) is True
 
@@ -157,7 +157,10 @@ def test_hdc_adapter_fetch_parses_fixture_record() -> None:
 def test_requests_adapter_fetch_parses_fixture_record(
     source_id: str,
     adapter_cls: type[
-        HpdtSourceAdapter | MojTribunalsSourceAdapter | EraSourceAdapter | TeachersSourceAdapter
+        HpdtSourceAdapter
+        | MojTribunalsSourceAdapter
+        | EraSourceAdapter
+        | TeachersSourceAdapter
         | PrivacySourceAdapter
         | HumanRightsSourceAdapter
         | OmbudsmanSourceAdapter
@@ -188,7 +191,7 @@ def test_requests_adapter_fetch_parses_fixture_record(
 
             records = adapter.fetch()
 
-    assert len(records) == 1
+    assert len(records) == 2
     assert records[0]["case_id"] == expected_case_id
     assert records[0]["source"] == source_id
     assert adapter.validate(records) is True

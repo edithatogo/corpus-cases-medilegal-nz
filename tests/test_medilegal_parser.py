@@ -28,7 +28,9 @@ LISTING_URLS = {
 @pytest.mark.parametrize("source_id", sorted(LISTING_URLS))
 def test_parse_source_listing_html_emits_contract_valid_records(source_id: str) -> None:
     manifest = json.loads((FIXTURES_ROOT / "fixture_manifest.json").read_text(encoding="utf-8"))
-    fixture = manifest.get("core_sources", {}).get(source_id) or manifest["extended_sources"][source_id]
+    fixture = (
+        manifest.get("core_sources", {}).get(source_id) or manifest["extended_sources"][source_id]
+    )
     html = (FIXTURES_ROOT / fixture["html"]).read_text(encoding="utf-8")
 
     records = parse_source_listing_html(
@@ -38,7 +40,8 @@ def test_parse_source_listing_html_emits_contract_valid_records(source_id: str) 
         retrieved_at="2026-07-01T00:00:00Z",
     )
 
-    assert len(records) == 1
+    assert len(records) == 2
+    assert len({record["case_id"] for record in records}) == 2
     record = records[0]
     expected = fixture["expected"]
     assert record["case_id"] == expected["identifier"]

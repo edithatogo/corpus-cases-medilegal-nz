@@ -31,8 +31,8 @@ def test_fixture_validated_records_do_not_claim_historical_completion() -> None:
     assert ledger["summary"]["all_sources_historically_complete"] is False
     assert ledger["summary"]["sources_with_known_targets"] == 13
     assert ledger["summary"]["total_expected_records_for_known_targets"] == 26
-    assert ledger["summary"]["total_records_against_known_targets"] == 13
-    assert ledger["summary"]["total_remaining_to_known_targets"] == 13
+    assert ledger["summary"]["total_records_against_known_targets"] == 26
+    assert ledger["summary"]["total_remaining_to_known_targets"] == 0
     assert ledger["summary"]["stage_counts"] == {"historical_backfill_in_progress": 13}
     hdc = next(source for source in ledger["sources"] if source["source_id"] == "hdc")
     assert hdc["parser_stage"] == "validated_records"
@@ -40,9 +40,9 @@ def test_fixture_validated_records_do_not_claim_historical_completion() -> None:
     assert hdc["target"]["expected_count_confidence"] == "baseline_minimum"
     assert hdc["target_progress"] == {
         "expected_count": 2,
-        "record_count": 1,
-        "remaining_to_target": 1,
-        "progress_ratio": 0.5,
+        "record_count": 2,
+        "remaining_to_target": 0,
+        "progress_ratio": 1.0,
     }
 
 
@@ -146,7 +146,7 @@ def test_backfill_manifest_captures_raw_provenance_and_text_hashes() -> None:
     manifest = build_backfill_run_manifest(records)
 
     assert manifest["status"] == "complete"
-    assert manifest["checkpoint"]["record_count"] == 13
+    assert manifest["checkpoint"]["record_count"] == 26
     assert manifest["checkpoint"]["raw_asset_count"] == 13
     first = manifest["records"][0]
     assert first["canonical_url"].startswith("https://")
