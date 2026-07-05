@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.sync_riopa_project import (  # noqa: E402
+    CONTENT_COMPLETION_PARENT_ISSUE,
+    CONTENT_COMPLETION_TRACK_ID,
     REPO_PROJECT,
     RIOPA_PROJECT,
     SUB_ISSUES,
@@ -50,6 +52,19 @@ def test_parse_markers_extracts_stable_metadata() -> None:
     assert markers["conductor-track-id"] == "monthly_dynamic_archive_publication_20260701"
 
 
+def test_issue_body_uses_spec_parent_and_track_markers() -> None:
+    spec = next(
+        spec
+        for spec in SUB_ISSUES
+        if spec.marker_id == "live-source-index-verification"
+    )
+
+    markers = parse_markers(issue_body(spec))
+
+    assert markers["parent-issue"] == str(CONTENT_COMPLETION_PARENT_ISSUE)
+    assert markers["conductor-track-id"] == CONTENT_COMPLETION_TRACK_ID
+
+
 def test_build_sync_plan_reports_in_sync_state() -> None:
     issues = []
     riopa_items = []
@@ -64,6 +79,7 @@ def test_build_sync_plan_reports_in_sync_state() -> None:
     plan = build_sync_plan(issues, riopa_items, repo_items)
 
     assert plan["status"] == "in_sync"
+    assert CONTENT_COMPLETION_PARENT_ISSUE in plan["parent_issues"]
     assert plan["actions"] == []
     assert plan["duplicate_markers"] == {}
 

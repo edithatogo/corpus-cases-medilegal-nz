@@ -1,0 +1,82 @@
+# Implementation Plan: Live Historical Corpus Completion And Rights Review
+
+## Phase 1: Track, Issue, And Project Evidence Setup
+
+- [x] Task: Create Conductor track artifacts.
+    - [x] Add specification, implementation plan, metadata, and index files.
+    - [x] Register the track in `conductor/tracks.md`.
+- [x] Task: Create GitHub issue hierarchy.
+    - [x] Create parent issue `#10` for live historical corpus completion.
+    - [x] Create seven subissues aligned with verification, rights, parser, candidate, backfill, release, and project-sync workstreams.
+    - [x] Add deterministic issue markers for project-sync readback.
+- [x] Task: Extend RIOPA project sync evidence.
+    - [x] Add content-completion subissues to sync desired state.
+    - [x] Preserve existing monthly archive issue sync behavior.
+    - [x] Add tests for multi-parent issue markers and sync planning.
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Track, Issue, And Project Evidence Setup' (Protocol in workflow.md)
+
+## Phase 2: Live Source Verification And Archived Replay
+
+- [ ] Task: Implement live source-index fetchers for all active sources.
+    - [ ] Fetch official index or listing evidence for the 13 active sources.
+    - [ ] Archive raw inputs with checksums, timestamps, URL metadata, and rights notes.
+    - [ ] Record failed fetches as explicit blockers.
+- [ ] Task: Preserve offline replay.
+    - [ ] Verify archived input hashes before replay.
+    - [ ] Rebuild expected-record ledgers from archived inputs without network access.
+    - [ ] Fail replay when manifest and raw evidence disagree.
+- [ ] Task: Reconcile live expected records against processed records.
+    - [ ] Match by source identifier, canonical URL, alternate URL, title/date fingerprint, and source-specific aliases.
+    - [ ] Classify matched, missing, extra, duplicate, ambiguous, excluded, blocked, and manual-review records.
+    - [ ] Emit source-level gap reports and aggregate completeness summaries.
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Live Source Verification And Archived Replay' (Protocol in workflow.md)
+
+## Phase 3: Rights, Terms, Privacy, And Claims Governance
+
+- [ ] Task: Complete source rights ledger for all active sources.
+    - [ ] Populate source terms URL, attribution, redistribution status, citation guidance, known exclusions, privacy caveats, and takedown contact.
+    - [ ] Keep unresolved sources as blockers with source-specific next action.
+    - [ ] Add validation for rights ledger completeness.
+- [ ] Task: Add release-claim gates.
+    - [ ] Block complete-corpus claims when rights, privacy, parser, live verification, or reconciliation status is unresolved.
+    - [ ] Keep dry-run publication allowed with explicit caveats.
+    - [ ] Generate README, dataset-card, release-note, and project-summary claims from ledgers.
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Rights, Terms, Privacy, And Claims Governance' (Protocol in workflow.md)
+
+## Phase 4: Parser Replacement And Live Drift Proof
+
+- [ ] Task: Replace high-risk generic parser paths.
+    - [ ] Implement source-specific parser proof for `moj_tribunals`, `royal_commissions`, `coronial`, `ombudsman`, `moj_courts`, `ipca`, and `law_commission`.
+    - [ ] Add fixture and live-smoke contracts for pagination, detail pages, document assets, dates, and source identifiers.
+    - [ ] Keep blockers explicit where live site shape prevents deterministic parser proof.
+- [ ] Task: Promote review-level parser sources only after drift checks.
+    - [ ] Run selector-drift checks for `hdc`, `hpdt`, `era`, `teachers`, `privacy`, and `human_rights`.
+    - [ ] Record whether generic parser behavior remains acceptable or needs replacement.
+- [ ] Task: Conductor - User Manual Verification 'Phase 4: Parser Replacement And Live Drift Proof' (Protocol in workflow.md)
+
+## Phase 5: Candidate Source Triage And Promotion
+
+- [ ] Task: Triage remaining candidate sources.
+    - [ ] Classify ACC appeals/reviews, other professional councils, Mental Health Review Tribunal, NZLII health/privacy/discipline subsets, and health appellate court filters as `approved`, `deferred`, or `excluded`.
+    - [ ] Record rights, public availability, duplication, scope, parser complexity, and promotion rationale.
+- [ ] Task: Promote approved candidates.
+    - [ ] Add source config and fixture contract for approved candidates.
+    - [ ] Add live verification, rights ledger, parser-risk status, and release-evidence integration.
+    - [ ] Keep deferred or excluded candidates visible in public-safe discovery ledgers.
+- [ ] Task: Conductor - User Manual Verification 'Phase 5: Candidate Source Triage And Promotion' (Protocol in workflow.md)
+
+## Phase 6: Historical Backfill, Publication, And Completion Proof
+
+- [ ] Task: Run historical backfill after verification gates pass.
+    - [ ] Generate processed records, manifests, source coverage ledgers, and dataset diff evidence from live-backed inputs.
+    - [ ] Reconcile processed records against expected live source records.
+    - [ ] Preserve unresolved source gaps as blockers rather than false completion.
+- [ ] Task: Publish verified release evidence.
+    - [ ] Attach source verification, rights, parser, candidate-source, and completeness evidence to GitHub release assets.
+    - [ ] Upload live-backed evidence to Hugging Face and verify remote manifests.
+    - [ ] Upload Zenodo draft/new-version evidence and preserve protected production handoff.
+- [ ] Task: Complete review and archive.
+    - [ ] Run `uv run pytest -q` and targeted workflow/project-sync tests.
+    - [ ] Run Conductor review, apply fixes, and archive the track after evidence is complete.
+    - [ ] Close or update the parent issue and subissues based on verified outcomes.
+- [ ] Task: Conductor - User Manual Verification 'Phase 6: Historical Backfill, Publication, And Completion Proof' (Protocol in workflow.md)

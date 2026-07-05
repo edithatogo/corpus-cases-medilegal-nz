@@ -15,6 +15,7 @@ OWNER = "edithatogo"
 REPO = "corpus-cases-medilegal-nz"
 REPOSITORY = f"{OWNER}/{REPO}"
 PARENT_ISSUE = 1
+CONTENT_COMPLETION_PARENT_ISSUE = 10
 RIOPA_PROJECT = "Rare Insights on Open Policy from Aotearoa"
 REPO_PROJECT = "corpus-cases-medilegal-nz Archive Roadmap"
 RIOPA_PROJECT_ID = "PVT_kwHOAOYc4M4BcJFF"
@@ -26,6 +27,7 @@ STATUS_DONE_OPTION_ID = "98236657"
 STATUS_IN_PROGRESS_OPTION_ID = "47fc9ee4"
 RIOPA_MIRROR_OTHER_OPTION_ID = "a77f89f8"
 PARENT_TRACK_ID = "monthly_dynamic_archive_publication_20260701"
+CONTENT_COMPLETION_TRACK_ID = "live_historical_source_backfill_rights_review_20260705"
 SYNC_TRACK_ID = "github_riopa_project_synchronisation_20260701"
 MARKER_PATTERN = re.compile(r"<!--\s*([a-zA-Z0-9_-]+):\s*([^>]+?)\s*-->")
 
@@ -41,6 +43,8 @@ class SubIssueSpec:
     summary: str
     status: str
     evidence: str
+    parent_issue: int = PARENT_ISSUE
+    conductor_track_id: str = PARENT_TRACK_ID
 
     @property
     def status_option_id(self) -> str:
@@ -135,6 +139,111 @@ SUB_ISSUES = [
         status="in_progress",
         evidence=f"Current track: conductor/tracks/{SYNC_TRACK_ID}/.",
     ),
+    SubIssueSpec(
+        marker_id="live-source-index-verification",
+        title="Live source index verification for all active sources",
+        summary=(
+            "Track live source-index fetch, archived raw input evidence, offline replay, "
+            "and expected-record ledger generation for all active sources."
+        ),
+        status="in_progress",
+        evidence=(
+            "Current track: conductor/tracks/"
+            "live_historical_source_backfill_rights_review_20260705/ Phase 2."
+        ),
+        parent_issue=CONTENT_COMPLETION_PARENT_ISSUE,
+        conductor_track_id=CONTENT_COMPLETION_TRACK_ID,
+    ),
+    SubIssueSpec(
+        marker_id="rights-terms-privacy-redistribution-review",
+        title="Rights, terms, privacy, and redistribution review for all active sources",
+        summary=(
+            "Track source terms, attribution, redistribution posture, privacy caveats, "
+            "citation guidance, known exclusions, and takedown contacts."
+        ),
+        status="in_progress",
+        evidence=(
+            "Current track: conductor/tracks/"
+            "live_historical_source_backfill_rights_review_20260705/ Phase 3."
+        ),
+        parent_issue=CONTENT_COMPLETION_PARENT_ISSUE,
+        conductor_track_id=CONTENT_COMPLETION_TRACK_ID,
+    ),
+    SubIssueSpec(
+        marker_id="high-risk-parser-replacement-proof",
+        title="Replace high-risk generic parsers with source-specific parser proofs",
+        summary=(
+            "Track replacement proof for high-risk generic-parser sources and selector-drift "
+            "checks for review-level parser sources."
+        ),
+        status="in_progress",
+        evidence=(
+            "Current track: conductor/tracks/"
+            "live_historical_source_backfill_rights_review_20260705/ Phase 4."
+        ),
+        parent_issue=CONTENT_COMPLETION_PARENT_ISSUE,
+        conductor_track_id=CONTENT_COMPLETION_TRACK_ID,
+    ),
+    SubIssueSpec(
+        marker_id="candidate-medicolegal-source-triage",
+        title="Triage candidate medicolegal sources",
+        summary=(
+            "Track approve, defer, or exclude decisions for ACC, other professional councils, "
+            "Mental Health Review Tribunal, NZLII subsets, and health appellate filters."
+        ),
+        status="in_progress",
+        evidence=(
+            "Current track: conductor/tracks/"
+            "live_historical_source_backfill_rights_review_20260705/ Phase 5."
+        ),
+        parent_issue=CONTENT_COMPLETION_PARENT_ISSUE,
+        conductor_track_id=CONTENT_COMPLETION_TRACK_ID,
+    ),
+    SubIssueSpec(
+        marker_id="historical-backfill-completeness-reconciliation",
+        title="Run historical backfill and reconcile completeness",
+        summary=(
+            "Track live-backed historical backfill, processed exports, dataset diffs, "
+            "and expected-versus-processed reconciliation."
+        ),
+        status="in_progress",
+        evidence=(
+            "Current track: conductor/tracks/"
+            "live_historical_source_backfill_rights_review_20260705/ Phase 6."
+        ),
+        parent_issue=CONTENT_COMPLETION_PARENT_ISSUE,
+        conductor_track_id=CONTENT_COMPLETION_TRACK_ID,
+    ),
+    SubIssueSpec(
+        marker_id="verified-release-evidence-publication",
+        title="Publish verified release evidence to GitHub, Hugging Face, and Zenodo",
+        summary=(
+            "Track GitHub release assets, Hugging Face remote manifest verification, "
+            "and Zenodo draft/new-version evidence for the live-backed corpus release."
+        ),
+        status="in_progress",
+        evidence=(
+            "Current track: conductor/tracks/"
+            "live_historical_source_backfill_rights_review_20260705/ Phase 6."
+        ),
+        parent_issue=CONTENT_COMPLETION_PARENT_ISSUE,
+        conductor_track_id=CONTENT_COMPLETION_TRACK_ID,
+    ),
+    SubIssueSpec(
+        marker_id="corpus-completion-riopa-project-sync",
+        title="Synchronise corpus-completion evidence with RIOPA and repo projects",
+        summary=(
+            "Track project-sync readback and issue evidence alignment for the live historical "
+            "corpus completion workstream."
+        ),
+        status="in_progress",
+        evidence=(
+            "Current track: conductor/tracks/"
+            "live_historical_source_backfill_rights_review_20260705/ Phase 1."
+        ),
+        parent_issue=CONTENT_COMPLETION_PARENT_ISSUE,
+        conductor_track_id=CONTENT_COMPLETION_TRACK_ID,
+    ),
 ]
 
 
@@ -159,9 +268,9 @@ def issue_body(spec: SubIssueSpec) -> str:
 
 ## Sync metadata
 
-<!-- parent-issue: {PARENT_ISSUE} -->
+<!-- parent-issue: {spec.parent_issue} -->
 <!-- riopa-subissue-id: {spec.marker_id} -->
-<!-- conductor-track-id: {PARENT_TRACK_ID} -->
+<!-- conductor-track-id: {spec.conductor_track_id} -->
 """
 
 
@@ -283,6 +392,7 @@ def build_sync_plan(
     return {
         "schema_version": "1.0.0",
         "parent_issue": PARENT_ISSUE,
+        "parent_issues": sorted({spec.parent_issue for spec in SUB_ISSUES}),
         "desired_subissue_count": len(SUB_ISSUES),
         "duplicate_markers": duplicates,
         "actions": actions,
@@ -314,7 +424,7 @@ def load_live_state() -> tuple[list[JsonObject], list[JsonObject], list[JsonObje
                 "--limit",
                 "200",
                 "--json",
-                "number,title,state,body,url,parent,projectItems",
+                "number,title,state,body,url",
             ]
         )
     )
@@ -344,7 +454,7 @@ def apply_sync_plan(plan: JsonObject) -> None:
                     "issue",
                     "create",
                     "--parent",
-                    str(PARENT_ISSUE),
+                    str(spec.parent_issue),
                     "--project",
                     RIOPA_PROJECT,
                     "--project",
