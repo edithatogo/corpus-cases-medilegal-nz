@@ -76,7 +76,7 @@
     - [ ] Upload live-backed evidence to Hugging Face and verify remote manifests.
     - [ ] Upload Zenodo draft/new-version evidence and preserve protected production handoff.
 - [ ] Task: Complete review and archive.
-    - [ ] Run `uv run pytest -q` and targeted workflow/project-sync tests.
+    - [x] Run `uv run pytest -q` and targeted workflow/project-sync tests.
     - [ ] Run Conductor review, apply fixes, and archive the track after evidence is complete.
     - [ ] Close or update the parent issue and subissues based on verified outcomes.
 - [ ] Task: Conductor - User Manual Verification 'Phase 6: Historical Backfill, Publication, And Completion Proof' (Protocol in workflow.md)
