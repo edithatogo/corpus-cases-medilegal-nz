@@ -30,6 +30,12 @@ from corpus_cases_medilegal_nz.source_maturity import (
     build_source_maturity_ledger,
     build_source_rights_review_ledger,
 )
+from corpus_cases_medilegal_nz.source_verification import (
+    build_source_verification_bundle,
+    build_source_verification_feasibility,
+    fetch_verification_inputs,
+    replay_verification_inputs,
+)
 from corpus_cases_medilegal_nz.sources import get_source_ids
 
 
@@ -51,6 +57,27 @@ def main(argv: Sequence[str] | None = None) -> int:
     sub.add_parser("source-rights", help="Report source-level rights review ledger.")
     sub.add_parser("parser-risk", help="Report parser replacement and live-smoke priorities.")
     sub.add_parser("publication-governance", help="Report remaining publication governance gates.")
+    sub.add_parser(
+        "source-verification-feasibility",
+        help="Report source verification input feasibility.",
+    )
+    verification_fetch = sub.add_parser(
+        "source-verification-fetch",
+        help="Archive source verification inputs.",
+    )
+    verification_fetch.add_argument("--output-dir", default="generated/source-verification")
+    verification_fetch.add_argument("--mode", choices=("fixture", "live"), default="fixture")
+    verification_replay = sub.add_parser(
+        "source-verification-replay",
+        help="Replay archived source verification inputs and verify hashes.",
+    )
+    verification_replay.add_argument("--evidence-dir", default="generated/source-verification")
+    verification = sub.add_parser(
+        "source-verification",
+        help="Build source verification feasibility, evidence archive, replay, and reconciliation.",
+    )
+    verification.add_argument("--output-dir", default="generated/source-verification")
+    verification.add_argument("--mode", choices=("fixture", "live"), default="fixture")
     proof = sub.add_parser("collection-proof", help="Build deterministic local collection proof.")
     proof.add_argument("--output-dir", default="data/processed")
     proof.add_argument("--fixture-root", default="tests/fixtures/sources")
@@ -117,6 +144,27 @@ def main(argv: Sequence[str] | None = None) -> int:
     elif ns.command == "publication-governance":
         result = build_publication_governance_ledger()
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "source-verification-feasibility":
+        result = build_source_verification_feasibility()
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "source-verification-fetch":
+        result = fetch_verification_inputs(output_dir=Path(ns.output_dir), mode=ns.mode)
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "source-verification-replay":
+        result = replay_verification_inputs(Path(ns.evidence_dir))
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+        if result["status"] != "pass":
+            exit_code = 1
+    elif ns.command == "source-verification":
+        records = load_jsonl_records(Path("data/processed/jsonl/records.jsonl"))
+        result = build_source_verification_bundle(
+            output_dir=Path(ns.output_dir),
+            processed_records=records,
+            mode=ns.mode,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+        if result["status"] == "blocked":
+            exit_code = 1
     elif ns.command == "collection-proof":
         result = write_collection_proof(
             output_dir=Path(ns.output_dir),

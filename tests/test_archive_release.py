@@ -141,13 +141,18 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
         evidence["quality"]["record_count"] == target_summary["total_records_against_known_targets"]
     )
     assert evidence["source_maturity"]["summary"]["stage_counts"] == {
-        "historical_backfill_in_progress": 13
+        "historical_backfill_complete": 13
     }
     assert target_summary["total_remaining_to_known_targets"] == (
         target_summary["total_expected_records_for_known_targets"]
         - target_summary["total_records_against_known_targets"]
     )
-    assert evidence["source_completeness"]["status"] == "warn"
+    assert evidence["source_completeness"]["status"] == "pass"
+    assert evidence["source_verification"]["status"] == "verified_complete"
+    assert (
+        evidence["source_verification"]["reconciliation"]["summary"]["matched_count"]
+        == (evidence["quality"]["record_count"])
+    )
     assert evidence["source_discovery_queue"]["status"] == "review_required"
     assert evidence["source_rights_review"]["status"] == "review_required"
     assert evidence["parser_risk"]["high_risk_source_count"] == 7
@@ -163,6 +168,11 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert (output_dir / "manifests/source_collection_audit.json").is_file()
     assert (output_dir / "manifests/source_maturity.json").is_file()
     assert (output_dir / "manifests/source_completeness.json").is_file()
+    assert (output_dir / "manifests/source_verification_summary.json").is_file()
+    assert (output_dir / "manifests/source_verification_feasibility.json").is_file()
+    assert (output_dir / "manifests/verification_input_manifest.json").is_file()
+    assert (output_dir / "manifests/source_expected_records.json").is_file()
+    assert (output_dir / "manifests/source_verification_reconciliation.json").is_file()
     assert (output_dir / "manifests/source_discovery_queue.json").is_file()
     assert (output_dir / "manifests/source_rights_review.json").is_file()
     assert (output_dir / "manifests/parser_risk.json").is_file()

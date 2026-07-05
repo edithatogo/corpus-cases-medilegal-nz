@@ -1,0 +1,64 @@
+name: Source Verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Verification mode"
+        required: true
+        default: "fixture"
+        type: choice
+        options:
+          - fixture
+          - live
+  schedule:
+    - cron: "37 2 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-verification-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      MODE: ${{ github.event.inputs.mode || 'fixture' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@e92bafb6253dcd438e0484186d7669ea7a8ca1cc
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Build deterministic collection proof
+        run: uv run python -m corpus_cases_medilegal_nz.cli collection-proof
+
+      - name: Build source verification evidence
+        run: |
+          uv run python -m corpus_cases_medilegal_nz.cli source-verification \
+            --output-dir generated/source-verification \
+            --mode "$MODE"
+
+      - name: Replay archived verification evidence
+        run: |
+          uv run python -m corpus_cases_medilegal_nz.cli source-verification-replay \
+            --evidence-dir generated/source-verification
+
+      - name: Upload source verification evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: source-verification-${{ env.MODE }}
+          path: generated/source-verification/**
+          if-no-files-found: error

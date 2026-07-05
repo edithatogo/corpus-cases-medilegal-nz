@@ -911,6 +911,7 @@ def build_release_evidence(
         build_source_rights_review_ledger,
         validate_public_claims,
     )
+    from corpus_cases_medilegal_nz.source_verification import build_source_verification_bundle
 
     root = Path(root)
     version = archive_version or derive_archive_version()
@@ -922,8 +923,21 @@ def build_release_evidence(
     collection_quality_gates = build_collection_quality_gates(records)
     privacy_governance = build_privacy_governance(records=records, root=root)
     redaction_exclusion_ledger = privacy_governance["ledger"]
-    source_maturity = build_source_maturity_ledger(root=root, records=records)
-    source_completeness = build_source_completeness_ledger(root=root, records=records)
+    source_verification = build_source_verification_bundle(
+        output_dir=root / "generated/source-verification",
+        root=root,
+        processed_records=records,
+    )
+    source_maturity = build_source_maturity_ledger(
+        root=root,
+        records=records,
+        target_metadata=source_verification["target_metadata"],
+    )
+    source_completeness = build_source_completeness_ledger(
+        root=root,
+        records=records,
+        target_metadata=source_verification["target_metadata"],
+    )
     source_discovery_queue = build_source_discovery_queue()
     source_rights_review = build_source_rights_review_ledger()
     parser_risk = build_parser_risk_ledger()
@@ -993,6 +1007,7 @@ def build_release_evidence(
         "backfill_run_manifest": backfill_run_manifest,
         "deduplication_ledger": deduplication_ledger,
         "freshness_slo": freshness_slo,
+        "source_verification": source_verification,
         "public_claims_validation": {
             "schema_version": "1.0.0",
             "generated_at": utc_now_iso(),
@@ -1155,6 +1170,26 @@ def build_release_artifacts(
     write_json(manifests_dir / "deduplication_ledger.json", evidence["deduplication_ledger"])
     write_json(manifests_dir / "freshness_slo.json", evidence["freshness_slo"])
     write_json(
+        manifests_dir / "source_verification_summary.json",
+        evidence["source_verification"],
+    )
+    write_json(
+        manifests_dir / "source_verification_feasibility.json",
+        evidence["source_verification"]["feasibility"],
+    )
+    write_json(
+        manifests_dir / "verification_input_manifest.json",
+        evidence["source_verification"]["input_manifest"],
+    )
+    write_json(
+        manifests_dir / "source_expected_records.json",
+        evidence["source_verification"]["expected_records"],
+    )
+    write_json(
+        manifests_dir / "source_verification_reconciliation.json",
+        evidence["source_verification"]["reconciliation"],
+    )
+    write_json(
         manifests_dir / "public_claims_validation.json",
         evidence["public_claims_validation"],
     )
@@ -1243,6 +1278,7 @@ def validate_release_evidence(payload: Mapping[str, Any]) -> list[str]:
         "zenodo",
         "quality",
         "source_coverage",
+        "source_verification",
         "public_surface",
         "checksums",
         "privacy_governance",
@@ -1278,6 +1314,22 @@ def validate_release_evidence(payload: Mapping[str, Any]) -> list[str]:
             failures.append("checksums.sha256sums_path is required")
     else:
         failures.append("checksums must be an object")
+    source_verification = payload.get("source_verification", {})
+    if isinstance(source_verification, Mapping):
+        if source_verification.get("status") not in {
+            "verified_complete",
+            "verified_incomplete",
+            "blocked",
+        }:
+            failures.append(
+                "source_verification.status must be verified_complete, verified_incomplete, or blocked"
+            )
+        if not isinstance(source_verification.get("feasibility", {}), Mapping):
+            failures.append("source_verification.feasibility must be an object")
+        if not isinstance(source_verification.get("reconciliation", {}), Mapping):
+            failures.append("source_verification.reconciliation must be an object")
+    else:
+        failures.append("source_verification must be an object")
     privacy = payload.get("privacy_governance", {})
     if isinstance(privacy, Mapping):
         if privacy.get("status") not in {"pass", "blocked"}:
@@ -1334,7 +1386,9 @@ def publication_readiness(
         ".github/workflows/monthly_dynamic_archive_publication.yml",
         ".github/workflows/osv_scan.yml",
         ".github/workflows/scorecard.yml",
+        ".github/workflows/source_verification.yml",
         "docs/monthly-dynamic-archive-publication.md",
+        "docs/source-verification.md",
         "schemas/release_evidence.schema.json",
         "scripts/build_release_evidence.py",
         "scripts/check_release_evidence.py",

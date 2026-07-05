@@ -28,6 +28,7 @@ from corpus_cases_medilegal_nz.source_maturity import (
     build_source_maturity_ledger,
     build_source_rights_review_ledger,
 )
+from corpus_cases_medilegal_nz.source_verification import build_source_verification_bundle
 
 CORE_SOURCE_URLS = {
     "hdc": "https://www.hdc.org.nz/decisions/search-decisions/",
@@ -99,12 +100,20 @@ def write_collection_proof(
         collection_quality_gates,
     )
     audit = build_source_collection_audit(records=records)
+    source_verification = build_source_verification_bundle(
+        output_dir=output_dir / "verification",
+        processed_records=records,
+        fixture_root=fixture_root,
+    )
     source_maturity = build_source_maturity_ledger(
-        records=records, previous_records=previous_records
+        records=records,
+        previous_records=previous_records,
+        target_metadata=source_verification["target_metadata"],
     )
     source_completeness = build_source_completeness_ledger(
         records=records,
         previous_records=previous_records,
+        target_metadata=source_verification["target_metadata"],
     )
     source_discovery_queue = build_source_discovery_queue()
     source_rights_review = build_source_rights_review_ledger()
@@ -137,6 +146,10 @@ def write_collection_proof(
     )
     dedupe_path = write_json(manifests_dir / "deduplication_ledger.json", deduplication_ledger)
     freshness_path = write_json(manifests_dir / "freshness_slo.json", freshness_slo)
+    source_verification_path = write_json(
+        manifests_dir / "source_verification_summary.json",
+        source_verification,
+    )
     evidence = {
         "schema_version": "1.0.0",
         "record_count": len(records),
@@ -157,6 +170,7 @@ def write_collection_proof(
         "backfill_run_manifest": backfill_run_manifest,
         "deduplication_ledger": deduplication_ledger,
         "freshness_slo": freshness_slo,
+        "source_verification": source_verification,
     }
     evidence_path = output_dir / "collection_proof.json"
     write_json(evidence_path, evidence)
@@ -172,6 +186,7 @@ def write_collection_proof(
     evidence["artifacts"]["backfill_run_manifest"] = str(backfill_manifest_path)
     evidence["artifacts"]["deduplication_ledger"] = str(dedupe_path)
     evidence["artifacts"]["freshness_slo"] = str(freshness_path)
+    evidence["artifacts"]["source_verification"] = str(source_verification_path)
     return evidence
 
 
