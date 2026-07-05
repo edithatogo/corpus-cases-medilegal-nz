@@ -1,0 +1,8 @@
+{
+  "track_id": "live_source_verification_reproducible_archiving_20260705",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-07-05T00:00:00Z",
+  "updated_at": "2026-07-05T00:00:00Z",
+  "description": "Verify live source completeness with reproducible archived evidence, including a feasibility phase that classifies immediately available source indexes and blocked verification inputs."
+}

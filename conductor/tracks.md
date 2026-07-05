@@ -99,3 +99,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Status: ✅ COMPLETE - source maturity ladder, completeness evidence, conservative public-claims gating, discovery queue, rights review, parser-risk prioritisation, backfill provenance, dedupe, freshness, and governance ledgers are implemented.*
 
 ---
+
+## [ ] Track: Live Source Verification And Reproducible Evidence Archiving
+*Link: [./conductor/tracks/live_source_verification_reproducible_archiving_20260705/](./conductor/tracks/live_source_verification_reproducible_archiving_20260705/)*
+*Status: NEW - feasibility-first source verification track to archive official and alternate verification inputs, classify blockers, reconcile expected records against processed records, and publish reproducible completeness evidence.*
+
+---
