@@ -53,11 +53,7 @@ def test_parse_markers_extracts_stable_metadata() -> None:
 
 
 def test_issue_body_uses_spec_parent_and_track_markers() -> None:
-    spec = next(
-        spec
-        for spec in SUB_ISSUES
-        if spec.marker_id == "live-source-index-verification"
-    )
+    spec = next(spec for spec in SUB_ISSUES if spec.marker_id == "live-source-index-verification")
 
     markers = parse_markers(issue_body(spec))
 

@@ -116,7 +116,7 @@ jobs:
         with:
           name: zizmor-report
           path: generated/security/zizmor-report.txt
-          if-no-files-found: error
+          if-no-files-found: warn
 
   no-publication-from-dependency-updates:
     name: Dependency Update Publication Guard

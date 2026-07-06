@@ -305,7 +305,10 @@ jobs:
           BUNDLE: ${{ steps.version.outputs.bundle }}
         run: |
           set -euo pipefail
-          RELEASE_NOTES="$ARTIFACT_DIR/manifests/release_evidence.json"
+          RELEASE_NOTES="generated/archive-intelligence/release-notes.claims.md"
+          if [ ! -s "$RELEASE_NOTES" ]; then
+            RELEASE_NOTES="$ARTIFACT_DIR/manifests/public_claims_validation.json"
+          fi
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release edit "$TAG" --notes-file "$RELEASE_NOTES"
           else
