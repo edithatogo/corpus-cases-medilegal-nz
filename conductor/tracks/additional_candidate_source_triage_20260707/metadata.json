@@ -1,0 +1,8 @@
+{
+  "track_id": "additional_candidate_source_triage_20260707",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-07-06T14:14:46Z",
+  "updated_at": "2026-07-06T14:14:46Z",
+  "description": "Expand candidate-source coverage for additional medicolegal source families and triage them into approved, deferred, or excluded outcomes."
+}

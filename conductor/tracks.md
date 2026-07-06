@@ -103,3 +103,15 @@ This file tracks all major tracks for the project. Each track has its own detail
 ## [x] Track: Live Source Verification And Reproducible Evidence Archiving
 *Link: [./conductor/tracks/live_source_verification_reproducible_archiving_20260705/](./conductor/tracks/live_source_verification_reproducible_archiving_20260705/)*
 *Status: ✅ COMPLETE - feasibility-first source verification, reproducible input archiving, offline replay, expected-record reconciliation, verified target promotion, release evidence integration, scheduled workflow, and operator documentation are implemented.*
+
+---
+
+## [ ] Track: Additional Candidate Source Triage And Coverage Expansion
+*Link: [./conductor/tracks/additional_candidate_source_triage_20260707/](./conductor/tracks/additional_candidate_source_triage_20260707/)*
+*Status: NEW - triage ACC appeals, social security and medical appeals, council disciplinary mirrors, mental health material, and health-related appellate filters into approved, deferred, or excluded outcomes.*
+
+---
+
+## [ ] Track: Redundant Source Validation And Reconciliation Hardening
+*Link: [./conductor/tracks/redundant_source_validation_hardening_20260707/](./conductor/tracks/redundant_source_validation_hardening_20260707/)*
+*Status: NEW - add redundant public witnesses such as NZLII, court summaries, council mirrors, and older ACCDCR pages to independently validate canonical and candidate coverage.*
