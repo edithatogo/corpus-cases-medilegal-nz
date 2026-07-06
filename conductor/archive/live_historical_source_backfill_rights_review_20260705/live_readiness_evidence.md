@@ -68,3 +68,22 @@ The monthly release artifact and dry-run publication paths are verified locally.
 Live Hugging Face upload and Zenodo draft/new-version upload remain unclaimed
 until `HF_TOKEN`, `HF_REPO_ID`, and Zenodo credentials are available to the
 monthly publication workflow or local publication scripts.
+
+## Remote Publication Evidence
+
+Generated on 2026-07-06 after pushing `master` to commit
+`23b83ed584ad9b6c3a301aea483b2a6df1a65e3a`.
+
+- GitHub release:
+  `https://github.com/edithatogo/corpus-cases-medilegal-nz/releases/tag/dataset-v2026.07.0`.
+- Monthly publication workflow:
+  `https://github.com/edithatogo/corpus-cases-medilegal-nz/actions/runs/28795675754`.
+- Monthly publication result: `success`.
+- Hugging Face publication step: `success`.
+- Zenodo draft/new-version upload step: `success`.
+- GitHub release asset upload step: `success`.
+- GitHub artifact attestation step: `success`.
+- Protected Zenodo handoff environment: approved and completed successfully.
+- Branch gates for commit `23b83ed584ad9b6c3a301aea483b2a6df1a65e3a`:
+  `Tests`, `Docs`, `CodeQL`, `OSV Scan`, `Mirror Sync`, and
+  `Code Quality And Workflow Hardening` all completed successfully.

@@ -103,11 +103,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 ## [x] Track: Live Source Verification And Reproducible Evidence Archiving
 *Link: [./conductor/tracks/live_source_verification_reproducible_archiving_20260705/](./conductor/tracks/live_source_verification_reproducible_archiving_20260705/)*
 *Status: ✅ COMPLETE - feasibility-first source verification, reproducible input archiving, offline replay, expected-record reconciliation, verified target promotion, release evidence integration, scheduled workflow, and operator documentation are implemented.*
-
----
-
-## [~] Track: Live Historical Corpus Completion And Rights Review
-*Link: [./conductor/tracks/live_historical_source_backfill_rights_review_20260705/](./conductor/tracks/live_historical_source_backfill_rights_review_20260705/)*
-*Status: IN PROGRESS - parent issue #10 and project-linked workstreams created; remaining work closes the gap between fixture-backed pipeline proof and live historical corpus completeness.*
-
----

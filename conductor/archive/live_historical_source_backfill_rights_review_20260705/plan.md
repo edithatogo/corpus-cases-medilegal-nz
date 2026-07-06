@@ -13,7 +13,7 @@
     - [x] Add content-completion subissues to sync desired state.
     - [x] Preserve existing monthly archive issue sync behavior.
     - [x] Add tests for multi-parent issue markers and sync planning.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Track, Issue, And Project Evidence Setup' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Track, Issue, And Project Evidence Setup' (Protocol in workflow.md)
 
 ## Phase 2: Live Source Verification And Archived Replay
 
@@ -29,7 +29,7 @@
     - [x] Match by source identifier, canonical URL, alternate URL, title/date fingerprint, and source-specific aliases.
     - [x] Classify matched, missing, extra, duplicate, ambiguous, excluded, blocked, and manual-review records.
     - [x] Emit source-level gap reports and aggregate completeness summaries.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Live Source Verification And Archived Replay' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Live Source Verification And Archived Replay' (Protocol in workflow.md)
 
 ## Phase 3: Rights, Terms, Privacy, And Claims Governance
 
@@ -41,7 +41,7 @@
     - [x] Block complete-corpus claims when rights, privacy, parser, live verification, or reconciliation status is unresolved.
     - [x] Keep dry-run publication allowed with explicit caveats.
     - [x] Generate README, dataset-card, release-note, and project-summary claims from ledgers.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Rights, Terms, Privacy, And Claims Governance' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Rights, Terms, Privacy, And Claims Governance' (Protocol in workflow.md)
 
 ## Phase 4: Parser Replacement And Live Drift Proof
 
@@ -52,7 +52,7 @@
 - [x] Task: Promote review-level parser sources only after drift checks.
     - [x] Run selector-drift checks for `hdc`, `hpdt`, `era`, `teachers`, `privacy`, and `human_rights`.
     - [x] Record whether generic parser behavior remains acceptable or needs replacement.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Parser Replacement And Live Drift Proof' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Parser Replacement And Live Drift Proof' (Protocol in workflow.md)
 
 ## Phase 5: Candidate Source Triage And Promotion
 
@@ -63,7 +63,7 @@
     - [x] Add source config and fixture contract for approved candidates.
     - [x] Add live verification, rights ledger, parser-risk status, and release-evidence integration.
     - [x] Keep deferred or excluded candidates visible in public-safe discovery ledgers.
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: Candidate Source Triage And Promotion' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Candidate Source Triage And Promotion' (Protocol in workflow.md)
 
 ## Phase 6: Historical Backfill, Publication, And Completion Proof
 
@@ -71,12 +71,12 @@
     - [x] Generate processed records, manifests, source coverage ledgers, and dataset diff evidence from live-backed inputs.
     - [x] Reconcile processed records against expected live source records.
     - [x] Preserve unresolved source gaps as blockers rather than false completion.
-- [ ] Task: Publish verified release evidence.
+- [x] Task: Publish verified release evidence.
     - [x] Attach source verification, rights, parser, candidate-source, and completeness evidence to GitHub release assets.
-    - [ ] Upload live-backed evidence to Hugging Face and verify remote manifests.
-    - [ ] Upload Zenodo draft/new-version evidence and preserve protected production handoff.
-- [ ] Task: Complete review and archive.
+    - [x] Upload live-backed evidence to Hugging Face and verify remote manifests.
+    - [x] Upload Zenodo draft/new-version evidence and preserve protected production handoff.
+- [x] Task: Complete review and archive.
     - [x] Run `uv run pytest -q` and targeted workflow/project-sync tests.
-    - [ ] Run Conductor review, apply fixes, and archive the track after evidence is complete.
-    - [ ] Close or update the parent issue and subissues based on verified outcomes.
-- [ ] Task: Conductor - User Manual Verification 'Phase 6: Historical Backfill, Publication, And Completion Proof' (Protocol in workflow.md)
+    - [x] Run Conductor review, apply fixes, and archive the track after evidence is complete.
+    - [x] Close or update the parent issue and subissues based on verified outcomes.
+- [x] Task: Conductor - User Manual Verification 'Phase 6: Historical Backfill, Publication, And Completion Proof' (Protocol in workflow.md)
