@@ -154,6 +154,8 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
         == (evidence["quality"]["record_count"])
     )
     assert evidence["source_discovery_queue"]["status"] == "triaged"
+    assert evidence["redundant_source_validation"]["status"] == "warn"
+    assert evidence["candidate_coverage"]["summary"]["approved_candidate_count"] == 4
     assert evidence["source_rights_review"]["status"] == "reviewed_with_caveats"
     assert evidence["parser_risk"]["high_risk_source_count"] == 7
     assert evidence["corpus_completion_readiness"]["status"] == "pass"
@@ -176,6 +178,8 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert (output_dir / "manifests/source_expected_records.json").is_file()
     assert (output_dir / "manifests/source_verification_reconciliation.json").is_file()
     assert (output_dir / "manifests/source_discovery_queue.json").is_file()
+    assert (output_dir / "manifests/redundant_source_validation.json").is_file()
+    assert (output_dir / "manifests/candidate_coverage.json").is_file()
     assert (output_dir / "manifests/source_rights_review.json").is_file()
     assert (output_dir / "manifests/parser_risk.json").is_file()
     assert (output_dir / "manifests/corpus_completion_readiness.json").is_file()

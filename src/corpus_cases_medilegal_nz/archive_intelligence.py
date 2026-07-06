@@ -862,6 +862,16 @@ def build_public_claims(
         if isinstance(evidence.get("source_maturity"), Mapping)
         else {}
     )
+    candidate_coverage = (
+        evidence.get("candidate_coverage", {})
+        if isinstance(evidence.get("candidate_coverage"), Mapping)
+        else {}
+    )
+    redundant_source_validation = (
+        evidence.get("redundant_source_validation", {})
+        if isinstance(evidence.get("redundant_source_validation"), Mapping)
+        else {}
+    )
     privacy = (
         evidence.get("privacy_rights_scoring", {})
         if isinstance(evidence.get("privacy_rights_scoring"), Mapping)
@@ -913,8 +923,10 @@ def build_public_claims(
     )
     release_notes = (
         f"Release maturity score: {maturity_score if maturity_score is not None else 'n/a'}. "
-        f"Observability tracks {len(observability.get('sources', []))} sources and evidence-backed "
-        f"claims are generated from ledgers rather than prose."
+        f"Observability tracks {len(observability.get('sources', []))} sources, "
+        f"{candidate_coverage.get('summary', {}).get('approved_candidate_count', 0)} approved "
+        f"candidates, and {redundant_source_validation.get('summary', {}).get('validation_source_count', 0)} "
+        "redundant witnesses; evidence-backed claims are generated from ledgers rather than prose."
     )
     project_summary = (
         f"Project sync should reference the same release evidence used for the archive: "
@@ -931,6 +943,12 @@ def build_public_claims(
             "all_sources_historically_complete": all_historically_complete,
             "maturity_score": maturity_score,
             "privacy_status": privacy.get("status", "unknown"),
+            "approved_candidate_count": candidate_coverage.get("summary", {}).get(
+                "approved_candidate_count", 0
+            ),
+            "redundant_witness_source_count": redundant_source_validation.get("summary", {}).get(
+                "validation_source_count", 0
+            ),
         },
         "markdown": {
             "README.md": readme,

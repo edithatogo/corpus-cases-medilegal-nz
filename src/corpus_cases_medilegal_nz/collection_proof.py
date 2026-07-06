@@ -19,11 +19,13 @@ from corpus_cases_medilegal_nz.archive import (
 from corpus_cases_medilegal_nz.medilegal_parser import parse_source_listing_html
 from corpus_cases_medilegal_nz.source_maturity import (
     build_backfill_run_manifest,
+    build_candidate_coverage_report,
     build_corpus_completion_readiness,
     build_deduplication_ledger,
     build_freshness_slo_ledger,
     build_parser_risk_ledger,
     build_publication_governance_ledger,
+    build_redundant_source_validation_ledger,
     build_source_completeness_ledger,
     build_source_discovery_queue,
     build_source_maturity_ledger,
@@ -126,6 +128,11 @@ def write_collection_proof(
         target_metadata=source_verification["target_metadata"],
     )
     source_discovery_queue = build_source_discovery_queue()
+    redundant_source_validation = build_redundant_source_validation_ledger()
+    candidate_coverage = build_candidate_coverage_report(
+        discovery_queue=source_discovery_queue,
+        redundant_source_validation=redundant_source_validation,
+    )
     source_rights_review = build_source_rights_review_ledger()
     parser_risk = build_parser_risk_ledger()
     publication_governance = build_publication_governance_ledger()
@@ -186,6 +193,8 @@ def write_collection_proof(
         "source_maturity": source_maturity,
         "source_completeness": source_completeness,
         "source_discovery_queue": source_discovery_queue,
+        "redundant_source_validation": redundant_source_validation,
+        "candidate_coverage": candidate_coverage,
         "source_rights_review": source_rights_review,
         "parser_risk": parser_risk,
         "corpus_completion_readiness": corpus_completion_readiness,
@@ -203,6 +212,12 @@ def write_collection_proof(
     evidence["artifacts"]["source_maturity"] = str(source_maturity_path)
     evidence["artifacts"]["source_completeness"] = str(source_completeness_path)
     evidence["artifacts"]["source_discovery_queue"] = str(source_discovery_path)
+    evidence["artifacts"]["redundant_source_validation"] = str(
+        write_json(manifests_dir / "redundant_source_validation.json", redundant_source_validation)
+    )
+    evidence["artifacts"]["candidate_coverage"] = str(
+        write_json(manifests_dir / "candidate_coverage.json", candidate_coverage)
+    )
     evidence["artifacts"]["source_rights_review"] = str(source_rights_path)
     evidence["artifacts"]["parser_risk"] = str(parser_risk_path)
     evidence["artifacts"]["corpus_completion_readiness"] = str(corpus_completion_path)

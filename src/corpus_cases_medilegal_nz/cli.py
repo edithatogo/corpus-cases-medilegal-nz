@@ -24,8 +24,10 @@ from corpus_cases_medilegal_nz.mirror import mirror_sync_readiness
 from corpus_cases_medilegal_nz.parser_contract import build_parser_contract
 from corpus_cases_medilegal_nz.source_maturity import (
     build_corpus_completion_readiness,
+    build_candidate_coverage_report,
     build_parser_risk_ledger,
     build_publication_governance_ledger,
+    build_redundant_source_validation_ledger,
     build_source_completeness_ledger,
     build_source_discovery_queue,
     build_source_maturity_ledger,
@@ -56,6 +58,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Report historical backfill completeness reconciliation.",
     )
     sub.add_parser("source-discovery", help="Report review-gated candidate source queue.")
+    sub.add_parser("candidate-coverage", help="Report candidate promotion and witness coverage.")
+    sub.add_parser(
+        "redundant-validation",
+        help="Report redundant public witness validation coverage.",
+    )
     sub.add_parser("source-rights", help="Report source-level rights review ledger.")
     sub.add_parser("parser-risk", help="Report parser replacement and live-smoke priorities.")
     sub.add_parser("publication-governance", help="Report remaining publication governance gates.")
@@ -151,6 +158,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
     elif ns.command == "source-discovery":
         result = build_source_discovery_queue()
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "candidate-coverage":
+        result = build_candidate_coverage_report()
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
+    elif ns.command == "redundant-validation":
+        result = build_redundant_source_validation_ledger()
         print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
     elif ns.command == "source-rights":
         result = build_source_rights_review_ledger()

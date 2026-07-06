@@ -1,0 +1,24 @@
+pipeline:
+  name: acc_appeals_reviews
+  description: "ACC appeals and review material candidate discovery pipeline"
+  source_url: "https://www.justice.govt.nz/tribunals/accident-compensation/"
+  base_url: "https://www.justice.govt.nz/tribunals/accident-compensation/"
+  paths:
+    raw_dir: "data/raw/candidates/acc_appeals_reviews"
+    processed_dir: "data/processed/candidates"
+  scraping:
+    page_size: 25
+    max_pages: 5
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) NZ-Medicolegal-Corpus-Sync"
+    timeout: 30
+  validation:
+    required_metadata_fields:
+      - "case_id"
+      - "date"
+      - "title"
+      - "citation"
+      - "url"
+  promotion:
+    canonical_registry_status: "candidate_only"
+    duplicate_strategy: "link_to_official_source_when_duplicate"
+    rights_status: "source_terms_review_required_before_canonical_release"

@@ -106,12 +106,12 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Additional Candidate Source Triage And Coverage Expansion
+## [x] Track: Additional Candidate Source Triage And Coverage Expansion
 *Link: [./conductor/tracks/additional_candidate_source_triage_20260707/](./conductor/tracks/additional_candidate_source_triage_20260707/)*
-*Status: NEW - triage ACC appeals, social security and medical appeals, council disciplinary mirrors, mental health material, and health-related appellate filters into approved, deferred, or excluded outcomes.*
+*Status: ✅ COMPLETE - approved ACC, social security, mental health, and NZLII candidate scaffolds; explicit deferred and excluded outcomes; coverage report; and candidate evidence hooks are implemented.*
 
 ---
 
-## [ ] Track: Redundant Source Validation And Reconciliation Hardening
+## [x] Track: Redundant Source Validation And Reconciliation Hardening
 *Link: [./conductor/tracks/redundant_source_validation_hardening_20260707/](./conductor/tracks/redundant_source_validation_hardening_20260707/)*
-*Status: NEW - add redundant public witnesses such as NZLII, court summaries, council mirrors, and older ACCDCR pages to independently validate canonical and candidate coverage.*
+*Status: ✅ COMPLETE - redundant witness ledger, candidate witness coverage, gap reporting, and release-evidence integration are implemented.*

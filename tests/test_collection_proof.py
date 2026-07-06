@@ -43,6 +43,8 @@ def test_write_collection_proof_exports_archive_compatible_records(tmp_path: Pat
     assert (output_dir / "manifests" / "source_maturity.json").is_file()
     assert (output_dir / "manifests" / "source_completeness.json").is_file()
     assert (output_dir / "manifests" / "source_discovery_queue.json").is_file()
+    assert (output_dir / "manifests" / "redundant_source_validation.json").is_file()
+    assert (output_dir / "manifests" / "candidate_coverage.json").is_file()
     assert (output_dir / "manifests" / "source_rights_review.json").is_file()
     assert (output_dir / "manifests" / "parser_risk.json").is_file()
     assert (output_dir / "manifests" / "corpus_completion_readiness.json").is_file()

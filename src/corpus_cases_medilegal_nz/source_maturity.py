@@ -41,6 +41,24 @@ HIGH_RISK_GENERIC_PARSER_SOURCES = {
 }
 
 CANDIDATE_PROMOTION_SCAFFOLDS = {
+    "acc_appeals_reviews": {
+        "config": "config/candidates/acc_appeals_reviews_pipeline.yaml",
+        "fixture": "tests/fixtures/candidates/acc_appeals_reviews/listing.html",
+        "parser_risk_status": "candidate_parser_contract_scaffolded",
+        "rights_status": "source_terms_review_required_before_canonical_release",
+    },
+    "mental_health_review_tribunal": {
+        "config": "config/candidates/mental_health_review_tribunal_pipeline.yaml",
+        "fixture": "tests/fixtures/candidates/mental_health_review_tribunal/listing.html",
+        "parser_risk_status": "candidate_parser_contract_scaffolded",
+        "rights_status": "source_terms_review_required_before_canonical_release",
+    },
+    "social_security_appeal_authority": {
+        "config": "config/candidates/social_security_appeal_authority_pipeline.yaml",
+        "fixture": "tests/fixtures/candidates/social_security_appeal_authority/listing.html",
+        "parser_risk_status": "candidate_parser_contract_scaffolded",
+        "rights_status": "source_terms_review_required_before_canonical_release",
+    },
     "nzlii_health_privacy_discipline": {
         "config": "config/candidates/nzlii_health_privacy_discipline_pipeline.yaml",
         "fixture": "tests/fixtures/candidates/nzlii_health_privacy_discipline/listing.html",
@@ -48,6 +66,69 @@ CANDIDATE_PROMOTION_SCAFFOLDS = {
         "rights_status": "terms_review_required_before_canonical_release",
     }
 }
+
+REDUNDANT_SOURCE_VALIDATION_WITNESSES = [
+    {
+        "validation_source_id": "nzlii_health_privacy_discipline",
+        "name": "NZLII health, privacy, and discipline subsets",
+        "url": "https://www.nzlii.org/",
+        "evidence_role": "redundant_witness",
+        "validation_class": "mirror",
+        "supports_source_ids": [
+            "hdc",
+            "hpdt",
+            "privacy",
+            "human_rights",
+            "teachers",
+        ],
+        "notes": "Independent public witness for health, privacy, and discipline coverage.",
+    },
+    {
+        "validation_source_id": "older_accdcr",
+        "name": "Older ACCDCR decisions",
+        "url": "https://www.justice.govt.nz/tribunals/accident-compensation/older-accdcr/",
+        "evidence_role": "redundant_witness",
+        "validation_class": "summary_index",
+        "supports_source_ids": ["acc_appeals_reviews"],
+        "notes": "Public ministry index and NZLII external witness for ACC appeal coverage.",
+    },
+    {
+        "validation_source_id": "social_security_appeal_authority_index",
+        "name": "Social Security Appeal Authority index",
+        "url": "https://www.justice.govt.nz/tribunals/social-security-appeal-authority/",
+        "evidence_role": "summary_index",
+        "validation_class": "summary_index",
+        "supports_source_ids": ["social_security_appeal_authority"],
+        "notes": "Public ministry index for benefit and medical appeal verification.",
+    },
+    {
+        "validation_source_id": "hpdt_council_mirrors",
+        "name": "Council HPDT decision mirror pages",
+        "url": "https://dcnz.org.nz/i-practise-in-new-zealand/health-practitioners-disciplinary-tribunal/health-practitioners-disciplinary-tribunal-decisions",
+        "evidence_role": "redundant_witness",
+        "validation_class": "mirror",
+        "supports_source_ids": ["hpdt"],
+        "notes": "Mirror evidence from professional council pages for HPDT coverage.",
+    },
+    {
+        "validation_source_id": "teaching_council_disciplinary_tribunal",
+        "name": "Teaching Council disciplinary tribunal page",
+        "url": "https://teachingcouncil.nz/en/code-and-standards/reporting-concerns/committees-and-tribunals/disciplinary-tribunal",
+        "evidence_role": "redundant_witness",
+        "validation_class": "mirror",
+        "supports_source_ids": ["teachers"],
+        "notes": "Public mirror and operator witness for teaching discipline coverage.",
+    },
+        {
+            "validation_source_id": "hrrt_decisions_index",
+            "name": "HRRT decisions index",
+            "url": "https://www.justice.govt.nz/tribunals/human-rights/hrrt-decisions/",
+            "evidence_role": "summary_index",
+        "validation_class": "summary_index",
+        "supports_source_ids": ["human_rights", "privacy", "hdc"],
+        "notes": "Broad public index that can corroborate privacy and human-rights decisions.",
+    },
+]
 
 PUBLIC_CLAIM_OVERSTATEMENT_PATTERNS = (
     "all cases archived",
@@ -347,13 +428,53 @@ def build_source_discovery_queue() -> JsonObject:
             "parser_complexity": "high",
             "expected_value": "high",
             "review_status": "needs_source_review",
-            "decision": "deferred",
+            "decision": "approved",
             "decision_rationale": (
-                "ACC appeal/review value is high, but public availability, rights posture, "
-                "and parser scope are not yet specific enough for canonical inclusion."
+                "Public ACC appeal surfaces exist and can be backed by an older ACCDCR "
+                "witness, so the source can proceed as an approved candidate."
             ),
-            "promotion_status": "blocked_until_public_source_rights_and_parser_scope_review",
-            "promotion_gate": "rights, public availability, and parser scope must be approved.",
+            "promotion_status": "ready_for_canonical_implementation",
+            "promotion_scaffold": CANDIDATE_PROMOTION_SCAFFOLDS["acc_appeals_reviews"],
+            "redundant_witnesses": ["older_accdcr"],
+            "promotion_gate": "confirm source-specific rights, scope, and parser contract.",
+        },
+        {
+            "candidate_id": "social_security_appeal_authority",
+            "name": "Social Security Appeal Authority decisions",
+            "url": "https://www.justice.govt.nz/tribunals/social-security-appeal-authority/",
+            "document_classes": ["appeal", "decision"],
+            "medicolegal_relevance": "medium",
+            "parser_complexity": "medium",
+            "expected_value": "medium",
+            "review_status": "needs_rights_review",
+            "decision": "approved",
+            "decision_rationale": (
+                "Public Ministry of Justice pages and published decisions support a "
+                "controlled candidate rollout for medical-benefit appeal coverage."
+            ),
+            "promotion_status": "ready_for_canonical_implementation",
+            "promotion_scaffold": CANDIDATE_PROMOTION_SCAFFOLDS["social_security_appeal_authority"],
+            "redundant_witnesses": ["social_security_appeal_authority_index"],
+            "promotion_gate": "confirm redistribution posture and duplicate handling.",
+        },
+        {
+            "candidate_id": "mental_health_review_tribunal",
+            "name": "Mental Health Review Tribunal material if public",
+            "url": "https://www.health.govt.nz/about-us/new-zealands-health-system/health-system-roles-and-organisations/health-committees-and-boards/mental-health-review-tribunal",
+            "document_classes": ["tribunal material"],
+            "medicolegal_relevance": "high",
+            "parser_complexity": "unknown",
+            "expected_value": "medium",
+            "review_status": "needs_public_availability_review",
+            "decision": "approved",
+            "decision_rationale": (
+                "The Ministry of Health points to public past decisions on NZLII, so the "
+                "tribunal can be treated as an approved candidate pending source-specific proof."
+            ),
+            "promotion_status": "ready_for_canonical_implementation",
+            "promotion_scaffold": CANDIDATE_PROMOTION_SCAFFOLDS["mental_health_review_tribunal"],
+            "redundant_witnesses": ["nzlii_health_privacy_discipline"],
+            "promotion_gate": "confirm public redistribution and archival replay contract.",
         },
         {
             "candidate_id": "professional_councils_other",
@@ -366,28 +487,11 @@ def build_source_discovery_queue() -> JsonObject:
             "review_status": "needs_source_discovery",
             "decision": "deferred",
             "decision_rationale": (
-                "Potentially valuable disciplinary material remains source-discovery work "
-                "until public council-specific sources are enumerated and deduplicated."
+                "Council-specific mirror pages are now captured as redundant witnesses, so "
+                "the remaining family stays deferred until a canonical promotion case is justified."
             ),
-            "promotion_status": "blocked_until_public_sources_identified",
-            "promotion_gate": "identify public sources and avoid duplication with HPDT.",
-        },
-        {
-            "candidate_id": "mental_health_review_tribunal",
-            "name": "Mental Health Review Tribunal material if public",
-            "url": "https://www.justice.govt.nz/tribunals/mental-health-review-tribunal/",
-            "document_classes": ["tribunal material"],
-            "medicolegal_relevance": "high",
-            "parser_complexity": "unknown",
-            "expected_value": "medium",
-            "review_status": "needs_public_availability_review",
-            "decision": "deferred",
-            "decision_rationale": (
-                "Mental Health Review Tribunal material may be sensitive and is included "
-                "only if public, redistributable source material is identified."
-            ),
-            "promotion_status": "blocked_until_public_availability_confirmed",
-            "promotion_gate": "only public, redistributable material may be registered.",
+            "promotion_status": "blocked_until_public_source_identification",
+            "promotion_gate": "promote only if a distinct canonical source appears.",
         },
         {
             "candidate_id": "nzlii_health_privacy_discipline",
@@ -407,6 +511,7 @@ def build_source_discovery_queue() -> JsonObject:
             "promotion_scaffold": CANDIDATE_PROMOTION_SCAFFOLDS[
                 "nzlii_health_privacy_discipline"
             ],
+            "redundant_witnesses": ["hrrt_decisions_index"],
             "promotion_gate": "confirm NZLII terms, attribution, and duplicate strategy.",
         },
         {
@@ -426,6 +531,40 @@ def build_source_discovery_queue() -> JsonObject:
             "promotion_status": "blocked_until_scope_definition",
             "promotion_gate": "define defensible medicolegal filter and source provenance.",
         },
+        {
+            "candidate_id": "immigration_and_protection_tribunal",
+            "name": "Immigration and Protection Tribunal decisions",
+            "url": "https://www.justice.govt.nz/tribunals/immigration/immigration-and-protection/",
+            "document_classes": ["tribunal decision"],
+            "medicolegal_relevance": "low",
+            "parser_complexity": "medium",
+            "expected_value": "low",
+            "review_status": "out_of_scope_review",
+            "decision": "excluded",
+            "decision_rationale": (
+                "Public and useful, but immigration appeal material is not part of the "
+                "current medicolegal corpus intent."
+            ),
+            "promotion_status": "excluded_out_of_scope",
+            "promotion_gate": "keep out of the canonical registry unless scope changes.",
+        },
+        {
+            "candidate_id": "lawyers_conveyancers_disciplinary_tribunal",
+            "name": "Lawyers and Conveyancers Disciplinary Tribunal decisions",
+            "url": "https://www.justice.govt.nz/tribunals/lawyers-and-conveyancers/lc-disciplinary-tribunal/lcdt-decisions/",
+            "document_classes": ["disciplinary decision"],
+            "medicolegal_relevance": "low",
+            "parser_complexity": "medium",
+            "expected_value": "low",
+            "review_status": "out_of_scope_review",
+            "decision": "excluded",
+            "decision_rationale": (
+                "The material is public but it is legal-professional rather than medicolegal "
+                "coverage, so it is excluded from the current corpus."
+            ),
+            "promotion_status": "excluded_out_of_scope",
+            "promotion_gate": "retain as a documented exclusion.",
+        },
     ]
     decision_counts = Counter(str(candidate["decision"]) for candidate in candidates)
     return {
@@ -440,6 +579,8 @@ def build_source_discovery_queue() -> JsonObject:
             "candidate_count": len(candidates),
             "decision_counts": dict(sorted(decision_counts.items())),
             "approved_candidate_count": decision_counts.get("approved", 0),
+            "deferred_candidate_count": decision_counts.get("deferred", 0),
+            "excluded_candidate_count": decision_counts.get("excluded", 0),
             "unpromoted_candidate_count": sum(
                 1
                 for candidate in candidates
@@ -448,6 +589,135 @@ def build_source_discovery_queue() -> JsonObject:
             ),
         },
         "candidates": candidates,
+    }
+
+
+def build_redundant_source_validation_ledger() -> JsonObject:
+    """Build a ledger of public witness sources for canonical and candidate coverage."""
+    active_sources = list(SOURCE_REGISTRY.keys())
+    validation_sources = []
+    source_witness_counts: dict[str, int] = {source_id: 0 for source_id in active_sources}
+    source_witnesses: dict[str, list[str]] = {source_id: [] for source_id in active_sources}
+    for witness in REDUNDANT_SOURCE_VALIDATION_WITNESSES:
+        supports = [source_id for source_id in witness.get("supports_source_ids", []) if source_id in source_witness_counts]
+        validation_sources.append(
+            {
+                **witness,
+                "support_count": len(supports),
+                "status": "available" if supports else "declared",
+                "supports_source_ids": supports,
+            }
+        )
+        for source_id in supports:
+            source_witness_counts[source_id] += 1
+            source_witnesses[source_id].append(str(witness["validation_source_id"]))
+    missing_witness_sources = [
+        source_id for source_id, count in source_witness_counts.items() if count == 0
+    ]
+    candidate_queue = build_source_discovery_queue()
+    approved_candidates = [
+        candidate
+        for candidate in candidate_queue.get("candidates", [])
+        if isinstance(candidate, Mapping) and candidate.get("decision") == "approved"
+    ]
+    candidate_witness_gaps = []
+    for candidate in approved_candidates:
+        redundant_witnesses = [
+            witness
+            for witness in validation_sources
+            if candidate.get("candidate_id") in witness.get("supports_source_ids", [])
+        ]
+        if not redundant_witnesses:
+            candidate_witness_gaps.append(str(candidate.get("candidate_id", "")))
+    return {
+        "schema_version": SOURCE_MATURITY_SCHEMA_VERSION,
+        "generated_at": utc_now_iso(),
+        "status": "warn" if missing_witness_sources or candidate_witness_gaps else "pass",
+        "summary": {
+            "validation_source_count": len(validation_sources),
+            "witnessed_source_count": len(active_sources) - len(missing_witness_sources),
+            "missing_witness_source_count": len(missing_witness_sources),
+            "approved_candidate_count": len(approved_candidates),
+            "candidate_witness_gap_count": len(candidate_witness_gaps),
+        },
+        "validation_sources": sorted(
+            validation_sources, key=lambda item: str(item["validation_source_id"])
+        ),
+        "source_witness_counts": dict(sorted(source_witness_counts.items())),
+        "source_witnesses": {
+            source_id: sorted(witnesses)
+            for source_id, witnesses in sorted(source_witnesses.items())
+            if witnesses
+        },
+        "missing_witness_sources": sorted(missing_witness_sources),
+        "approved_candidate_witness_gaps": sorted(candidate_witness_gaps),
+    }
+
+
+def build_candidate_coverage_report(
+    *,
+    discovery_queue: Mapping[str, Any] | None = None,
+    redundant_source_validation: Mapping[str, Any] | None = None,
+) -> JsonObject:
+    """Summarize approved, deferred, and excluded candidates plus witness coverage."""
+    if discovery_queue is None:
+        discovery_queue = build_source_discovery_queue()
+    if redundant_source_validation is None:
+        redundant_source_validation = build_redundant_source_validation_ledger()
+    candidates = [
+        candidate
+        for candidate in discovery_queue.get("candidates", [])
+        if isinstance(candidate, Mapping)
+    ]
+    by_status = Counter(str(candidate.get("decision", "unknown")) for candidate in candidates)
+    witness_lookup = {
+        str(source_id): len(witnesses)
+        for source_id, witnesses in redundant_source_validation.get("source_witnesses", {}).items()
+    }
+    rows = []
+    for candidate in candidates:
+        candidate_id = str(candidate.get("candidate_id", ""))
+        declared_witnesses = [
+            str(witness)
+            for witness in candidate.get("redundant_witnesses", [])
+            if str(witness).strip()
+        ]
+        redundant_witnesses = declared_witnesses or [
+            str(witness.get("validation_source_id"))
+            for witness in redundant_source_validation.get("validation_sources", [])
+            if candidate_id in witness.get("supports_source_ids", [])
+        ]
+        rows.append(
+            {
+                "candidate_id": candidate_id,
+                "decision": str(candidate.get("decision", "unknown")),
+                "promotion_status": str(candidate.get("promotion_status", "")),
+                "witness_count": len(redundant_witnesses),
+                "witnesses": sorted(str(witness) for witness in redundant_witnesses),
+                "eligible_for_promotion": bool(
+                    candidate.get("decision") == "approved"
+                    and candidate.get("promotion_status") == "ready_for_canonical_implementation"
+                ),
+            }
+        )
+    gaps = [row["candidate_id"] for row in rows if row["decision"] == "approved" and row["witness_count"] == 0]
+    return {
+        "schema_version": SOURCE_MATURITY_SCHEMA_VERSION,
+        "generated_at": utc_now_iso(),
+        "status": "warn" if gaps else "pass",
+        "summary": {
+            "candidate_count": len(candidates),
+            "approved_candidate_count": by_status.get("approved", 0),
+            "deferred_candidate_count": by_status.get("deferred", 0),
+            "excluded_candidate_count": by_status.get("excluded", 0),
+            "approved_candidate_with_witness_count": sum(
+                1 for row in rows if row["decision"] == "approved" and row["witness_count"] > 0
+            ),
+            "approved_candidate_without_witness_count": len(gaps),
+        },
+        "candidates": sorted(rows, key=lambda item: item["candidate_id"]),
+        "candidate_witness_gaps": sorted(gaps),
+        "witness_source_count": len(witness_lookup),
     }
 
 

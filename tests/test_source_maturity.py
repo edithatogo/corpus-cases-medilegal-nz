@@ -4,6 +4,7 @@ from pathlib import Path
 
 from corpus_cases_medilegal_nz.collection_proof import build_fixture_collection_records
 from corpus_cases_medilegal_nz.source_maturity import (
+    build_candidate_coverage_report,
     SOURCE_MATURITY_LADDER,
     build_backfill_run_manifest,
     build_corpus_completion_readiness,
@@ -11,6 +12,7 @@ from corpus_cases_medilegal_nz.source_maturity import (
     build_freshness_slo_ledger,
     build_parser_risk_ledger,
     build_publication_governance_ledger,
+    build_redundant_source_validation_ledger,
     build_source_completeness_ledger,
     build_source_discovery_queue,
     build_source_maturity_ledger,
@@ -105,7 +107,11 @@ def test_source_discovery_queue_is_review_gated() -> None:
     assert "Approved candidates are not active registry sources" in queue["promotion_policy"]
     candidate_ids = {candidate["candidate_id"] for candidate in queue["candidates"]}
     assert "acc_appeals_reviews" in candidate_ids
+    assert "social_security_appeal_authority" in candidate_ids
+    assert "mental_health_review_tribunal" in candidate_ids
     assert "nzlii_health_privacy_discipline" in candidate_ids
+    assert "immigration_and_protection_tribunal" in candidate_ids
+    assert "lawyers_conveyancers_disciplinary_tribunal" in candidate_ids
 
 
 def test_source_rights_review_defaults_are_conservative() -> None:
@@ -160,8 +166,11 @@ def test_candidate_source_triage_records_durable_decisions() -> None:
     assert {candidate["decision"] for candidate in queue["candidates"]} == {
         "approved",
         "deferred",
+        "excluded",
     }
-    assert candidates["acc_appeals_reviews"]["decision"] == "deferred"
+    assert candidates["acc_appeals_reviews"]["decision"] == "approved"
+    assert candidates["social_security_appeal_authority"]["decision"] == "approved"
+    assert candidates["mental_health_review_tribunal"]["decision"] == "approved"
     assert candidates["nzlii_health_privacy_discipline"]["decision"] == "approved"
     assert candidates["nzlii_health_privacy_discipline"]["promotion_status"] == (
         "ready_for_canonical_implementation"
@@ -169,6 +178,41 @@ def test_candidate_source_triage_records_durable_decisions() -> None:
     assert candidates["nzlii_health_privacy_discipline"]["promotion_scaffold"]["config"] == (
         "config/candidates/nzlii_health_privacy_discipline_pipeline.yaml"
     )
+    assert candidates["acc_appeals_reviews"]["promotion_scaffold"]["config"] == (
+        "config/candidates/acc_appeals_reviews_pipeline.yaml"
+    )
+    assert candidates["social_security_appeal_authority"]["promotion_scaffold"]["config"] == (
+        "config/candidates/social_security_appeal_authority_pipeline.yaml"
+    )
+    assert candidates["mental_health_review_tribunal"]["promotion_scaffold"]["config"] == (
+        "config/candidates/mental_health_review_tribunal_pipeline.yaml"
+    )
+
+
+def test_candidate_coverage_report_tracks_approved_and_excluded_families() -> None:
+    queue = build_source_discovery_queue()
+    redundant = build_redundant_source_validation_ledger()
+
+    coverage = build_candidate_coverage_report(
+        discovery_queue=queue,
+        redundant_source_validation=redundant,
+    )
+
+    assert coverage["summary"]["approved_candidate_count"] == 4
+    assert coverage["summary"]["deferred_candidate_count"] == 2
+    assert coverage["summary"]["excluded_candidate_count"] == 2
+    assert coverage["summary"]["approved_candidate_with_witness_count"] == 4
+    assert coverage["candidate_witness_gaps"] == []
+
+
+def test_redundant_source_validation_ledger_tracks_validation_witnesses() -> None:
+    ledger = build_redundant_source_validation_ledger()
+
+    assert ledger["status"] == "warn"
+    assert ledger["summary"]["validation_source_count"] >= 4
+    assert ledger["summary"]["missing_witness_source_count"] >= 1
+    assert ledger["source_witness_counts"]["hpdt"] >= 1
+    assert "hdc" in ledger["source_witnesses"]
 
 
 def test_corpus_completion_readiness_blocks_complete_claims_until_all_gates_pass() -> None:
