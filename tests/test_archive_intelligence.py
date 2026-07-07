@@ -16,6 +16,7 @@ from corpus_cases_medilegal_nz.archive import (
 from corpus_cases_medilegal_nz.archive_intelligence import (
     MATURITY_DIMENSIONS,
     build_archive_anomaly_report,
+    build_archive_status_report,
     build_archive_intelligence_from_artifact_dir,
     build_archive_intelligence_from_file,
     build_archive_maturity_report,
@@ -448,6 +449,48 @@ def test_public_claims_and_privacy_scoring_are_generated_from_ledgers(tmp_path: 
         "evidence-backed claims are generated from ledgers"
         in claims["markdown"]["release-notes.md"]
     )
+
+
+def test_archive_status_report_combines_operator_surfaces(tmp_path: Path) -> None:
+    records = [
+        {
+            "id": f"{source}-1",
+            "source": source,
+            "text": "Example text.",
+            "date": "2026-07-02",
+            "url": "https://example.com/decision",
+            "metadata": {
+                "retrieved_at": "2026-07-02T00:00:00Z",
+                "parsed_at": "2026-07-02T00:15:00Z",
+                "document_class": "decision",
+                "rights_review_status": "reviewed",
+            },
+        }
+        for source in ALL_SOURCES
+    ]
+    report = build_archive_status_report(
+        root=ROOT,
+        records=records,
+        publication_report={"status": "ready", "blockers": [], "warnings": []},
+        mirror_report={
+            "status": "ready",
+            "blockers": [],
+            "warnings": [],
+            "mirror_target_summary": {"healthy_count": 2},
+        },
+    )
+
+    assert report["schema_version"] == "1.0.0"
+    assert report["summary"]["source_count"] == len(SOURCE_REGISTRY)
+    assert report["summary"]["verification_immediately_available_count"] == len(SOURCE_REGISTRY)
+    assert report["summary"]["publication_status"] == "ready"
+    assert report["summary"]["mirror_status"] == "ready"
+    assert "source_collection_audit" in report["sections"]
+    assert "source_verification_feasibility" in report["sections"]
+    assert report["sections"]["source_verification_feasibility"]["summary"][
+        "immediately_available_count"
+    ] == len(SOURCE_REGISTRY)
+    assert report["status"] in {"warn", "blocked"}
 
 
 def test_federation_compatibility_report_flags_missing_sections() -> None:

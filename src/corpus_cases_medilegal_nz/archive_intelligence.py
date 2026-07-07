@@ -15,6 +15,17 @@ from corpus_cases_medilegal_nz.archive import (
     utc_now_iso,
     write_json,
 )
+from corpus_cases_medilegal_nz.mirror import mirror_sync_readiness
+from corpus_cases_medilegal_nz.source_maturity import (
+    build_candidate_coverage_report,
+    build_parser_risk_ledger,
+    build_publication_governance_ledger,
+    build_redundant_source_validation_ledger,
+    build_source_completeness_ledger,
+    build_source_maturity_ledger,
+    build_source_rights_review_ledger,
+)
+from corpus_cases_medilegal_nz.source_verification import build_source_verification_feasibility
 from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY
 
 JsonObject = dict[str, Any]
@@ -963,6 +974,123 @@ def build_public_claims(
         "failures": failures,
     }
     return result
+
+
+def build_archive_status_report(
+    *,
+    root: Path = Path(),
+    records: Iterable[Mapping[str, Any]] = (),
+    environment: Mapping[str, str] | None = None,
+    publication_report: Mapping[str, Any] | None = None,
+    mirror_report: Mapping[str, Any] | None = None,
+) -> JsonObject:
+    """Build a consolidated archive status report for operators."""
+    root = Path(root)
+    records_list = [dict(record) for record in records]
+    source_coverage = build_source_coverage(root=root, records=records_list)
+    source_audit = build_source_collection_audit(root=root, records=records_list)
+    source_maturity = build_source_maturity_ledger(root=root, records=records_list)
+    source_completeness = build_source_completeness_ledger(root=root, records=records_list)
+    candidate_coverage = build_candidate_coverage_report()
+    source_rights_review = build_source_rights_review_ledger()
+    parser_risk = build_parser_risk_ledger()
+    redundant_source_validation = build_redundant_source_validation_ledger()
+    publication_governance = build_publication_governance_ledger()
+    verification_feasibility = build_source_verification_feasibility(root=root)
+    publication = publication_report
+    if publication is None:
+        from corpus_cases_medilegal_nz.archive import publication_readiness
+
+        publication = publication_readiness(environment=environment, root=root)
+    mirror = mirror_report
+    if mirror is None:
+        mirror = mirror_sync_readiness(
+            environment=environment,
+            root=root,
+            require_complete_mirror_set=False,
+            probe_remotes=False,
+        )
+
+    sections: JsonObject = {
+        "source_coverage": source_coverage,
+        "source_collection_audit": source_audit,
+        "source_maturity": source_maturity,
+        "source_completeness": source_completeness,
+        "source_verification_feasibility": verification_feasibility,
+        "candidate_coverage": candidate_coverage,
+        "source_rights_review": source_rights_review,
+        "parser_risk": parser_risk,
+        "redundant_source_validation": redundant_source_validation,
+        "publication_governance": publication_governance,
+        "publication_readiness": publication,
+        "mirror_readiness": mirror,
+    }
+    blockers: list[str] = []
+    warnings: list[str] = []
+    for section_id, section in sections.items():
+        if not isinstance(section, Mapping):
+            continue
+        status = str(section.get("status", "")).strip()
+        if status in {"blocked", "fail"}:
+            blockers.append(f"{section_id}:{status}")
+        elif status in {"warn", "gated", "missing", "unknown", "probe_failed"}:
+            warnings.append(f"{section_id}:{status}")
+        section_blockers = section.get("blockers", [])
+        if isinstance(section_blockers, list):
+            blockers.extend(
+                f"{section_id}:{blocker}"
+                for blocker in section_blockers
+                if str(blocker).strip() and status not in {"pass", "ready", "compatible"}
+            )
+        section_warnings = section.get("warnings", [])
+        if isinstance(section_warnings, list):
+            warnings.extend(
+                f"{section_id}:{warning}"
+                for warning in section_warnings
+                if str(warning).strip()
+            )
+    overall_status = "blocked" if blockers else "warn" if warnings else "pass"
+    summary = {
+        "source_count": len(source_audit.get("sources", [])) if isinstance(source_audit, Mapping) else 0,
+        "validated_source_count": sum(
+            1
+            for source in source_audit.get("sources", [])
+            if isinstance(source, Mapping) and source.get("completion_stage") == "validated_records"
+        )
+        if isinstance(source_audit, Mapping)
+        else 0,
+        "historically_complete_source_count": int(
+            source_maturity.get("summary", {}).get("historically_complete_source_count", 0)
+            if isinstance(source_maturity, Mapping)
+            else 0
+        ),
+        "verification_immediately_available_count": int(
+            verification_feasibility.get("summary", {}).get("immediately_available_count", 0)
+            if isinstance(verification_feasibility, Mapping)
+            else 0
+        ),
+        "candidate_approved_count": int(
+            candidate_coverage.get("summary", {}).get("approved_candidate_count", 0)
+            if isinstance(candidate_coverage, Mapping)
+            else 0
+        ),
+        "redundant_witness_count": int(
+            redundant_source_validation.get("summary", {}).get("validation_source_count", 0)
+            if isinstance(redundant_source_validation, Mapping)
+            else 0
+        ),
+        "publication_status": str(publication.get("status", "unknown")) if isinstance(publication, Mapping) else "unknown",
+        "mirror_status": str(mirror.get("status", "unknown")) if isinstance(mirror, Mapping) else "unknown",
+    }
+    return {
+        "schema_version": ARCHIVE_INTELLIGENCE_SCHEMA_VERSION,
+        "generated_at": utc_now_iso(),
+        "status": overall_status,
+        "summary": summary,
+        "blockers": blockers,
+        "warnings": warnings,
+        "sections": sections,
+    }
 
 
 def build_federation_compatibility_report(

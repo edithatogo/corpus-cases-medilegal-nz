@@ -12,8 +12,10 @@ from corpus_cases_medilegal_nz.archive import (
     build_source_collection_audit,
     load_jsonl_records,
     publication_readiness,
+    write_json,
 )
 from corpus_cases_medilegal_nz.archive_intelligence import (
+    build_archive_status_report,
     validate_archive_intelligence_report,
     write_archive_intelligence_report,
     write_archive_intelligence_report_from_artifact_dir,
@@ -139,6 +141,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         default="generated/archive-intelligence/archive_maturity.json",
     )
     intelligence.add_argument("--strict", action="store_true")
+    archive_status = sub.add_parser(
+        "archive-status",
+        help="Build a consolidated archive, publication, and mirror status report.",
+    )
+    archive_status.add_argument("--output", default="generated/archive-status/archive_status.json")
     ns = parser.parse_args(argv)
     exit_code = 0
     if ns.command == "sources":
@@ -270,6 +277,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             for failure in failures:
                 print(failure)  # noqa: T201
             exit_code = 1
+    elif ns.command == "archive-status":
+        records = load_jsonl_records(Path("data/processed/jsonl/records.jsonl"))
+        result = build_archive_status_report(root=Path(), records=records)
+        write_json(Path(ns.output), result)
+        print(json.dumps(result, indent=2, sort_keys=True))  # noqa: T201
     else:
         parser.error(f"Unhandled command: {ns.command}")
         exit_code = 2

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from corpus_cases_medilegal_nz import cli
 
 
@@ -54,3 +56,23 @@ def test_live_backfill_proof_cli_reports_status(monkeypatch) -> None:
     )
 
     assert cli.main(["live-backfill-proof"]) == 0
+
+
+def test_archive_status_cli_writes_report(tmp_path, monkeypatch) -> None:
+    output = tmp_path / "archive-status.json"
+    monkeypatch.setattr(cli, "load_jsonl_records", lambda _path: [{"source": "hdc"}])
+    monkeypatch.setattr(
+        cli,
+        "build_archive_status_report",
+        lambda **_kwargs: {
+            "schema_version": "1.0.0",
+            "status": "warn",
+            "summary": {"source_count": 1},
+            "blockers": [],
+            "warnings": [],
+            "sections": {},
+        },
+    )
+
+    assert cli.main(["archive-status", "--output", str(output)]) == 0
+    assert json.loads(output.read_text(encoding="utf-8"))["status"] == "warn"
