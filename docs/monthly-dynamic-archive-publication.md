@@ -89,6 +89,7 @@ The publication workflow also writes the archive-intelligence bundle under
 - `anomaly_report.json`
 - `public_claims.json`
 - `federation_compatibility.json`
+- `archive_status.json`
 - `README.claims.md`
 - `dataset-card.claims.md`
 - `release-notes.claims.md`

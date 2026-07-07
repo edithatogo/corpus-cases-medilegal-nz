@@ -996,7 +996,11 @@ def build_archive_status_report(
     parser_risk = build_parser_risk_ledger()
     redundant_source_validation = build_redundant_source_validation_ledger()
     publication_governance = build_publication_governance_ledger()
-    verification_feasibility = build_source_verification_feasibility(root=root)
+    verification_root = root
+    fixture_manifest = verification_root / "tests" / "fixtures" / "sources" / "fixture_manifest.json"
+    if not fixture_manifest.is_file():
+        verification_root = Path(__file__).resolve().parents[2]
+    verification_feasibility = build_source_verification_feasibility(root=verification_root)
     publication = publication_report
     if publication is None:
         from corpus_cases_medilegal_nz.archive import publication_readiness
@@ -1157,6 +1161,12 @@ def build_archive_intelligence_bundle(
     )
     public_claims = build_public_claims(enriched, maturity_report=maturity)
     federation_compatibility = build_federation_compatibility_report(enriched)
+    archive_status = build_archive_status_report(
+        root=root,
+        records=current_records,
+        publication_report=evidence.get("publication_readiness"),
+        mirror_report=evidence.get("mirror_readiness"),
+    )
     return {
         "schema_version": ARCHIVE_INTELLIGENCE_SCHEMA_VERSION,
         "generated_at": utc_now_iso(),
@@ -1166,6 +1176,7 @@ def build_archive_intelligence_bundle(
         "anomaly_report": anomaly_report,
         "public_claims": public_claims,
         "federation_compatibility": federation_compatibility,
+        "archive_status": archive_status,
     }
 
 
@@ -1191,6 +1202,7 @@ def write_archive_intelligence_bundle(
     write_json(output_dir / "anomaly_report.json", bundle["anomaly_report"])
     write_json(output_dir / "public_claims.json", bundle["public_claims"])
     write_json(output_dir / "federation_compatibility.json", bundle["federation_compatibility"])
+    write_json(output_dir / "archive_status.json", bundle["archive_status"])
     for filename, text in bundle["public_claims"]["markdown"].items():
         (output_dir / f"{Path(filename).stem}.claims.md").write_text(str(text), encoding="utf-8")
     write_json(
@@ -1206,6 +1218,7 @@ def write_archive_intelligence_bundle(
                     "anomaly_report.json",
                     "public_claims.json",
                     "federation_compatibility.json",
+                    "archive_status.json",
                     "README.claims.md",
                     "dataset-card.claims.md",
                     "release-notes.claims.md",

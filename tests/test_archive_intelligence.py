@@ -544,11 +544,13 @@ def test_write_archive_intelligence_bundle_writes_claim_and_compatibility_artifa
     assert output_dir.joinpath("anomaly_report.json").is_file()
     assert output_dir.joinpath("public_claims.json").is_file()
     assert output_dir.joinpath("federation_compatibility.json").is_file()
+    assert output_dir.joinpath("archive_status.json").is_file()
     assert output_dir.joinpath("README.claims.md").is_file()
     assert output_dir.joinpath("dataset-card.claims.md").is_file()
     assert output_dir.joinpath("release-notes.claims.md").is_file()
     assert output_dir.joinpath("github-project-summary.claims.md").is_file()
     assert bundle["public_claims"]["facts"]["record_count"] == len(SOURCE_REGISTRY)
+    assert bundle["archive_status"]["summary"]["source_count"] == len(SOURCE_REGISTRY)
 
 
 def test_archive_intelligence_loads_sibling_metadata_manifest(tmp_path: Path) -> None:
