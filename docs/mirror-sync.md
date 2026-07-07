@@ -4,6 +4,10 @@ The repository keeps a secondary Git mirror workflow in
 [`.github/workflows/mirror_sync.yml`](../.github/workflows/mirror_sync.yml).
 It runs on pushes to `main` and `master`, and it is also manually dispatchable.
 
+Local mirror values should stay in ignored `.env` or `.env.local` files, while
+the workflow itself reads the corresponding GitHub secrets and variables at
+runtime.
+
 ## Required Secrets
 
 - `GIT_MIRROR_URL`
