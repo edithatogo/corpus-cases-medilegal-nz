@@ -40,12 +40,16 @@ from corpus_cases_medilegal_nz.source_verification import build_source_verificat
 CORE_SOURCE_URLS = {
     "hdc": "https://www.hdc.org.nz/decisions/search-decisions/",
     "hpdt": "https://www.hpdt.org.nz/Search-Decisions",
+    "acc_appeals_reviews": "https://www.justice.govt.nz/tribunals/accident-compensation/older-accdcr/",
+    "social_security_appeal_authority": "https://www.justice.govt.nz/tribunals/social-security-appeal-authority/",
+    "mental_health_review_tribunal": "https://www.health.govt.nz/about-us/new-zealands-health-system/health-system-roles-and-organisations/health-committees-and-boards/mental-health-review-tribunal",
     "moj_tribunals": "https://www.justice.govt.nz/tribunals/",
     "era": "https://www.era.govt.nz/",
     "teachers": "https://www.teachersdisciplinarytribunal.nz/",
 }
 
 EXTENDED_SOURCE_URLS = {
+    "nzlii_health_privacy_discipline": "https://www.nzlii.org/",
     "privacy": "https://www.privacy.org.nz/resources-and-learning/case-notes-and-court-decisions/",
     "human_rights": "https://www.justice.govt.nz/tribunals/human-rights/hrrt-decisions/",
     "ombudsman": "https://www.ombudsman.parliament.nz/resources",

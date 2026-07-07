@@ -8,7 +8,14 @@ from corpus_cases_medilegal_nz.source_parser_profiles import (
 
 
 def test_high_risk_sources_have_source_specific_profiles() -> None:
-    assert set(SOURCE_SPECIFIC_PARSER_PROFILES) == HIGH_RISK_GENERIC_PARSER_SOURCES
+    assert HIGH_RISK_GENERIC_PARSER_SOURCES.issubset(SOURCE_SPECIFIC_PARSER_PROFILES)
+    for source_id in (
+        "acc_appeals_reviews",
+        "social_security_appeal_authority",
+        "mental_health_review_tribunal",
+        "nzlii_health_privacy_discipline",
+    ):
+        assert source_id in SOURCE_SPECIFIC_PARSER_PROFILES
 
 
 def test_source_specific_parser_attaches_profile_metadata() -> None:

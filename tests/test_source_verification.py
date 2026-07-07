@@ -15,6 +15,7 @@ from corpus_cases_medilegal_nz.source_verification import (
     replay_verification_inputs,
     verification_target_metadata,
 )
+from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -22,8 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_source_verification_feasibility_covers_all_sources() -> None:
     report = build_source_verification_feasibility(root=ROOT)
 
-    assert report["summary"]["source_count"] == 13
-    assert report["summary"]["immediately_available_count"] == 13
+    assert report["summary"]["source_count"] == len(SOURCE_REGISTRY)
+    assert report["summary"]["immediately_available_count"] == len(SOURCE_REGISTRY)
     assert report["summary"]["blocked_count"] == 0
     assert {source["verification_status"] for source in report["sources"]} == {
         "immediately_available"
@@ -39,7 +40,7 @@ def test_fetch_verification_inputs_archives_raw_fixtures_and_manifest(tmp_path: 
 
     manifest = fetch_verification_inputs(output_dir=evidence_dir, root=ROOT)
 
-    assert manifest["summary"]["archived_input_count"] == 13
+    assert manifest["summary"]["archived_input_count"] == len(SOURCE_REGISTRY)
     assert manifest["summary"]["metadata_only_count"] == 0
     assert (evidence_dir / "manifests" / "verification_input_manifest.json").is_file()
     assert (evidence_dir / "raw" / "hdc" / "listing.html").is_file()
@@ -71,10 +72,10 @@ def test_source_verification_bundle_reconciles_expected_records(tmp_path: Path) 
     )
 
     assert bundle["status"] == "verified_complete"
-    assert bundle["feasibility"]["summary"]["source_count"] == 13
-    assert bundle["input_manifest"]["summary"]["archived_input_count"] == 13
-    assert bundle["expected_records"]["summary"]["expected_record_count"] == 26
-    assert bundle["reconciliation"]["summary"]["matched_count"] == 26
+    assert bundle["feasibility"]["summary"]["source_count"] == len(SOURCE_REGISTRY)
+    assert bundle["input_manifest"]["summary"]["archived_input_count"] == len(SOURCE_REGISTRY)
+    assert bundle["expected_records"]["summary"]["expected_record_count"] == len(SOURCE_REGISTRY) * 2
+    assert bundle["reconciliation"]["summary"]["matched_count"] == len(SOURCE_REGISTRY) * 2
     assert bundle["reconciliation"]["summary"]["missing_count"] == 0
     assert bundle["replay"]["status"] == "pass"
     assert (tmp_path / "verification" / "manifests" / "source_expected_records.jsonl").is_file()
@@ -172,7 +173,7 @@ def test_verification_public_claims_are_evidence_backed(tmp_path: Path) -> None:
     claims = build_verification_public_claims(bundle)
 
     assert claims["status"] == "verified_complete"
-    assert "26 expected records" in claims["coverage_statement"]
+    assert f"{len(SOURCE_REGISTRY) * 2} expected records" in claims["coverage_statement"]
     assert claims["blocked_sources"] == []
 
 

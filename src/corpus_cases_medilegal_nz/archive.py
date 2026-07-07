@@ -1035,7 +1035,7 @@ def build_release_evidence(
                 {
                     "markdown": {
                         "coverage_statement": (
-                            "13 sources are parser validated; historical backfill "
+                            f"{len(SOURCE_REGISTRY)} sources are parser validated; historical backfill "
                             "completion is source-specific and evidence-backed."
                         )
                     }

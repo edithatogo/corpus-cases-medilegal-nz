@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from corpus_cases_medilegal_nz.collection_proof import build_fixture_collection_records
+from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY
 from corpus_cases_medilegal_nz.source_maturity import (
     build_candidate_coverage_report,
     SOURCE_MATURITY_LADDER,
@@ -30,14 +31,16 @@ def test_fixture_validated_records_do_not_claim_historical_completion() -> None:
     ledger = build_source_maturity_ledger(root=ROOT, records=records)
 
     assert ledger["maturity_ladder"] == SOURCE_MATURITY_LADDER
-    assert ledger["summary"]["source_count"] == 13
+    assert ledger["summary"]["source_count"] == len(SOURCE_REGISTRY)
     assert ledger["summary"]["historically_complete_source_count"] == 0
     assert ledger["summary"]["all_sources_historically_complete"] is False
-    assert ledger["summary"]["sources_with_known_targets"] == 13
-    assert ledger["summary"]["total_expected_records_for_known_targets"] == 26
-    assert ledger["summary"]["total_records_against_known_targets"] == 26
+    assert ledger["summary"]["sources_with_known_targets"] == len(SOURCE_REGISTRY)
+    assert ledger["summary"]["total_expected_records_for_known_targets"] == len(SOURCE_REGISTRY) * 2
+    assert ledger["summary"]["total_records_against_known_targets"] == len(SOURCE_REGISTRY) * 2
     assert ledger["summary"]["total_remaining_to_known_targets"] == 0
-    assert ledger["summary"]["stage_counts"] == {"historical_backfill_in_progress": 13}
+    assert ledger["summary"]["stage_counts"] == {
+        "historical_backfill_in_progress": len(SOURCE_REGISTRY)
+    }
     hdc = next(source for source in ledger["sources"] if source["source_id"] == "hdc")
     assert hdc["parser_stage"] == "validated_records"
     assert hdc["historical_maturity_stage"] == "historical_backfill_in_progress"
@@ -80,7 +83,7 @@ def test_source_completeness_warns_until_all_sources_are_complete() -> None:
     completeness = build_source_completeness_ledger(root=ROOT, records=records)
 
     assert completeness["status"] == "warn"
-    assert len(completeness["blockers"]) == 13
+    assert len(completeness["blockers"]) == len(SOURCE_REGISTRY)
     assert "hdc is historical_backfill_in_progress" in completeness["blockers"]
 
 
@@ -118,7 +121,7 @@ def test_source_rights_review_defaults_are_conservative() -> None:
     ledger = build_source_rights_review_ledger()
 
     assert ledger["status"] == "reviewed_with_caveats"
-    assert len(ledger["sources"]) == 13
+    assert len(ledger["sources"]) == len(SOURCE_REGISTRY)
     assert {source["status"] for source in ledger["sources"]} == {"reviewed"}
     assert all(
         source["redistribution_status"]
@@ -135,7 +138,7 @@ def test_source_rights_review_validation_reports_unresolved_sources() -> None:
     validation = validate_source_rights_review_ledger(ledger)
 
     assert validation["status"] == "pass"
-    assert validation["summary"]["source_count"] == 13
+    assert validation["summary"]["source_count"] == len(SOURCE_REGISTRY)
     assert validation["summary"]["unresolved_source_count"] == 0
     assert validation["blockers"] == []
 
@@ -173,7 +176,7 @@ def test_candidate_source_triage_records_durable_decisions() -> None:
     assert candidates["mental_health_review_tribunal"]["decision"] == "approved"
     assert candidates["nzlii_health_privacy_discipline"]["decision"] == "approved"
     assert candidates["nzlii_health_privacy_discipline"]["promotion_status"] == (
-        "ready_for_canonical_implementation"
+        "ready_for_canonical_release"
     )
     assert candidates["nzlii_health_privacy_discipline"]["promotion_scaffold"]["config"] == (
         "config/candidates/nzlii_health_privacy_discipline_pipeline.yaml"
@@ -262,8 +265,8 @@ def test_backfill_manifest_captures_raw_provenance_and_text_hashes() -> None:
     manifest = build_backfill_run_manifest(records)
 
     assert manifest["status"] == "complete"
-    assert manifest["checkpoint"]["record_count"] == 26
-    assert manifest["checkpoint"]["raw_asset_count"] == 13
+    assert manifest["checkpoint"]["record_count"] == len(SOURCE_REGISTRY) * 2
+    assert manifest["checkpoint"]["raw_asset_count"] == len(SOURCE_REGISTRY)
     first = manifest["records"][0]
     assert first["canonical_url"].startswith("https://")
     assert first["derived_text_sha256"]

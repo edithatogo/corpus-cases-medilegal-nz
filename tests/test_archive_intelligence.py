@@ -28,12 +28,16 @@ from corpus_cases_medilegal_nz.archive_intelligence import (
     write_archive_intelligence_bundle,
     write_archive_intelligence_report,
 )
+from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY
 from corpus_cases_medilegal_nz.source_maturity import build_source_maturity_ledger
 
 ROOT = Path(__file__).resolve().parents[1]
 ALL_SOURCES = (
     "hdc",
     "hpdt",
+    "acc_appeals_reviews",
+    "social_security_appeal_authority",
+    "mental_health_review_tribunal",
     "moj_tribunals",
     "era",
     "teachers",
@@ -45,6 +49,7 @@ ALL_SOURCES = (
     "royal_commissions",
     "coronial",
     "moj_courts",
+    "nzlii_health_privacy_discipline",
 )
 
 
@@ -270,7 +275,7 @@ def test_source_observability_ledger_captures_drift_and_review_state(tmp_path: P
     )
     by_source = {source["source_id"]: source for source in ledger["sources"]}
 
-    assert ledger["summary"]["source_count"] == 13
+    assert ledger["summary"]["source_count"] == len(SOURCE_REGISTRY)
     assert by_source["hdc"]["crawlability"]["status"] == "reachable"
     assert by_source["hdc"]["parser_completion"]["status"] == "validated_records"
     assert by_source["hdc"]["timestamps"]["last_fetch_at"] == "2026-07-02T00:00:00Z"
@@ -433,7 +438,7 @@ def test_public_claims_and_privacy_scoring_are_generated_from_ledgers(tmp_path: 
 
     assert privacy["status"] == "leading"
     assert privacy["score"] == 100
-    assert "validated records across 13 active sources" in claims["markdown"]["README.md"]
+    assert f"validated records across {len(SOURCE_REGISTRY)} active sources" in claims["markdown"]["README.md"]
     assert "Historical backfill is not yet complete" in claims["markdown"]["README.md"]
     assert (
         "Privacy/rights status is summarized as leading." in claims["markdown"]["dataset-card.md"]
@@ -500,7 +505,7 @@ def test_write_archive_intelligence_bundle_writes_claim_and_compatibility_artifa
     assert output_dir.joinpath("dataset-card.claims.md").is_file()
     assert output_dir.joinpath("release-notes.claims.md").is_file()
     assert output_dir.joinpath("github-project-summary.claims.md").is_file()
-    assert bundle["public_claims"]["facts"]["record_count"] == 13
+    assert bundle["public_claims"]["facts"]["record_count"] == len(SOURCE_REGISTRY)
 
 
 def test_archive_intelligence_loads_sibling_metadata_manifest(tmp_path: Path) -> None:

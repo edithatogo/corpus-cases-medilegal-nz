@@ -433,7 +433,7 @@ def build_source_discovery_queue() -> JsonObject:
                 "Public ACC appeal surfaces exist and can be backed by an older ACCDCR "
                 "witness, so the source can proceed as an approved candidate."
             ),
-            "promotion_status": "ready_for_canonical_implementation",
+            "promotion_status": "ready_for_canonical_release",
             "promotion_scaffold": CANDIDATE_PROMOTION_SCAFFOLDS["acc_appeals_reviews"],
             "redundant_witnesses": ["older_accdcr"],
             "promotion_gate": "confirm source-specific rights, scope, and parser contract.",
@@ -452,7 +452,7 @@ def build_source_discovery_queue() -> JsonObject:
                 "Public Ministry of Justice pages and published decisions support a "
                 "controlled candidate rollout for medical-benefit appeal coverage."
             ),
-            "promotion_status": "ready_for_canonical_implementation",
+            "promotion_status": "ready_for_canonical_release",
             "promotion_scaffold": CANDIDATE_PROMOTION_SCAFFOLDS["social_security_appeal_authority"],
             "redundant_witnesses": ["social_security_appeal_authority_index"],
             "promotion_gate": "confirm redistribution posture and duplicate handling.",
@@ -471,7 +471,7 @@ def build_source_discovery_queue() -> JsonObject:
                 "The Ministry of Health points to public past decisions on NZLII, so the "
                 "tribunal can be treated as an approved candidate pending source-specific proof."
             ),
-            "promotion_status": "ready_for_canonical_implementation",
+            "promotion_status": "ready_for_canonical_release",
             "promotion_scaffold": CANDIDATE_PROMOTION_SCAFFOLDS["mental_health_review_tribunal"],
             "redundant_witnesses": ["nzlii_health_privacy_discipline"],
             "promotion_gate": "confirm public redistribution and archival replay contract.",
@@ -507,7 +507,7 @@ def build_source_discovery_queue() -> JsonObject:
                 "Approved for implementation planning as a secondary discovery source, "
                 "subject to NZLII terms, attribution, and duplicate-handling evidence."
             ),
-            "promotion_status": "ready_for_canonical_implementation",
+            "promotion_status": "ready_for_canonical_release",
             "promotion_scaffold": CANDIDATE_PROMOTION_SCAFFOLDS[
                 "nzlii_health_privacy_discipline"
             ],
@@ -695,10 +695,10 @@ def build_candidate_coverage_report(
                 "witness_count": len(redundant_witnesses),
                 "witnesses": sorted(str(witness) for witness in redundant_witnesses),
                 "eligible_for_promotion": bool(
-                    candidate.get("decision") == "approved"
-                    and candidate.get("promotion_status") == "ready_for_canonical_implementation"
-                ),
-            }
+                candidate.get("decision") == "approved"
+                and candidate.get("promotion_status") == "ready_for_canonical_release"
+            ),
+        }
         )
     gaps = [row["candidate_id"] for row in rows if row["decision"] == "approved" and row["witness_count"] == 0]
     return {
@@ -724,11 +724,15 @@ def build_candidate_coverage_report(
 def build_source_rights_review_ledger() -> JsonObject:
     """Build conservative source-level rights review evidence."""
     terms_urls = {
+        "acc_appeals_reviews": "https://www.justice.govt.nz/tribunals/accident-compensation/older-accdcr/",
         "hdc": "https://www.hdc.org.nz/about-us/about-this-site/",
         "hpdt": "https://www.hpdt.org.nz/",
         "moj_tribunals": "https://www.justice.govt.nz/about/about-this-site/",
         "era": "https://www.era.govt.nz/about-this-site/",
         "teachers": "https://www.teachersdisciplinarytribunal.nz/",
+        "social_security_appeal_authority": "https://www.justice.govt.nz/tribunals/social-security-appeal-authority/",
+        "mental_health_review_tribunal": "https://www.health.govt.nz/about-us/new-zealands-health-system/health-system-roles-and-organisations/health-committees-and-boards/mental-health-review-tribunal",
+        "nzlii_health_privacy_discipline": "https://www.nzlii.org/",
         "royal_commissions": "https://www.waitangitribunal.govt.nz/en/about/website-information",
         "coronial": "https://coronialservices.justice.govt.nz/",
         "privacy": "https://www.privacy.org.nz/about-us/about-this-website/",

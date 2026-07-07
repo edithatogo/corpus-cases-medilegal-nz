@@ -17,9 +17,9 @@ from corpus_cases_medilegal_nz.sources import (
 class TestSourceRegistry:
     """Tests for the SOURCE_REGISTRY dictionary."""
 
-    def test_has_13_sources(self) -> None:
-        """Registry must have all 13 sources registered."""
-        assert len(SOURCE_REGISTRY) >= 13
+    def test_has_all_sources(self) -> None:
+        """Registry must include the promoted and canonical source families."""
+        assert len(SOURCE_REGISTRY) >= 17
 
     def test_hdc_exists(self) -> None:
         """HDC must be in the registered sources."""
@@ -28,6 +28,9 @@ class TestSourceRegistry:
     def test_all_key_sources_present(self) -> None:
         """All core medical-legal sources must be present."""
         for sid in [
+            "acc_appeals_reviews",
+            "social_security_appeal_authority",
+            "mental_health_review_tribunal",
             "hpdt",
             "moj_tribunals",
             "era",
@@ -40,6 +43,7 @@ class TestSourceRegistry:
             "royal_commissions",
             "coronial",
             "moj_courts",
+            "nzlii_health_privacy_discipline",
         ]:
             assert sid in SOURCE_REGISTRY, f"Missing source: {sid}"
 

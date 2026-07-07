@@ -9,8 +9,18 @@ import pytest
 from corpus_cases_medilegal_nz.parser_contract import validate_parser_input, validate_parser_records
 
 FIXTURES_ROOT = Path(__file__).parent / "fixtures" / "sources"
-CORE_SOURCE_IDS = {"hdc", "hpdt", "moj_tribunals", "era", "teachers"}
+CORE_SOURCE_IDS = {
+    "hdc",
+    "hpdt",
+    "acc_appeals_reviews",
+    "social_security_appeal_authority",
+    "mental_health_review_tribunal",
+    "moj_tribunals",
+    "era",
+    "teachers",
+}
 EXTENDED_SOURCE_IDS = {
+    "nzlii_health_privacy_discipline",
     "privacy",
     "human_rights",
     "ombudsman",

@@ -19,6 +19,7 @@ from corpus_cases_medilegal_nz.archive import (
     sha256_file,
     validate_release_evidence,
 )
+from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -69,7 +70,7 @@ def test_source_collection_audit_reports_current_parser_completion_state() -> No
     audit = build_source_collection_audit(root=ROOT, records=[])
     by_source = {source["source_id"]: source for source in audit["sources"]}
 
-    assert audit["stage_counts"]["fetch_scaffold_parser_stub"] == 13
+    assert audit["stage_counts"]["fetch_scaffold_parser_stub"] == len(SOURCE_REGISTRY)
     assert by_source["hdc"]["completion_stage"] == "fetch_scaffold_parser_stub"
     assert by_source["hdc"]["adapter_module_exists"] is True
     assert by_source["hdc"]["record_count"] == 0
@@ -136,12 +137,14 @@ def test_build_release_artifacts_writes_required_ledgers(tmp_path: Path) -> None
     assert evidence["release"]["github_release_tag"] == "dataset-v2026.07.0"
     assert evidence["zenodo"]["publish_handoff_only"] is True
     assert evidence["parser_contract"]["provider"]["package"] == "nlp_policy_nz"
-    assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == 13
+    assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == len(
+        SOURCE_REGISTRY
+    )
     assert (
         evidence["quality"]["record_count"] == target_summary["total_records_against_known_targets"]
     )
     assert evidence["source_maturity"]["summary"]["stage_counts"] == {
-        "historical_backfill_complete": 13
+        "historical_backfill_complete": len(SOURCE_REGISTRY)
     }
     assert target_summary["total_remaining_to_known_targets"] == (
         target_summary["total_expected_records_for_known_targets"]

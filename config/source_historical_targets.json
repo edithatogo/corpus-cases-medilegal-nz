@@ -23,6 +23,36 @@
         "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
       ]
     },
+    "acc_appeals_reviews": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "social_security_appeal_authority": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "mental_health_review_tribunal": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
     "moj_tribunals": {
       "expected_count": 2,
       "expected_count_confidence": "baseline_minimum",
@@ -104,6 +134,16 @@
       ]
     },
     "moj_courts": {
+      "expected_count": 2,
+      "expected_count_confidence": "baseline_minimum",
+      "source_update_cadence": "monthly",
+      "date_range_start": "2026-01-01",
+      "date_range_end": "2026-12-31",
+      "known_limitations": [
+        "Baseline target is a conservative minimum for backfill progress measurement, not a verified full historical source total."
+      ]
+    },
+    "nzlii_health_privacy_discipline": {
       "expected_count": 2,
       "expected_count_confidence": "baseline_minimum",
       "source_update_cadence": "monthly",

@@ -35,6 +35,39 @@
         "title": "Search Decisions"
       }
     },
+    "acc_appeals_reviews": {
+      "html": "acc_appeals_reviews/listing.html",
+      "pdf": "acc_appeals_reviews/decision.pdf",
+      "expected": {
+        "body_text": "ACC appeal synthetic fixture.",
+        "date": "2026-05-18",
+        "decision_link": "/tribunals/accident-compensation/older-accdcr/acc-2026-001/",
+        "identifier": "ACC-2026-001",
+        "title": "ACC appeals and review fixture"
+      }
+    },
+    "social_security_appeal_authority": {
+      "html": "social_security_appeal_authority/listing.html",
+      "pdf": "social_security_appeal_authority/decision.pdf",
+      "expected": {
+        "body_text": "Medical appeal synthetic fixture.",
+        "date": "2026-05-19",
+        "decision_link": "/tribunals/social-security-appeal-authority/ssa-2026-001/",
+        "identifier": "SSA-2026-001",
+        "title": "Social Security Appeal Authority fixture"
+      }
+    },
+    "mental_health_review_tribunal": {
+      "html": "mental_health_review_tribunal/listing.html",
+      "pdf": "mental_health_review_tribunal/decision.pdf",
+      "expected": {
+        "body_text": "Mental health decision synthetic fixture.",
+        "date": "2026-05-20",
+        "decision_link": "/mental-health-review-tribunal/2026/mhrt-2026-001/",
+        "identifier": "MHRT-2026-001",
+        "title": "Mental Health Review Tribunal fixture"
+      }
+    },
     "moj_tribunals": {
       "html": "moj_tribunals/listing.html",
       "pdf": "moj_tribunals/decision.pdf",
@@ -59,6 +92,17 @@
     }
   },
   "extended_sources": {
+    "nzlii_health_privacy_discipline": {
+      "html": "nzlii_health_privacy_discipline/listing.html",
+      "pdf": "nzlii_health_privacy_discipline/decision.pdf",
+      "expected": {
+        "body_text": "NZLII health and rights synthetic fixture.",
+        "date": "2026-07-01",
+        "decision_link": "/nz/cases/NZHRRT/2026/1.html",
+        "identifier": "NZHRRT 2026/1",
+        "title": "NZLII health, privacy, and discipline fixture"
+      }
+    },
     "privacy": {
       "html": "privacy/listing.html",
       "pdf": "privacy/decision.pdf",

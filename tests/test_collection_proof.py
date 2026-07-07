@@ -8,6 +8,7 @@ from corpus_cases_medilegal_nz.collection_proof import (
     build_fixture_collection_records,
     write_collection_proof,
 )
+from corpus_cases_medilegal_nz.sources import SOURCE_REGISTRY
 
 
 def test_build_fixture_collection_records_covers_all_fixture_sources() -> None:
@@ -29,15 +30,17 @@ def test_write_collection_proof_exports_archive_compatible_records(tmp_path: Pat
     evidence = write_collection_proof(output_dir=output_dir)
     records = load_jsonl_records(output_dir / "jsonl" / "records.jsonl")
 
-    assert evidence["record_count"] == 26
-    assert len(records) == 26
-    assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == 13
+    assert evidence["record_count"] == len(SOURCE_REGISTRY) * 2
+    assert len(records) == len(SOURCE_REGISTRY) * 2
+    assert evidence["source_collection_audit"]["stage_counts"]["validated_records"] == len(
+        SOURCE_REGISTRY
+    )
     assert next(
         record for record in records if record["source"] == "moj_courts"
     )["metadata"]["parser_profile_id"] == "moj_courts_jdo_v1"
     assert evidence["collection_quality_gates"]["status"] == "pass"
-    assert evidence["dataset_diff"]["counts"]["added"] == 26
-    assert evidence["dataset_diff"]["counts"]["current"] == 26
+    assert evidence["dataset_diff"]["counts"]["added"] == len(SOURCE_REGISTRY) * 2
+    assert evidence["dataset_diff"]["counts"]["current"] == len(SOURCE_REGISTRY) * 2
     assert (output_dir / "manifests" / "dataset_diff.json").is_file()
     assert (output_dir / "manifests" / "collection_quality_gates.json").is_file()
     assert (output_dir / "manifests" / "source_maturity.json").is_file()

@@ -9,6 +9,9 @@ from typing import Any
 SOURCE_REGISTRY: dict[str, dict[str, Any]] = {
     "hdc": {"name": "Health and Disability Commissioner", "url": "https://www.hdc.org.nz/decisions/search-decisions/", "config": "config/hdc_pipeline.yaml"},
     "hpdt": {"name": "Health Practitioners Disciplinary Tribunal", "url": "https://www.hpdt.org.nz/Search-Decisions", "config": "config/hpdt_pipeline.yaml"},
+    "acc_appeals_reviews": {"name": "ACC Appeals and Reviews", "url": "https://www.justice.govt.nz/tribunals/accident-compensation/older-accdcr/", "config": "config/candidates/acc_appeals_reviews_pipeline.yaml"},
+    "social_security_appeal_authority": {"name": "Social Security Appeal Authority", "url": "https://www.justice.govt.nz/tribunals/social-security-appeal-authority/", "config": "config/candidates/social_security_appeal_authority_pipeline.yaml"},
+    "mental_health_review_tribunal": {"name": "Mental Health Review Tribunal", "url": "https://www.health.govt.nz/about-us/new-zealands-health-system/health-system-roles-and-organisations/health-committees-and-boards/mental-health-review-tribunal", "config": "config/candidates/mental_health_review_tribunal_pipeline.yaml"},
     "moj_tribunals": {"name": "Ministry of Justice Tribunals", "url": "https://www.justice.govt.nz/tribunals/", "config": "config/moj_tribunals_pipeline.yaml"},
     "era": {"name": "Employment Relations Authority", "url": "https://www.era.govt.nz/", "config": "config/era_pipeline.yaml"},
     "teachers": {"name": "Teachers Disciplinary Tribunal", "url": "https://www.teachersdisciplinarytribunal.nz/", "config": "config/teachers_pipeline.yaml"},
@@ -20,6 +23,7 @@ SOURCE_REGISTRY: dict[str, dict[str, Any]] = {
     "moj_courts": {"name": "Ministry of Justice Court Cases", "url": "https://www.justice.govt.nz/courts/decisions/jdo/", "config": "config/moj_courts_pipeline.yaml"},
     "ipca": {"name": "Independent Police Conduct Authority", "url": "https://www.ipca.govt.nz/Site/publications-and-media/Accountability/Archive.aspx", "config": "config/ipca_pipeline.yaml"},
     "law_commission": {"name": "Law Commission Reports", "url": "https://www.lawcom.govt.nz/our-work", "config": "config/law_commission_pipeline.yaml"},
+    "nzlii_health_privacy_discipline": {"name": "NZLII health, privacy, and discipline subsets", "url": "https://www.nzlii.org/", "config": "config/candidates/nzlii_health_privacy_discipline_pipeline.yaml"},
 }
 
 
@@ -70,6 +74,24 @@ def get_adapter(source_id: str) -> SourceAdapter:
         from corpus_cases_medilegal_nz.sources.hpdt import HpdtSourceAdapter
 
         adapter_cls = HpdtSourceAdapter
+    elif source_id == "acc_appeals_reviews":
+        from corpus_cases_medilegal_nz.sources.acc_appeals_reviews import (
+            AccAppealsReviewsSourceAdapter,
+        )
+
+        adapter_cls = AccAppealsReviewsSourceAdapter
+    elif source_id == "social_security_appeal_authority":
+        from corpus_cases_medilegal_nz.sources.social_security_appeal_authority import (
+            SocialSecurityAppealAuthoritySourceAdapter,
+        )
+
+        adapter_cls = SocialSecurityAppealAuthoritySourceAdapter
+    elif source_id == "mental_health_review_tribunal":
+        from corpus_cases_medilegal_nz.sources.mental_health_review_tribunal import (
+            MentalHealthReviewTribunalSourceAdapter,
+        )
+
+        adapter_cls = MentalHealthReviewTribunalSourceAdapter
     elif source_id == "moj_tribunals":
         from corpus_cases_medilegal_nz.sources.moj_tribunals import MojTribunalsSourceAdapter
 
@@ -114,6 +136,12 @@ def get_adapter(source_id: str) -> SourceAdapter:
         from corpus_cases_medilegal_nz.sources.moj_courts import MojCourtsSourceAdapter
 
         adapter_cls = MojCourtsSourceAdapter
+    elif source_id == "nzlii_health_privacy_discipline":
+        from corpus_cases_medilegal_nz.sources.nzlii_health_privacy_discipline import (
+            NzliiHealthPrivacyDisciplineSourceAdapter,
+        )
+
+        adapter_cls = NzliiHealthPrivacyDisciplineSourceAdapter
 
     return adapter_cls(
         source_id=source_id,

@@ -10,6 +10,26 @@ from corpus_cases_medilegal_nz.source_maturity import HIGH_RISK_GENERIC_PARSER_S
 JsonObject = dict[str, Any]
 
 SOURCE_SPECIFIC_PARSER_PROFILES: dict[str, JsonObject] = {
+    "acc_appeals_reviews": {
+        "profile_id": "acc_appeals_reviews_listing_v1",
+        "record_kinds": ["appeal decision", "review decision", "summary order"],
+        "required_evidence": ["appeal index", "detail page", "source-specific identifier"],
+    },
+    "social_security_appeal_authority": {
+        "profile_id": "social_security_appeal_authority_listing_v1",
+        "record_kinds": ["appeal decision", "medical appeal", "benefit review"],
+        "required_evidence": ["appeal index", "detail page", "source-specific identifier"],
+    },
+    "mental_health_review_tribunal": {
+        "profile_id": "mental_health_review_tribunal_listing_v1",
+        "record_kinds": ["tribunal decision", "order", "summary"],
+        "required_evidence": ["tribunal index", "detail page", "source-specific identifier"],
+    },
+    "nzlii_health_privacy_discipline": {
+        "profile_id": "nzlii_health_privacy_discipline_listing_v1",
+        "record_kinds": ["case", "tribunal decision", "disciplinary decision"],
+        "required_evidence": ["search results", "detail page", "source-specific identifier"],
+    },
     "moj_tribunals": {
         "profile_id": "moj_tribunals_listing_v1",
         "record_kinds": ["tribunal decision", "tribunal order", "public report"],
