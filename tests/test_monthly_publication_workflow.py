@@ -55,6 +55,7 @@ def test_monthly_workflow_has_publication_guards_and_surfaces() -> None:
     assert "anomaly_report.json" in workflow
     assert "public_claims.json" in workflow
     assert "federation_compatibility.json" in workflow
+    assert "archive_status.json" in workflow
     assert "README.claims.md" in workflow
 
 

@@ -278,6 +278,12 @@ jobs:
             --artifact-dir "$ARTIFACT_DIR" \
             --output-dir generated/archive-intelligence
 
+      - name: Build consolidated archive status report
+        run: |
+          set -euo pipefail
+          uv run python -m corpus_cases_medilegal_nz.cli archive-status \
+            --output generated/archive-intelligence/archive_status.json
+
       - name: Upload GitHub Actions artifact
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
@@ -335,6 +341,7 @@ jobs:
             "generated/archive-intelligence/anomaly_report.json" \
             "generated/archive-intelligence/public_claims.json" \
             "generated/archive-intelligence/federation_compatibility.json" \
+            "generated/archive-intelligence/archive_status.json" \
             "generated/archive-intelligence/README.claims.md" \
             "generated/archive-intelligence/dataset-card.claims.md" \
             "generated/archive-intelligence/release-notes.claims.md" \
