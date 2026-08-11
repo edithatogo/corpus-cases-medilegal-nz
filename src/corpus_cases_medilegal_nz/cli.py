@@ -25,8 +25,8 @@ from corpus_cases_medilegal_nz.hf_sync import main as hf_sync_main
 from corpus_cases_medilegal_nz.mirror import mirror_sync_readiness
 from corpus_cases_medilegal_nz.parser_contract import build_parser_contract
 from corpus_cases_medilegal_nz.source_maturity import (
-    build_corpus_completion_readiness,
     build_candidate_coverage_report,
+    build_corpus_completion_readiness,
     build_parser_risk_ledger,
     build_publication_governance_ledger,
     build_redundant_source_validation_ledger,
